@@ -3,7 +3,7 @@ import { Link } from 'react-router'
 export default function Hero() {
   return (
     <section className="text-center sm:text-left">
-      <h1 className="text-4xl font-medium tracking-tight text-zinc-950 sm:text-5xl dark:text-zinc-50">
+      <h1 className="font-secondary text-4xl font-medium tracking-tight text-zinc-950 sm:text-5xl dark:text-zinc-50">
         Arcane 3.0
       </h1>
       <p className="mt-4 leading-relaxed">

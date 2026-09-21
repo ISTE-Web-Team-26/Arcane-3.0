@@ -2,10 +2,10 @@ import { Link } from 'react-router'
 
 export default function Contact() {
   return (
-    <footer className="border-t border-zinc-200 px-4 py-6 sm:px-8 dark:border-zinc-800">
+    <footer className="border-t border-zinc-200 px-4 py-6 font-primary sm:px-8 dark:border-zinc-800">
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <p className="text-sm font-semibold text-zinc-950 dark:text-zinc-50">
+          <p className="font-secondary text-sm font-semibold text-zinc-950 dark:text-zinc-50">
             Arcane 3.0
           </p>
           <p className="mt-1 text-sm">

@@ -9,7 +9,7 @@ const events = [
 export default function Events() {
   return (
     <section className="mt-12">
-      <h2 className="text-2xl font-medium tracking-tight text-zinc-950 dark:text-zinc-50">
+      <h2 className="font-secondary text-2xl font-medium tracking-tight text-zinc-950 dark:text-zinc-50">
         Events
       </h2>
       <p className="mt-3 leading-relaxed">
@@ -22,7 +22,7 @@ export default function Events() {
             to={e.to}
             className="rounded-xl border border-zinc-200 p-4 transition-shadow hover:shadow-lg dark:border-zinc-800"
           >
-            <p className="font-medium text-zinc-950 dark:text-zinc-50">
+            <p className="font-secondary font-medium text-zinc-950 dark:text-zinc-50">
               {e.title}
             </p>
             <p className="mt-1 text-sm">{e.blurb}</p>
