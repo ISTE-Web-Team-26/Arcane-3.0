@@ -1,33 +1,65 @@
 import { useEffect, useRef } from 'react'
 import { Link } from 'react-router'
-import { createTextEffect } from '@external/tte-js/src/index.js'
+import type { TextEffectController } from '@external/tte-js/src/index.js'
 import art from '../../assets/arcane-3.0.txt?raw'
 import { themePalette } from '../../helpers/theme.ts'
 
 export default function Hero() {
+  const sectionRef = useRef<HTMLElement>(null)
   const preRef = useRef<HTMLPreElement>(null)
+  const controllerRef = useRef<TextEffectController | null>(null)
 
   useEffect(() => {
-    if (!preRef.current) return
-    const controller = createTextEffect(preRef.current, {
-      effect: 'thunderstorm',
-      duration: 1200,
-      fps: 60,
-      loop: true,
-      colors: themePalette(),
-    })
+    let cancelled = false
+    let observer: IntersectionObserver | null = null
+
+    const start = async () => {
+      // Dynamic import: tte-js loads as a separate chunk after first paint,
+      // so it stays off the critical path for initial page load.
+      const { createTextEffect } = await import(
+        '@external/tte-js/src/index.js'
+      )
+      if (cancelled || !preRef.current) return
+      controllerRef.current = createTextEffect(preRef.current, {
+        effect: 'thunderstorm',
+        duration: 1200,
+        fps: 60,
+        loop: true,
+        colors: themePalette(),
+      })
+    }
+
+    const section = sectionRef.current
+    if (section && 'IntersectionObserver' in window) {
+      observer = new IntersectionObserver((entries) => {
+        if (entries.some((entry) => entry.isIntersecting)) {
+          observer?.disconnect()
+          void start()
+        }
+      })
+      observer.observe(section)
+    } else {
+      void start()
+    }
+
     return () => {
-      controller.destroy()
+      cancelled = true
+      observer?.disconnect()
+      controllerRef.current?.destroy()
+      controllerRef.current = null
     }
   }, [])
 
   return (
-    <section className="flex min-h-[62svh] w-full flex-col items-center justify-center text-center">
+    <section
+      ref={sectionRef}
+      className="flex min-h-[62svh] w-full flex-col items-center justify-center text-center"
+    >
       <h1 className="sr-only">Arcane 3.0</h1>
       <pre
         ref={preRef}
         aria-label="Arcane 3.0"
-        className="mx-auto w-fit max-w-full overflow-x-auto font-mono text-xs leading-[1.4] text-near-black sm:text-sm md:text-base dark:text-mist"
+        className="mx-auto w-fit max-w-full overflow-x-auto font-mono text-xs leading-[1.4] text-transparent sm:text-sm md:text-base"
       >
         {art}
       </pre>
