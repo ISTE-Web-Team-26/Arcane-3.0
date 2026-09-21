@@ -1,4 +1,5 @@
 import { Outlet } from 'react-router'
+import Contact from './Contact.tsx'
 import Navbar from './Navbar.tsx'
 
 export default function Layout() {
@@ -8,6 +9,7 @@ export default function Layout() {
       <main className="mx-auto flex w-full max-w-3xl flex-1 flex-col px-4 py-8 sm:px-8">
         <Outlet />
       </main>
+      <Contact />
     </div>
   )
 }
