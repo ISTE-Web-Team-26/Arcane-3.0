@@ -5,7 +5,6 @@ import Event2 from './pages/Event2.tsx'
 import Event3 from './pages/Event3.tsx'
 import Home from './pages/Home.tsx'
 import NotFound from './pages/NotFound.tsx'
-import './App.css'
 
 function App() {
   return (
