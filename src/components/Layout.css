@@ -1,0 +1,85 @@
+.site-nav {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 16px 32px;
+  border-bottom: 1px solid var(--border);
+  position: sticky;
+  top: 0;
+  background: var(--bg);
+  z-index: 10;
+}
+
+.site-nav .brand {
+  font-weight: 600;
+  font-size: 20px;
+  color: var(--text-h);
+  text-decoration: none;
+}
+
+.site-nav nav {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.site-nav nav a {
+  text-decoration: none;
+  color: var(--text);
+  font-size: 16px;
+  padding: 6px 12px;
+  border-radius: 6px;
+  transition:
+    background 0.2s,
+    color 0.2s;
+}
+
+.site-nav nav a:hover {
+  background: var(--social-bg);
+  color: var(--text-h);
+}
+
+.site-nav nav a.active {
+  background: var(--accent-bg);
+  color: var(--accent);
+}
+
+.site-main {
+  flex-grow: 1;
+  display: flex;
+  flex-direction: column;
+  padding: 32px;
+  text-align: left;
+  max-width: 800px;
+  width: 100%;
+  margin: 0 auto;
+  box-sizing: border-box;
+}
+
+.page-links {
+  display: flex;
+  gap: 12px;
+  margin-top: 24px;
+  flex-wrap: wrap;
+}
+
+.page-links a {
+  color: var(--text-h);
+  font-size: 16px;
+  border-radius: 6px;
+  background: var(--social-bg);
+  padding: 8px 16px;
+  text-decoration: none;
+}
+
+.page-links a:hover {
+  box-shadow: var(--shadow);
+}
+
+.back-link {
+  display: inline-block;
+  margin-top: 24px;
+  color: var(--accent);
+  text-decoration: none;
+}
