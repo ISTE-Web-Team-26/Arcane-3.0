@@ -1,6 +1,6 @@
 export default function About() {
   return (
-    <section id="about" className="mt-12">
+    <section id="about" className="mt-12 scroll-mt-20">
       <h2 className="font-heading text-2xl font-medium tracking-tight text-near-black dark:text-mist">
         About
       </h2>

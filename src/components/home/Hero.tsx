@@ -53,7 +53,8 @@ export default function Hero() {
   return (
     <section
       ref={sectionRef}
-      className="flex min-h-[62svh] w-full flex-col items-center justify-center text-center"
+      id="home"
+      className="flex min-h-[62svh] w-full scroll-mt-20 flex-col items-center justify-center text-center"
     >
       <h1 className="sr-only">Arcane 3.0</h1>
       <pre

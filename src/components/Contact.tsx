@@ -2,7 +2,10 @@ import { Link } from 'react-router'
 
 export default function Contact() {
   return (
-    <footer className="border-t border-dark-red/30 px-4 py-6 font-content sm:px-8">
+    <footer
+      id="contact"
+      className="scroll-mt-20 border-t border-dark-red/30 px-4 py-6 font-content sm:px-8"
+    >
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <p className="font-heading text-sm font-semibold text-near-black dark:text-mist">

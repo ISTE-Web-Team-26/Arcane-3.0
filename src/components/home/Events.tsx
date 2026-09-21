@@ -8,7 +8,7 @@ const events = [
 
 export default function Events() {
   return (
-    <section className="mt-12">
+    <section id="events" className="mt-12 scroll-mt-20">
       <h2 className="font-heading text-2xl font-medium tracking-tight text-near-black dark:text-mist">
         Events
       </h2>
