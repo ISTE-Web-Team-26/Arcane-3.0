@@ -1,0 +1,178 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>tte.js GIF capture</title>
+    <style>
+      * {
+        box-sizing: border-box;
+      }
+
+      html,
+      body {
+        height: 100%;
+        margin: 0;
+      }
+
+      body {
+        background:
+          radial-gradient(circle at 18% 5%, #293986 0, transparent 43%),
+          radial-gradient(circle at 86% 90%, #681f6d 0, transparent 40%),
+          #08090d;
+        color: #f7f7fb;
+        display: grid;
+        font-family: Arial, sans-serif;
+        overflow: hidden;
+        padding: 34px;
+      }
+
+      main {
+        border: 1px solid #343a55;
+        border-radius: 18px;
+        display: grid;
+        grid-template-rows: auto 1fr auto;
+        overflow: hidden;
+        padding: 26px;
+      }
+
+      header {
+        align-items: start;
+        display: flex;
+        justify-content: space-between;
+      }
+
+      h1,
+      p {
+        margin: 0;
+      }
+
+      h1 {
+        font-size: 28px;
+        letter-spacing: -0.05em;
+      }
+
+      .tagline,
+      .count {
+        color: #aeb5ce;
+        font-size: 12px;
+        margin-top: 6px;
+      }
+
+      .count {
+        font-family: 'SFMono-Regular', Consolas, monospace;
+        text-align: right;
+      }
+
+      .stage {
+        display: grid;
+        place-items: center;
+      }
+
+      pre {
+        font:
+          600 16px / 1.15 'SFMono-Regular',
+          Consolas,
+          monospace;
+        letter-spacing: -0.04em;
+        margin: 0;
+        white-space: pre;
+      }
+
+      footer {
+        display: grid;
+        gap: 10px;
+      }
+
+      .effect-name {
+        color: #ffffff;
+        font:
+          700 14px 'SFMono-Regular',
+          Consolas,
+          monospace;
+        letter-spacing: 0.12em;
+        text-transform: uppercase;
+      }
+
+      .progress {
+        background: #23273a;
+        border-radius: 999px;
+        height: 3px;
+        overflow: hidden;
+      }
+
+      .progress div {
+        background: linear-gradient(90deg, #8a5cff, #00d1ff, #ffffff);
+        height: 100%;
+        transform-origin: left;
+      }
+    </style>
+  </head>
+  <body>
+    <main>
+      <header>
+        <div>
+          <h1>tte.js</h1>
+          <p class="tagline">37 terminal text effects. Pure JavaScript.</p>
+        </div>
+        <p class="count"></p>
+      </header>
+
+      <div class="stage">
+        <pre aria-label="tte.js effect preview">
+┌────────────────────────────┐
+│                            │
+│       PURE JAVASCRIPT      │
+│                            │
+└────────────────────────────┘</pre
+        >
+      </div>
+
+      <footer>
+        <p class="effect-name"></p>
+        <div class="progress"><div></div></div>
+      </footer>
+    </main>
+
+    <script type="module">
+      import { createTextEffect, effectCatalog } from '../src/index.js'
+
+      const effects = effectCatalog()
+      const pre = document.querySelector('pre')
+      const name = document.querySelector('.effect-name')
+      const count = document.querySelector('.count')
+      const progressBar = document.querySelector('.progress div')
+      const animation = createTextEffect(pre, {
+        autoplay: false,
+        colors: ['#8a5cff', '#00d1ff', '#ffffff'],
+        duration: 2200,
+        hotColors: ['#fff4b0', '#ff9d2e', '#ff3d1f'],
+        laserColors: ['#ffffff', '#5de0ff'],
+        seed: 'tte.js-gif',
+      })
+
+      window.capture = {
+        effects: effects.map((effect) => effect.name),
+        intro() {
+          animation.options.effect = 'wipe'
+          animation.rebuild()
+          animation.render(1, animation.options.duration)
+
+          name.textContent = 'ALL 37 EFFECTS'
+          count.textContent = 'PURE JS'
+          progressBar.style.transform = 'scaleX(0)'
+        },
+        render(effectName, effectIndex, progress) {
+          animation.options.effect = effectName
+          animation.options.seed = `tte.js-gif:${effectName}`
+          animation.rebuild()
+          animation.render(progress, progress * animation.options.duration)
+
+          name.textContent = effectName
+          count.textContent = `${String(effectIndex + 1).padStart(2, '0')} / ${effects.length}`
+          progressBar.style.transform = `scaleX(${(effectIndex + progress) / effects.length})`
+        },
+      }
+    </script>
+  </body>
+</html>

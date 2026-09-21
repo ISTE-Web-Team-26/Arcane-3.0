@@ -1,0 +1,341 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta
+      name="description"
+      content="See every terminal-style text effect included with tte.js." />
+    <link
+      rel="icon"
+      href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22><text y=%22.9em%22 font-size=%2290%22>⌁</text></svg>" />
+    <title>tte.js effect gallery</title>
+    <style>
+      :root {
+        color-scheme: dark;
+        font-family: Inter, system-ui, sans-serif;
+        background: #08090d;
+        color: #f7f7fb;
+        font-synthesis: none;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        min-height: 100vh;
+        margin: 0;
+      }
+
+      body::before {
+        background:
+          radial-gradient(circle at 20% 0%, #23337a55 0, transparent 32rem),
+          radial-gradient(circle at 90% 15%, #62238333 0, transparent 28rem);
+        content: '';
+        inset: 0;
+        pointer-events: none;
+        position: fixed;
+      }
+
+      .page {
+        display: grid;
+        gap: 3rem;
+        margin: 0 auto;
+        max-width: 76rem;
+        padding: 5rem 1.5rem;
+        position: relative;
+        width: 100%;
+      }
+
+      header {
+        display: grid;
+        gap: 2rem;
+      }
+
+      h1,
+      h2,
+      p {
+        margin: 0;
+      }
+
+      h1 {
+        font-size: clamp(2.75rem, 8vw, 6rem);
+        letter-spacing: -0.07em;
+        line-height: 0.9;
+      }
+
+      .intro {
+        color: #aeb5ce;
+        line-height: 1.6;
+        margin-top: 1.25rem;
+        max-width: 36rem;
+      }
+
+      .gallery {
+        display: grid;
+        gap: 1.25rem;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+
+      .controls {
+        align-items: end;
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.75rem;
+      }
+
+      label {
+        color: #8e96b1;
+        display: grid;
+        font-size: 0.75rem;
+        gap: 0.35rem;
+      }
+
+      .effect-card {
+        background: #0d0f18cc;
+        border: 1px solid #252a3f;
+        border-radius: 1rem;
+        display: grid;
+        gap: 1rem;
+        overflow: hidden;
+        padding: 1rem;
+      }
+
+      .effect-card__header {
+        align-items: center;
+        display: flex;
+        gap: 1rem;
+        justify-content: space-between;
+        padding: 0.25rem;
+      }
+
+      .effect-card h2 {
+        font-family: 'SFMono-Regular', Consolas, monospace;
+        font-size: 0.9rem;
+        font-weight: 600;
+      }
+
+      .effect-card p {
+        color: #8e96b1;
+        font-size: 0.85rem;
+        margin-top: 0.35rem;
+      }
+
+      .stage {
+        background:
+          radial-gradient(circle at 50% 25%, #18235d 0, transparent 42%),
+          #0d0f18;
+        border: 1px solid #252a3f;
+        border-radius: 0.65rem;
+        display: grid;
+        min-height: 13rem;
+        overflow: hidden;
+        padding: 2.5rem 1.25rem;
+        place-items: center;
+        width: 100%;
+      }
+
+      pre {
+        font:
+          600 clamp(0.4rem, 1.15vw, 0.9rem) / 1.05 'SFMono-Regular',
+          Consolas,
+          monospace;
+        letter-spacing: -0.04em;
+        margin: 0;
+        white-space: pre;
+      }
+
+      .effect-card:not(:first-child) pre {
+        font-size: clamp(0.42rem, 0.8vw, 0.7rem);
+      }
+
+      button {
+        background: #171a28;
+        border: 1px solid #343a55;
+        border-radius: 0.5rem;
+        color: inherit;
+        cursor: pointer;
+        font:
+          600 0.8rem Inter,
+          system-ui,
+          sans-serif;
+        padding: 0.7rem 0.9rem;
+      }
+
+      button,
+      select {
+        min-height: 2.5rem;
+      }
+
+      select {
+        background: #171a28;
+        border: 1px solid #343a55;
+        border-radius: 0.5rem;
+        color: inherit;
+        font: inherit;
+        padding: 0.55rem 2rem 0.55rem 0.7rem;
+      }
+
+      .controls > button {
+        background: #f2f5ff;
+        color: #10121b;
+        padding-inline: 1.1rem;
+      }
+
+      button:hover {
+        background: #21263a;
+      }
+
+      .controls > button:hover {
+        background: #dce3ff;
+      }
+
+      .speedrun {
+        background: #0d0f18cc;
+        border: 1px solid #252a3f;
+        border-radius: 1rem;
+        display: grid;
+        gap: 1rem;
+        padding: 1rem;
+      }
+
+      .speedrun__header {
+        align-items: center;
+        display: flex;
+        gap: 1rem;
+        justify-content: space-between;
+        padding: 0.25rem;
+      }
+
+      .speedrun h2 {
+        font-size: 1rem;
+      }
+
+      .speedrun p {
+        color: #8e96b1;
+        font-size: 0.85rem;
+        margin-top: 0.35rem;
+      }
+
+      .speedrun a {
+        color: #b9dfff;
+        font-size: 0.85rem;
+        white-space: nowrap;
+      }
+
+      .speedrun img {
+        border-radius: 0.65rem;
+        display: block;
+        height: auto;
+        width: 100%;
+      }
+
+      footer {
+        color: #777f99;
+        font-size: 0.85rem;
+        text-align: center;
+      }
+
+      footer a {
+        color: #b9dfff;
+      }
+
+      @media (max-width: 48rem) {
+        .page {
+          padding-block: 3rem;
+        }
+
+        .gallery {
+          grid-template-columns: 1fr;
+        }
+
+        .stage {
+          min-height: 14rem;
+        }
+
+        pre,
+        .effect-card:not(:first-child) pre {
+          font-size: clamp(0.33rem, 1.65vw, 0.7rem);
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="page">
+      <header>
+        <div>
+          <h1>tte.js</h1>
+          <p class="intro">
+            Terminal-style text effects for the browser. Plain JavaScript,
+            Canvas, and no runtime dependencies.
+          </p>
+        </div>
+        <div class="controls" aria-label="Gallery options">
+          <label>
+            Speed
+            <select id="speed">
+              <option value="1.5">Fast</option>
+              <option value="1" selected>Normal</option>
+              <option value="0.65">Slow</option>
+            </select>
+          </label>
+          <label>
+            Palette
+            <select id="palette">
+              <option value="aurora">Aurora</option>
+              <option value="fire">Fire</option>
+              <option value="matrix">Matrix</option>
+              <option value="ice">Ice</option>
+            </select>
+          </label>
+          <button id="new-seed" type="button">New seed</button>
+          <button id="replay-all" type="button">Replay all effects</button>
+        </div>
+      </header>
+
+      <section class="speedrun">
+        <div class="speedrun__header">
+          <div>
+            <h2>The 14-second speed run</h2>
+            <p>All 37 effects in one shareable GIF.</p>
+          </div>
+          <a href="./tte-effects.gif" download>Download GIF</a>
+        </div>
+        <img
+          src="./tte-effects.gif"
+          alt="All 37 tte.js effects playing in sequence"
+          width="800"
+          height="450" />
+      </section>
+
+      <main class="gallery" id="gallery"></main>
+
+      <template id="effect-card">
+        <article class="effect-card">
+          <div class="effect-card__header">
+            <div>
+              <h2></h2>
+              <p></p>
+            </div>
+            <button type="button" data-replay>Replay</button>
+          </div>
+          <div class="stage">
+            <pre></pre>
+          </div>
+        </article>
+      </template>
+
+      <footer>
+        Effect designs by
+        <a href="https://github.com/ChrisBuilds/terminaltexteffects">
+          TerminalTextEffects
+        </a>
+        and adapted with reference to
+        <a href="https://github.com/omacom/ttfx">ttfx</a>.
+      </footer>
+    </div>
+
+    <script type="module" src="./demo.js"></script>
+  </body>
+</html>
