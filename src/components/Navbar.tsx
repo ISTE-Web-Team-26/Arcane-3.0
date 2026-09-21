@@ -1,15 +1,11 @@
 import { Link, useLocation } from 'react-router'
+import arcaneLogo from '../assets/arcane-logo.png'
 
-const linkBase =
-  'rounded-md px-3 py-1.5 text-sm font-medium transition-colors text-near-black/70 hover:bg-medium-red/10 hover:text-medium-red dark:text-mist/70 dark:hover:bg-medium-red/20 dark:hover:text-mist'
-const linkActive =
-  'bg-medium-red/15 text-dark-red dark:bg-medium-red/25 dark:text-mist'
-
-const links = [
-  { id: 'home', label: 'Home' },
-  { id: 'about', label: 'About' },
-  { id: 'events', label: 'Events' },
-  { id: 'contact', label: 'Contact' },
+const navLinks = [
+  { id: 'home', label: 'HOME' },
+  { id: 'events', label: 'EVENTS' },
+  { id: 'about', label: 'ABOUT' },
+  { id: 'contact', label: 'CONTACT' },
 ]
 
 export default function Navbar() {
@@ -17,35 +13,71 @@ export default function Navbar() {
 
   const handleClick = (id: string) => {
     // Link won't navigate when the hash is unchanged — scroll manually.
-    if (pathname === '/' && hash === `#${id}`) {
-      document.getElementById(id)?.scrollIntoView({ behavior: 'smooth' })
+    if (pathname === '/' && (hash === `#${id}` || (!hash && id === 'home'))) {
+      const targetId = id === 'home' ? 'home' : id
+      document.getElementById(targetId)?.scrollIntoView({ behavior: 'smooth' })
     }
   }
 
+  const isLinkActive = (id: string) => {
+    if (pathname === '/') {
+      if (id === 'home') return !hash || hash === '#home'
+      return hash === `#${id}`
+    }
+    return false
+  }
+
   return (
-    <header className="sticky top-0 z-10 flex items-center justify-between gap-4 border-b border-dark-red/30 bg-mist/90 px-4 py-3 font-content backdrop-blur sm:px-8 dark:border-dark-red/30 dark:bg-near-black/90">
+    <header className="sticky top-0 z-50 flex min-h-[4.5rem] items-center justify-between gap-4 border-b border-dark-red/30 bg-mist/95 px-4 py-3.5 font-content backdrop-blur-md sm:min-h-[5rem] sm:px-8 dark:border-dark-red/40 dark:bg-near-black/95">
+      {/* Left: Non-rounded Logo & System Tag */}
       <Link
         to="/"
-        className="font-heading text-lg font-semibold tracking-tight text-near-black dark:text-mist"
+        onClick={() => handleClick('home')}
+        className="group flex items-center gap-3 transition-transform active:scale-95"
+        aria-label="Arcane 3.0 Home"
       >
-        Arcane 3.0
+        <img
+          src={arcaneLogo}
+          alt="Arcane 3.0 Logo"
+          className="h-10 w-auto sm:h-12 object-contain"
+        />
+
+        {/* <span className="hidden rounded-xs border border-mist/10 bg-near-black/80 px-2 py-0.5 font-mono text-[11px] font-semibold tracking-widest text-mist/70 uppercase sm:inline-block">
+          //:SYS.RUN
+        </span> */}
       </Link>
-      <nav className="flex flex-wrap gap-1">
-        {links.map((link) => (
-          <Link
-            key={link.id}
-            to={`/#${link.id}`}
-            onClick={() => handleClick(link.id)}
-            className={
-              pathname === '/' && hash === `#${link.id}`
-                ? `${linkBase} ${linkActive}`
-                : linkBase
-            }
-          >
-            {link.label}
-          </Link>
-        ))}
-      </nav>
+
+      {/* Right: Nav Links + Register Button */}
+      <div className="flex items-center gap-4 sm:gap-6 md:gap-8">
+        <nav className="flex items-center gap-3 sm:gap-5 md:gap-6 font-mono text-xs font-semibold tracking-widest sm:text-sm">
+          {navLinks.map((link) => {
+            const active = isLinkActive(link.id)
+            return (
+              <Link
+                key={link.id}
+                to={`/#${link.id}`}
+                onClick={() => handleClick(link.id)}
+                className={`transition-colors uppercase ${
+                  active
+                    ? 'text-medium-red dark:text-mist font-bold'
+                    : 'text-near-black/70 hover:text-near-black dark:text-mist/60 dark:hover:text-mist'
+                }`}
+              >
+                {link.label}
+              </Link>
+            )
+          })}
+        </nav>
+
+        {/* Register Button in Red Border Box */}
+        <Link
+          to="/#events"
+          onClick={() => handleClick('events')}
+          className="rounded-xs border border-medium-red px-4 py-1.5 font-mono text-xs font-bold tracking-widest text-medium-red uppercase transition-all duration-200 hover:bg-medium-red hover:text-mist hover:shadow-[0_0_14px_rgba(170,52,48,0.45)] active:scale-95 sm:text-sm dark:text-mist dark:hover:bg-medium-red dark:hover:text-mist"
+        >
+          REGISTER
+        </Link>
+      </div>
     </header>
   )
 }
