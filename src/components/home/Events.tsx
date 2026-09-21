@@ -9,7 +9,7 @@ const events = [
 export default function Events() {
   return (
     <section className="mt-12">
-      <h2 className="font-heading text-2xl font-medium tracking-tight text-zinc-950 dark:text-zinc-50">
+      <h2 className="font-heading text-2xl font-medium tracking-tight text-near-black dark:text-mist">
         Events
       </h2>
       <p className="mt-3 leading-relaxed">
@@ -20,9 +20,9 @@ export default function Events() {
           <Link
             key={e.to}
             to={e.to}
-            className="rounded-xl border border-zinc-200 p-4 transition-shadow hover:shadow-lg dark:border-zinc-800"
+            className="rounded-xl border border-dark-red/25 p-4 transition-all hover:border-medium-red hover:shadow-lg dark:border-dark-red/30 dark:hover:border-medium-red"
           >
-            <p className="font-heading font-medium text-zinc-950 dark:text-zinc-50">
+            <p className="font-heading font-medium text-near-black dark:text-mist">
               {e.title}
             </p>
             <p className="mt-1 text-sm">{e.blurb}</p>

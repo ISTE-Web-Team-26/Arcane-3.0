@@ -3,6 +3,11 @@
 @theme {
   --font-heading: "Pixelify Sans", system-ui, sans-serif;
   --font-content: "Geist Pixel", "Pixelify Sans", system-ui, sans-serif;
+
+  --color-medium-red: #aa3430;
+  --color-near-black: #040203;
+  --color-dark-red: #831b1c;
+  --color-mist: #e7e5e8;
 }
 
 html {
