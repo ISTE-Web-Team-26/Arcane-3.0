@@ -1,8 +1,8 @@
 @import "tailwindcss";
 
 @theme {
-  --font-primary: "Pixelify Sans", system-ui, sans-serif;
-  --font-secondary: "Geist Pixel", "Pixelify Sans", system-ui, sans-serif;
+  --font-heading: "Pixelify Sans", system-ui, sans-serif;
+  --font-content: "Geist Pixel", "Pixelify Sans", system-ui, sans-serif;
 }
 
 html {
@@ -11,5 +11,5 @@ html {
 
 body {
   margin: 0;
-  font-family: var(--font-primary);
+  font-family: var(--font-content);
 }

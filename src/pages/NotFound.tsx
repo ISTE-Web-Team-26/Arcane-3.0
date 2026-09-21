@@ -3,7 +3,7 @@ import { Link } from 'react-router'
 export default function NotFound() {
   return (
     <section>
-      <h1 className="font-secondary text-4xl font-medium tracking-tight text-zinc-950 sm:text-5xl dark:text-zinc-50">
+      <h1 className="font-heading text-4xl font-medium tracking-tight text-zinc-950 sm:text-5xl dark:text-zinc-50">
         404 — Not found
       </h1>
       <p className="mt-4 leading-relaxed">This page doesn&apos;t exist.</p>

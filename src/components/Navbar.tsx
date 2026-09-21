@@ -11,10 +11,10 @@ function navClass({ isActive }: { isActive: boolean }) {
 
 export default function Navbar() {
   return (
-    <header className="sticky top-0 z-10 flex items-center justify-between gap-4 border-b border-zinc-200 bg-white/90 px-4 py-3 font-primary backdrop-blur sm:px-8 dark:border-zinc-800 dark:bg-zinc-950/90">
+    <header className="sticky top-0 z-10 flex items-center justify-between gap-4 border-b border-zinc-200 bg-white/90 px-4 py-3 font-content backdrop-blur sm:px-8 dark:border-zinc-800 dark:bg-zinc-950/90">
       <NavLink
         to="/"
-        className="font-secondary text-lg font-semibold tracking-tight text-zinc-950 dark:text-zinc-50"
+        className="font-heading text-lg font-semibold tracking-tight text-zinc-950 dark:text-zinc-50"
       >
         Arcane 3.0
       </NavLink>
