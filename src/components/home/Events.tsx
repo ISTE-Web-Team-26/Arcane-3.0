@@ -124,14 +124,14 @@ export default function Events({
 
           <h2
             id={`${sectionId}-heading`}
-            className="font-heading text-3xl font-bold text-near-black sm:text-4xl md:text-5xl dark:text-mist"
+            className="font-heading text-3xl font-bold text-near-black underline underline-offset-8 decoration-medium-red sm:text-4xl md:text-5xl dark:text-mist"
           >
             EVENTS
           </h2>
 
-          <p className="mt-1 text-xs text-near-black/70 sm:text-sm md:text-base dark:text-mist/70">
+          {/* <p className="mt-1 text-xs text-near-black/70 sm:text-sm md:text-base dark:text-mist/70">
             Discover what's happening next.
-          </p>
+          </p> */}
         </div>
 
         {/* Top-right Counter & Navigation Controls */}
