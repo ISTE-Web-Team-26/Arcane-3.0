@@ -28,7 +28,7 @@ export default function Navbar() {
   }
 
   return (
-    <header className="fixed inset-x-0 top-0 z-50 flex min-h-[4.5rem] w-full items-center justify-between gap-4 border-b border-dark-red/20 bg-mist/60 px-4 py-3.5 font-content backdrop-blur-md sm:min-h-[5rem] sm:px-8 dark:border-white/10 dark:bg-near-black/50">
+    <header className="fixed inset-x-0 top-0 z-50 flex min-h-[4.5rem] w-full items-center justify-between gap-4 border-b border-dark-red/15 bg-mist/20 px-4 py-3.5 font-content backdrop-blur-sm sm:min-h-[5rem] sm:px-8 dark:border-white/10 dark:bg-near-black/20">
       {/* Left: Non-rounded Logo & System Tag */}
       <Link
         to="/"
