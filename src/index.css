@@ -1,7 +1,7 @@
 @import "tailwindcss";
 
 @theme {
-  --font-heading: "Pixelify Sans", system-ui, sans-serif;
+  --font-heading: "Jersey 20", sans-serif;
   --font-content: "Geist Pixel", "Pixelify Sans", system-ui, sans-serif;
 
   --color-medium-red: #aa3430;
@@ -19,41 +19,15 @@ body {
   font-family: var(--font-content);
 }
 
+.font-heading {
+  letter-spacing: 0.08em;
+}
+
 .logo-shimmer {
   position: relative;
   display: inline-flex;
   align-items: center;
 }
-
-.logo-shimmer::before {
-  content: "";
-  position: absolute;
-  inset: -15%;
-  background: radial-gradient(
-    ellipse at center,
-    rgba(238, 39, 33, 0.28) 0%,
-    rgba(170, 52, 48, 0.15) 45%,
-    transparent 72%
-  );
-  filter: blur(14px);
-  border-radius: 9999px;
-  pointer-events: none;
-  z-index: -1;
-  opacity: 0.9;
-  animation: logo-glow-pulse 4s ease-in-out infinite alternate;
-}
-
-@keyframes logo-glow-pulse {
-  0% {
-    transform: scale(0.96);
-    opacity: 0.75;
-  }
-  100% {
-    transform: scale(1.06);
-    opacity: 1;
-  }
-}
-
 
 .logo-shimmer::after {
   content: "";

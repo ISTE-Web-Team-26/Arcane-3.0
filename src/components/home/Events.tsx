@@ -1,31 +1,20 @@
 import { useCallback, useEffect, useId, useRef, useState } from 'react'
 import { Link } from 'react-router'
-import type { TextEffectController } from '@external/tte-js/src/index.js'
 import { DEFAULT_EVENTS, type EventItem } from '../../data/events.ts'
-import { themePalette } from '../../helpers/theme.ts'
 
 interface EventsProps {
   events?: EventItem[]
-  headingEffect?: string
-  titleEffect?: string
 }
 
 export default function Events({
   events = DEFAULT_EVENTS,
-  headingEffect = 'burn',
-  titleEffect = 'beams',
 }: EventsProps) {
   const sectionId = useId()
   const sectionRef = useRef<HTMLElement>(null)
-  const headingRef = useRef<HTMLHeadingElement>(null)
-  const headingControllerRef = useRef<TextEffectController | null>(null)
-  const activeTitleRef = useRef<HTMLHeadingElement | null>(null)
-  const titleControllerRef = useRef<TextEffectController | null>(null)
 
   const [currentIndex, setCurrentIndex] = useState(0)
   const [dragOffset, setDragOffset] = useState(0)
   const [isDragging, setIsDragging] = useState(false)
-  const [isInView, setIsInView] = useState(false)
 
   const dragStartX = useRef(0)
   const dragStartY = useRef(0)
@@ -71,112 +60,6 @@ export default function Events({
     window.addEventListener('keydown', handleKeyDown)
     return () => window.removeEventListener('keydown', handleKeyDown)
   }, [handlePrev, handleNext])
-
-  // Viewport intersection observer to trigger heading animation
-  useEffect(() => {
-    const section = sectionRef.current
-    if (!section) return
-
-    let cancelled = false
-    const observer = new IntersectionObserver(
-      (entries) => {
-        if (entries.some((entry) => entry.isIntersecting)) {
-          if (!cancelled) {
-            setIsInView(true)
-          }
-          observer.disconnect()
-        }
-      },
-      { threshold: 0.15 },
-    )
-
-    observer.observe(section)
-
-    return () => {
-      cancelled = true
-      observer.disconnect()
-    }
-  }, [])
-
-  // Heading text animation via tte.js
-  useEffect(() => {
-    if (!isInView || !headingRef.current) return
-
-    let cancelled = false
-    const prefersReduced =
-      typeof window !== 'undefined' &&
-      window.matchMedia('(prefers-reduced-motion: reduce)').matches
-
-    if (prefersReduced) return
-
-    const runHeadingEffect = async () => {
-      try {
-        const { createTextEffect } = await import(
-          '@external/tte-js/src/index.js'
-        )
-        if (cancelled || !headingRef.current) return
-
-        headingControllerRef.current?.destroy()
-        headingControllerRef.current = createTextEffect(headingRef.current, {
-          effect: headingEffect,
-          duration: 900,
-          fps: 60,
-          loop: false,
-          colors: themePalette(),
-        })
-      } catch (err) {
-        console.warn('tte.js heading effect error:', err)
-      }
-    }
-
-    void runHeadingEffect()
-
-    return () => {
-      cancelled = true
-      headingControllerRef.current?.destroy()
-      headingControllerRef.current = null
-    }
-  }, [isInView, headingEffect])
-
-  // Active event title text animation via tte.js on slide change
-  useEffect(() => {
-    if (!isInView || !activeTitleRef.current) return
-
-    let cancelled = false
-    const prefersReduced =
-      typeof window !== 'undefined' &&
-      window.matchMedia('(prefers-reduced-motion: reduce)').matches
-
-    if (prefersReduced) return
-
-    const runTitleEffect = async () => {
-      try {
-        const { createTextEffect } = await import(
-          '@external/tte-js/src/index.js'
-        )
-        if (cancelled || !activeTitleRef.current) return
-
-        titleControllerRef.current?.destroy()
-        titleControllerRef.current = createTextEffect(activeTitleRef.current, {
-          effect: titleEffect,
-          duration: 750,
-          fps: 60,
-          loop: false,
-          colors: themePalette(),
-        })
-      } catch (err) {
-        console.warn('tte.js title effect error:', err)
-      }
-    }
-
-    void runTitleEffect()
-
-    return () => {
-      cancelled = true
-      titleControllerRef.current?.destroy()
-      titleControllerRef.current = null
-    }
-  }, [activeEventIndex, isInView, titleEffect])
 
   // Mouse & Touch Drag handlers
   const handleDragStart = (clientX: number, clientY: number) => {
@@ -241,8 +124,7 @@ export default function Events({
 
           <h2
             id={`${sectionId}-heading`}
-            ref={headingRef}
-            className="font-heading text-3xl font-bold tracking-tight text-near-black sm:text-4xl md:text-5xl dark:text-mist"
+            className="font-heading text-3xl font-bold text-near-black sm:text-4xl md:text-5xl dark:text-mist"
           >
             EVENTS
           </h2>
@@ -402,8 +284,7 @@ export default function Events({
                     {/* Left: Event Title & Short Description */}
                     <div className="max-w-xl text-left">
                       <h3
-                        ref={isCenter ? activeTitleRef : undefined}
-                        className="font-heading text-lg font-bold tracking-tight text-mist sm:text-2xl md:text-3xl lg:text-4xl uppercase"
+                        className="font-heading text-lg font-bold text-mist sm:text-2xl md:text-3xl lg:text-4xl uppercase"
                       >
                         {item.title}
                       </h3>

@@ -3,7 +3,7 @@ import { Link } from 'react-router'
 export default function Event1() {
   return (
     <section>
-      <h1 className="font-heading text-4xl font-medium tracking-tight text-near-black sm:text-5xl dark:text-mist">
+      <h1 className="font-heading text-4xl font-medium text-near-black sm:text-5xl dark:text-mist">
         Event 1
       </h1>
       <p className="mt-4 leading-relaxed">
