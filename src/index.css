@@ -18,3 +18,89 @@ body {
   margin: 0;
   font-family: var(--font-content);
 }
+
+.logo-shimmer {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+}
+
+.logo-shimmer::before {
+  content: "";
+  position: absolute;
+  inset: -15%;
+  background: radial-gradient(
+    ellipse at center,
+    rgba(238, 39, 33, 0.28) 0%,
+    rgba(170, 52, 48, 0.15) 45%,
+    transparent 72%
+  );
+  filter: blur(14px);
+  border-radius: 9999px;
+  pointer-events: none;
+  z-index: -1;
+  opacity: 0.9;
+  animation: logo-glow-pulse 4s ease-in-out infinite alternate;
+}
+
+@keyframes logo-glow-pulse {
+  0% {
+    transform: scale(0.96);
+    opacity: 0.75;
+  }
+  100% {
+    transform: scale(1.06);
+    opacity: 1;
+  }
+}
+
+
+.logo-shimmer::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    115deg,
+    transparent 0%,
+    transparent 25%,
+    rgba(255, 255, 255, 0.4) 45%,
+    rgba(255, 255, 255, 0.95) 50%,
+    rgba(255, 120, 120, 0.7) 56%,
+    transparent 75%,
+    transparent 100%
+  );
+  background-size: 250% 100%;
+  -webkit-mask-image: var(--logo-url);
+  -webkit-mask-size: contain;
+  -webkit-mask-repeat: no-repeat;
+  -webkit-mask-position: center;
+  mask-image: var(--logo-url);
+  mask-size: contain;
+  mask-repeat: no-repeat;
+  mask-position: center;
+  animation: logo-shimmer-sweep 3.2s ease-in-out infinite;
+  pointer-events: none;
+  mix-blend-mode: screen;
+}
+
+@keyframes logo-shimmer-sweep {
+  0% {
+    background-position: 200% 0;
+    opacity: 0;
+  }
+  15% {
+    opacity: 1;
+  }
+  60% {
+    opacity: 1;
+  }
+  75% {
+    background-position: -200% 0;
+    opacity: 0;
+  }
+  100% {
+    background-position: -200% 0;
+    opacity: 0;
+  }
+}
+
