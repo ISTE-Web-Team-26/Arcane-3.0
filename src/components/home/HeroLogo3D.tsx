@@ -137,10 +137,10 @@ export default function HeroLogo3D() {
         `,
       })
       disposables.push(logoMaterial, texture)
-      // Slightly bigger than before: 5.2 world units wide (~18% up from 4.4).
+      // Slightly bigger than before: 5.5 world units wide.
       // `updateFit` below scales it down on narrow/tall screens so it never
-      // overflows, and caps its height so the CTA buttons keep clear space.
-      const BASE_W = 5.2
+      // overflows, and caps its height so the date/countdown block keeps clear space.
+      const BASE_W = 5.5
       const BASE_H = BASE_W / LOGO_ASPECT
       const logoMesh = new THREE.Mesh(
         new THREE.PlaneGeometry(BASE_W, BASE_H),
@@ -160,7 +160,7 @@ export default function HeroLogo3D() {
         const vW = vH * camera.aspect
         bounds.halfW = vW / 2
         bounds.halfH = vH / 2
-        const s = Math.min((vW * 0.92) / BASE_W, (vH * 0.6) / BASE_H, 1.15)
+        const s = Math.min((vW * 0.92) / BASE_W, (vH * 0.62) / BASE_H, 1.15)
         logoMesh.scale.setScalar(Math.max(s, 0.25))
       }
 
@@ -406,7 +406,7 @@ export default function HeroLogo3D() {
       <img
         src={logoUrl}
         alt="Arcane 3.0 pixel logo"
-        className={`absolute inset-0 m-auto h-auto w-[92%] max-w-5xl -translate-y-[10%] object-contain transition-opacity duration-500 ${
+        className={`absolute inset-0 m-auto h-auto w-[94%] max-w-5xl -translate-y-[10%] object-contain transition-opacity duration-500 ${
           webglReady && !webglFailed ? 'opacity-0' : 'opacity-100'
         }`}
         draggable={false}
