@@ -1,4 +1,4 @@
-import { Link } from 'react-router'
+import Countdown from './Countdown.tsx'
 import HeroLogo3D from './HeroLogo3D.tsx'
 
 export default function Hero() {
@@ -9,19 +9,24 @@ export default function Hero() {
     >
       <h1 className="sr-only">Arcane 3.0</h1>
       <HeroLogo3D />
-      <div className="relative z-10 flex flex-wrap justify-center gap-3 px-4 pb-[9svh]">
-        <Link
-          to="/event1"
-          className="rounded-lg bg-medium-red px-4 py-2 text-sm font-medium text-mist transition-colors hover:bg-dark-red"
-        >
-          Explore events
-        </Link>
-        <a
-          href="#about"
-          className="rounded-lg border border-dark-red/30 bg-near-black/5 px-4 py-2 text-sm font-medium text-near-black backdrop-blur-sm transition-shadow hover:shadow-lg dark:border-mist/20 dark:bg-mist/10 dark:text-mist"
-        >
-          Learn more
-        </a>
+      <div className="relative z-10 flex flex-col items-center px-4 pb-[8svh]">
+        <p className="flex items-center gap-2.5 font-mono text-[11px] font-semibold tracking-[0.3em] text-medium-red uppercase sm:text-xs dark:text-mist/80">
+          <span
+            className="inline-block h-1.5 w-1.5 animate-pulse bg-medium-red"
+            aria-hidden="true"
+          />
+          Save the date
+          <span
+            className="inline-block h-1.5 w-1.5 animate-pulse bg-medium-red"
+            aria-hidden="true"
+          />
+        </p>
+        <p className="mt-3 font-heading text-4xl font-bold tracking-tight text-near-black [text-shadow:0_0_28px_rgba(170,52,48,0.45)] sm:text-6xl dark:text-mist">
+          29<sup className="text-[0.55em]">TH</sup> SEPTEMBER 2026
+        </p>
+        <div className="mt-5">
+          <Countdown />
+        </div>
       </div>
     </section>
   )

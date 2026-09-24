@@ -351,10 +351,11 @@ export default function HeroLogo3D() {
         boltMaterial.opacity = flashValue
         bolt.visible = flashValue > 0.03
 
-        // Gentle float + pointer parallax.
+        // Gentle float + pointer parallax. Base lift keeps the logo
+        // sitting slightly above center, clear of the date/countdown block.
         pointer.x += (pointer.tx - pointer.x) * 0.06
         pointer.y += (pointer.ty - pointer.y) * 0.06
-        logoMesh.position.y = Math.sin(clock.elapsedTime * 0.8) * 0.03
+        logoMesh.position.y = 0.32 + Math.sin(clock.elapsedTime * 0.8) * 0.03
         logoMesh.rotation.y = pointer.x * 0.08
         logoMesh.rotation.x = -pointer.y * 0.05
 
@@ -405,7 +406,7 @@ export default function HeroLogo3D() {
       <img
         src={logoUrl}
         alt="Arcane 3.0 pixel logo"
-        className={`absolute inset-0 m-auto h-auto w-[92%] max-w-5xl object-contain transition-opacity duration-500 ${
+        className={`absolute inset-0 m-auto h-auto w-[92%] max-w-5xl -translate-y-[10%] object-contain transition-opacity duration-500 ${
           webglReady && !webglFailed ? 'opacity-0' : 'opacity-100'
         }`}
         draggable={false}
