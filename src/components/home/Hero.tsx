@@ -24,6 +24,24 @@ export default function Hero() {
         <p className="mt-3 font-content text-4xl font-bold tracking-normal text-near-black [text-shadow:0_0_28px_rgba(170,52,48,0.45)] sm:text-6xl dark:text-mist">
           29<sup className="text-[0.55em]">TH</sup> SEPTEMBER 2026
         </p>
+        <p className="mt-3 flex items-center gap-2 font-mono text-sm font-semibold tracking-[0.25em] text-near-black/70 uppercase sm:text-base dark:text-mist/70">
+          <svg
+            width="16"
+            height="16"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            aria-hidden="true"
+            className="text-medium-red"
+          >
+            <path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z" />
+            <circle cx="12" cy="10" r="3" />
+          </svg>
+          FISAT, Angamaly
+        </p>
         <div className="mt-5">
           <Countdown />
         </div>
