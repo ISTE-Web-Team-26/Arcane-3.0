@@ -3,16 +3,17 @@ import logoUrl from '../../assets/arcane-logo.png'
 
 const LOGO_ASPECT = 2400 / 1023
 const RAIN_COLOR = 0x5876a8
+const BOLT_COLOR = 0xffffff // white bolt, fat line for extra width
 
 /**
  * Thunderstorm logo rendered with Three.js.
  *
  * Faithful port of the tte-js `thunderstorm` ASCII effect:
- * - rain streaks falling in front of the logo (`│`, #5876a8)
+ * - blue-grey rain streaks falling in front of the logo
  * - periodic lightning flash every 13 x 110ms tick that blows the logo
  *   out to white (glow 20 in the ASCII renderer) and turns every 8th
  *   drop into a white diagonal (`╱`)
- * - a jagged bolt that is only visible on flash frames
+ * - a jagged white thunderbolt (fat line, 3px) only visible on flash frames
  *
  * Three.js is dynamically imported so it stays off the critical path.
  * A static <img> is rendered until WebGL is ready (and as a fallback).
@@ -50,8 +51,19 @@ export default function HeroLogo3D() {
       if (!container) return
 
       let THREE: typeof import('three')
+      let Line2: typeof import('three/examples/jsm/lines/Line2.js').Line2
+      let LineGeometry: typeof import('three/examples/jsm/lines/LineGeometry.js').LineGeometry
+      let LineMaterial: typeof import('three/examples/jsm/lines/LineMaterial.js').LineMaterial
       try {
         THREE = await import('three')
+        const [line2Mod, lineGeoMod, lineMatMod] = await Promise.all([
+          import('three/examples/jsm/lines/Line2.js'),
+          import('three/examples/jsm/lines/LineGeometry.js'),
+          import('three/examples/jsm/lines/LineMaterial.js'),
+        ])
+        Line2 = line2Mod.Line2
+        LineGeometry = lineGeoMod.LineGeometry
+        LineMaterial = lineMatMod.LineMaterial
       } catch {
         if (!cancelled) setWebglFailed(true)
         return
@@ -164,7 +176,14 @@ export default function HeroLogo3D() {
         logoMesh.scale.setScalar(Math.max(s, 0.25))
       }
 
-      // --- Rain streaks (the `│` particles, #5876a8) -------------------
+      const updateResolutions = () => {
+        const size = rendererInstance.getDrawingBufferSize(
+          new THREE.Vector2(),
+        )
+        boltMaterial.resolution.copy(size)
+      }
+
+      // --- Rain streaks (thin blue-grey lines) ---------------------------
       const RAIN_COUNT = 300
       const randomX = () => (Math.random() * 2 - 1) * (bounds.halfW + 0.3)
       const randomY = () => (Math.random() * 2 - 1) * (bounds.halfH + 0.3)
@@ -214,23 +233,19 @@ export default function HeroLogo3D() {
       disposables.push(flashGeometry, flashMaterial)
       scene.add(new THREE.LineSegments(flashGeometry, flashMaterial))
 
-      // --- Lightning bolt (visible only on flash frames) ---------------
+      // --- Lightning bolt (visible only on flash frames, fat line 3px) --
       const BOLT_SEGMENTS = 14
-      const boltPositions = new Float32Array((BOLT_SEGMENTS + 1) * 3)
-      const boltGeometry = new THREE.BufferGeometry()
-      boltGeometry.setAttribute(
-        'position',
-        new THREE.BufferAttribute(boltPositions, 3),
-      )
-      const boltMaterial = new THREE.LineBasicMaterial({
-        color: 0xffffff,
+      const boltGeometry = new LineGeometry()
+      const boltMaterial = new LineMaterial({
+        color: BOLT_COLOR,
+        linewidth: 3,
         transparent: true,
         opacity: 0,
         blending: THREE.AdditiveBlending,
         depthWrite: false,
       })
       disposables.push(boltGeometry, boltMaterial)
-      const bolt = new THREE.Line(boltGeometry, boltMaterial)
+      const bolt = new Line2(boltGeometry, boltMaterial)
       bolt.position.z = -0.3
       bolt.frustumCulled = false
       scene.add(bolt)
@@ -239,6 +254,7 @@ export default function HeroLogo3D() {
         const strikeX = (Math.random() * 2 - 1) * bounds.halfW * 0.7
         const top = bounds.halfH + 0.5
         const bottom = -bounds.halfH - 0.5
+        const pts: number[] = []
         for (let i = 0; i <= BOLT_SEGMENTS; i += 1) {
           const t = i / BOLT_SEGMENTS
           const y = top - t * (top - bottom)
@@ -246,11 +262,9 @@ export default function HeroLogo3D() {
             i === 0 || i === BOLT_SEGMENTS
               ? 0
               : (Math.random() - 0.5) * 0.36
-          boltPositions[i * 3] = strikeX + jitter + t * 0.25
-          boltPositions[i * 3 + 1] = y
-          boltPositions[i * 3 + 2] = 0
+          pts.push(strikeX + jitter + t * 0.25, y, 0)
         }
-        boltGeometry.attributes.position.needsUpdate = true
+        boltGeometry.setPositions(pts)
       }
       rebuildBolt()
 
@@ -264,6 +278,7 @@ export default function HeroLogo3D() {
         camera.aspect = w / h
         camera.updateProjectionMatrix()
         updateFit()
+        updateResolutions()
       }
       updateFit()
       resize()
