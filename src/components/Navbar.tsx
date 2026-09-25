@@ -55,14 +55,14 @@ export default function Navbar() {
           target="_blank"
           rel="noreferrer"
           aria-label="ISTE — Indian Society for Technical Education"
-          className="hidden items-center gap-1.5 rounded-full border border-dark-red/20 bg-near-black/5 py-1 pr-2.5 pl-1 transition-transform active:scale-95 sm:flex dark:border-white/10 dark:bg-white/5"
+          className="hidden items-center gap-2 rounded-full border border-medium-red/50 bg-white/70 py-1.5 pr-3 pl-1.5 shadow-[0_0_14px_rgba(170,52,48,0.35)] transition-transform active:scale-95 sm:flex dark:border-mist/25 dark:bg-white/10"
         >
           <img
             src={isteLogo}
             alt="ISTE logo"
-            className="h-6 w-6 rounded-full object-cover"
+            className="h-8 w-8 rounded-full object-cover"
           />
-          <span className="font-mono text-[10px] font-bold tracking-widest text-near-black/70 uppercase dark:text-mist/70">
+          <span className="font-mono text-xs font-bold tracking-widest text-near-black uppercase dark:text-mist">
             ISTE
           </span>
         </a>
@@ -71,14 +71,14 @@ export default function Navbar() {
           target="_blank"
           rel="noreferrer"
           aria-label="FISAT — Federal Institute of Science and Technology"
-          className="hidden items-center gap-1.5 rounded-full border border-dark-red/20 bg-near-black/5 py-1 pr-2.5 pl-1 transition-transform active:scale-95 sm:flex dark:border-white/10 dark:bg-white/5"
+          className="hidden items-center gap-2 rounded-full border border-medium-red/50 bg-white/70 py-1.5 pr-3 pl-1.5 shadow-[0_0_14px_rgba(170,52,48,0.35)] transition-transform active:scale-95 sm:flex dark:border-mist/25 dark:bg-white/10"
         >
           <img
             src={fisatCrest}
             alt="FISAT crest"
-            className="h-6 w-6 rounded-full bg-white object-cover"
+            className="h-8 w-8 rounded-full bg-white object-cover"
           />
-          <span className="font-mono text-[10px] font-bold tracking-widest text-near-black/70 uppercase dark:text-mist/70">
+          <span className="font-mono text-xs font-bold tracking-widest text-near-black uppercase dark:text-mist">
             FISAT
           </span>
         </a>
