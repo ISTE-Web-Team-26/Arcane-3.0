@@ -1,5 +1,7 @@
 import { Link, useLocation } from 'react-router'
 import arcaneLogo from '../assets/arcane-logo.png'
+import fisatCrest from '../assets/fisat-crest.png'
+import isteLogo from '../assets/iste-logo.png'
 
 const navLinks = [
   { id: 'home', label: 'HOME' },
@@ -29,23 +31,58 @@ export default function Navbar() {
 
   return (
     <header className="fixed inset-x-0 top-0 z-50 flex min-h-[4.5rem] w-full items-center justify-between gap-4 border-b border-dark-red/15 bg-mist/20 px-4 py-3.5 font-content backdrop-blur-sm sm:min-h-[5rem] sm:px-8 dark:border-white/10 dark:bg-near-black/20">
-      {/* Left: Non-rounded Logo & System Tag */}
-      <Link
-        to="/"
-        onClick={() => handleClick('home')}
-        className="group flex items-center gap-3 transition-transform active:scale-95"
-        aria-label="Arcane 3.0 Home"
-      >
-        <img
-          src={arcaneLogo}
-          alt="Arcane 3.0 Logo"
-          className="h-10 w-auto sm:h-12 object-contain"
-        />
+      {/* Left: Non-rounded Logo & Partner pills */}
+      <div className="flex items-center gap-2 sm:gap-3">
+        <Link
+          to="/"
+          onClick={() => handleClick('home')}
+          className="group flex items-center gap-3 transition-transform active:scale-95"
+          aria-label="Arcane 3.0 Home"
+        >
+          <img
+            src={arcaneLogo}
+            alt="Arcane 3.0 Logo"
+            className="h-10 w-auto sm:h-12 object-contain"
+          />
 
-        {/* <span className="hidden rounded-xs border border-mist/10 bg-near-black/80 px-2 py-0.5 font-mono text-[11px] font-semibold tracking-widest text-mist/70 uppercase sm:inline-block">
-          //:SYS.RUN
-        </span> */}
-      </Link>
+          {/* <span className="hidden rounded-xs border border-mist/10 bg-near-black/80 px-2 py-0.5 font-mono text-[11px] font-semibold tracking-widest text-mist/70 uppercase sm:inline-block">
+            //:SYS.RUN
+          </span> */}
+        </Link>
+
+        <a
+          href="https://www.isteonline.in/"
+          target="_blank"
+          rel="noreferrer"
+          aria-label="ISTE — Indian Society for Technical Education"
+          className="hidden items-center gap-1.5 rounded-full border border-dark-red/20 bg-near-black/5 py-1 pr-2.5 pl-1 transition-transform active:scale-95 sm:flex dark:border-white/10 dark:bg-white/5"
+        >
+          <img
+            src={isteLogo}
+            alt="ISTE logo"
+            className="h-6 w-6 rounded-full object-cover"
+          />
+          <span className="font-mono text-[10px] font-bold tracking-widest text-near-black/70 uppercase dark:text-mist/70">
+            ISTE
+          </span>
+        </a>
+        <a
+          href="https://fisat.ac.in/"
+          target="_blank"
+          rel="noreferrer"
+          aria-label="FISAT — Federal Institute of Science and Technology"
+          className="hidden items-center gap-1.5 rounded-full border border-dark-red/20 bg-near-black/5 py-1 pr-2.5 pl-1 transition-transform active:scale-95 sm:flex dark:border-white/10 dark:bg-white/5"
+        >
+          <img
+            src={fisatCrest}
+            alt="FISAT crest"
+            className="h-6 w-6 rounded-full bg-white object-cover"
+          />
+          <span className="font-mono text-[10px] font-bold tracking-widest text-near-black/70 uppercase dark:text-mist/70">
+            FISAT
+          </span>
+        </a>
+      </div>
 
       {/* Right: Nav Links + Register Button */}
       <div className="flex items-center gap-4 sm:gap-6 md:gap-8">
