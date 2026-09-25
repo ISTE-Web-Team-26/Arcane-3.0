@@ -18,10 +18,23 @@ const BOLT_COLOR = 0xffffff // white bolt, fat line for extra width
  * Three.js is dynamically imported so it stays off the critical path.
  * A static <img> is rendered until WebGL is ready (and as a fallback).
  */
-export default function HeroLogo3D() {
+export default function HeroLogo3D({
+  anchor = null,
+}: {
+  /** Free zone (px from container top/bottom) the logo should center in. */
+  anchor?: { top: number; bottom: number } | null
+}) {
   const containerRef = useRef<HTMLDivElement>(null)
   const [webglReady, setWebglReady] = useState(false)
   const [webglFailed, setWebglFailed] = useState(false)
+  const anchorRef = useRef(anchor)
+  const refreshFitRef = useRef<() => void>(() => {})
+
+  // Mirror the measured free zone and re-fit the logo when it changes.
+  useEffect(() => {
+    anchorRef.current = anchor
+    refreshFitRef.current()
+  }, [anchor])
 
   useEffect(() => {
     if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
@@ -164,6 +177,8 @@ export default function HeroLogo3D() {
       // Visible-world bounds, refreshed on resize so rain + bolt always
       // cover the full viewport on both landscape (PC) and portrait (mobile).
       const bounds = { halfW: 3.2, halfH: 1.8 }
+      // Vertical center for the logo mesh, recomputed by updateFit.
+      const aim = { y: 0.32 }
       const updateFit = () => {
         const vH =
           2 *
@@ -172,9 +187,24 @@ export default function HeroLogo3D() {
         const vW = vH * camera.aspect
         bounds.halfW = vW / 2
         bounds.halfH = vH / 2
-        const s = Math.min((vW * 0.92) / BASE_W, (vH * 0.62) / BASE_H, 1.15)
+        // Center the logo halfway between the navbar and the text block.
+        // Without measurements yet, fall back to a slight lift above center.
+        const Hpx = containerRef.current?.clientHeight ?? 0
+        const a = anchorRef.current
+        let centerY = 0.32
+        let maxH = vH * 0.62
+        if (a && Hpx > 0) {
+          const avail = Math.max(80, Hpx - a.top - a.bottom)
+          const midFromTop = a.top + avail / 2
+          const worldPerPx = vH / Hpx
+          centerY = (Hpx / 2 - midFromTop) * worldPerPx
+          maxH = avail * worldPerPx * 0.9
+        }
+        aim.y = centerY
+        const s = Math.min((vW * 0.92) / BASE_W, maxH / BASE_H, 1.15)
         logoMesh.scale.setScalar(Math.max(s, 0.25))
       }
+      refreshFitRef.current = updateFit
 
       const updateResolutions = () => {
         const size = rendererInstance.getDrawingBufferSize(
@@ -366,11 +396,11 @@ export default function HeroLogo3D() {
         boltMaterial.opacity = flashValue
         bolt.visible = flashValue > 0.03
 
-        // Gentle float + pointer parallax. Base lift keeps the logo
-        // sitting slightly above center, clear of the date/countdown block.
+        // Gentle float around the measured halfway point between the
+        // navbar and the text block.
         pointer.x += (pointer.tx - pointer.x) * 0.06
         pointer.y += (pointer.ty - pointer.y) * 0.06
-        logoMesh.position.y = 0.32 + Math.sin(clock.elapsedTime * 0.8) * 0.03
+        logoMesh.position.y = aim.y + Math.sin(clock.elapsedTime * 0.8) * 0.03
         logoMesh.rotation.y = pointer.x * 0.08
         logoMesh.rotation.x = -pointer.y * 0.05
 
@@ -421,9 +451,12 @@ export default function HeroLogo3D() {
       <img
         src={logoUrl}
         alt="Arcane 3.0 pixel logo"
-        className={`absolute inset-0 m-auto h-auto w-[94%] max-w-5xl -translate-y-[10%] object-contain transition-opacity duration-500 ${
-          webglReady && !webglFailed ? 'opacity-0' : 'opacity-100'
-        }`}
+        style={
+          anchor ? { top: anchor.top, bottom: anchor.bottom } : undefined
+        }
+        className={`absolute inset-x-0 m-auto h-auto w-[94%] max-w-5xl object-contain transition-opacity duration-500 ${
+          anchor ? '' : '-translate-y-[10%] '
+        }${webglReady && !webglFailed ? 'opacity-0' : 'opacity-100'}`}
         draggable={false}
       />
       {!webglReady && !webglFailed && (

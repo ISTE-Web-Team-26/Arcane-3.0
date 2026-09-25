@@ -1,15 +1,53 @@
+import { useEffect, useRef, useState } from 'react'
 import Countdown from './Countdown.tsx'
 import HeroLogo3D from './HeroLogo3D.tsx'
 
+export interface LogoAnchor {
+  /** Free-zone inset from the viewport top (below the navbar), in px. */
+  top: number
+  /** Free-zone inset from the viewport bottom (the text block height), in px. */
+  bottom: number
+}
+
 export default function Hero() {
+  const sectionRef = useRef<HTMLElement>(null)
+  const contentRef = useRef<HTMLDivElement>(null)
+  const [anchor, setAnchor] = useState<LogoAnchor | null>(null)
+
+  // Measure the free zone between the navbar and the text block so the
+  // 3D logo can sit exactly halfway between them.
+  useEffect(() => {
+    const measure = () => {
+      const section = sectionRef.current
+      const content = contentRef.current
+      if (!section || !content) return
+      const navH =
+        document.querySelector('header')?.getBoundingClientRect().height ?? 72
+      setAnchor({ top: navH, bottom: content.offsetHeight })
+    }
+    measure()
+    window.addEventListener('resize', measure)
+    const ro = new ResizeObserver(measure)
+    if (sectionRef.current) ro.observe(sectionRef.current)
+    if (contentRef.current) ro.observe(contentRef.current)
+    return () => {
+      window.removeEventListener('resize', measure)
+      ro.disconnect()
+    }
+  }, [])
+
   return (
     <section
+      ref={sectionRef}
       id="home"
       className="relative -mx-4 -mt-[4.5rem] flex h-[100svh] max-w-none flex-col items-center justify-end overflow-x-clip text-center sm:-mx-8 sm:-mt-[5rem]"
     >
       <h1 className="sr-only">Arcane 3.0</h1>
-      <HeroLogo3D />
-      <div className="relative z-10 flex flex-col items-center px-4 pb-[7svh]">
+      <HeroLogo3D anchor={anchor} />
+      <div
+        ref={contentRef}
+        className="relative z-10 flex flex-col items-center px-4 pb-[7svh]"
+      >
         <p className="flex items-center gap-2.5 font-mono text-[11px] font-semibold tracking-[0.3em] text-medium-red uppercase sm:text-xs dark:text-mist/80">
           <span
             className="inline-block h-1.5 w-1.5 animate-pulse bg-medium-red"
