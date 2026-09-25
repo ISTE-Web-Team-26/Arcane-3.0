@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react'
+import { useLayoutEffect, useRef, useState } from 'react'
 import Countdown from './Countdown.tsx'
 import HeroLogo3D from './HeroLogo3D.tsx'
 
@@ -15,8 +15,9 @@ export default function Hero() {
   const [anchor, setAnchor] = useState<LogoAnchor | null>(null)
 
   // Measure the free zone between the navbar and the text block so the
-  // 3D logo can sit exactly halfway between them.
-  useEffect(() => {
+  // 3D logo can sit exactly halfway between them. Layout effect: measured
+  // before first paint, so nothing ever renders at a placeholder spot.
+  useLayoutEffect(() => {
     const measure = () => {
       const section = sectionRef.current
       const content = contentRef.current
