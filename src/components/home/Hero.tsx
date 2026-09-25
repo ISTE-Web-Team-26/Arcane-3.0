@@ -42,6 +42,12 @@ export default function Hero() {
           </svg>
           FISAT, Angamaly
         </p>
+        <p className="mt-4 max-w-xl font-heading text-sm tracking-wide text-near-black/80 sm:text-base dark:text-mist/80">
+          Sparks to ignite. Limits to break.{' '}
+          <span className="text-medium-red dark:text-mist">
+            One arena, endless ascents.
+          </span>
+        </p>
         <div className="mt-5">
           <Countdown />
         </div>
