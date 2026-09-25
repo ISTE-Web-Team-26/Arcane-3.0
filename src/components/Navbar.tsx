@@ -1,3 +1,4 @@
+import { useState, useEffect } from 'react'
 import { Link, useLocation } from 'react-router'
 import arcaneLogo from '../assets/arcane-logo.png'
 
@@ -10,8 +11,26 @@ const navLinks = [
 
 export default function Navbar() {
   const { pathname, hash } = useLocation()
+  const [isOpen, setIsOpen] = useState(false)
+
+  // Close mobile dropdown on route or hash change
+  useEffect(() => {
+    setIsOpen(false)
+  }, [pathname, hash])
+
+  // Close dropdown on resize to desktop
+  useEffect(() => {
+    const handleResize = () => {
+      if (window.innerWidth >= 768) {
+        setIsOpen(false)
+      }
+    }
+    window.addEventListener('resize', handleResize)
+    return () => window.removeEventListener('resize', handleResize)
+  }, [])
 
   const handleClick = (id: string) => {
+    setIsOpen(false)
     // Link won't navigate when the hash is unchanged — scroll manually.
     if (pathname === '/' && (hash === `#${id}` || (!hash && id === 'home'))) {
       const targetId = id === 'home' ? 'home' : id
@@ -29,7 +48,7 @@ export default function Navbar() {
 
   return (
     <header className="sticky top-0 z-50 flex min-h-[4.5rem] items-center justify-between gap-4 border-b border-dark-red/30 bg-mist/95 px-4 py-3.5 font-content backdrop-blur-md sm:min-h-[5rem] sm:px-8 dark:border-dark-red/40 dark:bg-near-black/95">
-      {/* Left: Non-rounded Logo & System Tag */}
+      {/* Left: Logo */}
       <Link
         to="/"
         onClick={() => handleClick('home')}
@@ -48,9 +67,9 @@ export default function Navbar() {
         </div>
       </Link>
 
-      {/* Right: Nav Links + Register Button */}
-      <div className="flex items-center gap-4 sm:gap-6 md:gap-8">
-        <nav className="flex items-center gap-3 sm:gap-5 md:gap-6 font-mono text-xs font-semibold tracking-widest sm:text-sm">
+      {/* Desktop Navigation: Links + Register Button */}
+      <div className="hidden md:flex items-center gap-6 lg:gap-8">
+        <nav className="flex items-center gap-5 lg:gap-6 font-mono text-xs font-semibold tracking-widest sm:text-sm">
           {navLinks.map((link) => {
             const active = isLinkActive(link.id)
             return (
@@ -86,6 +105,89 @@ export default function Navbar() {
           REGISTER
         </Link>
       </div>
+
+      {/* Mobile Hamburger / Close Button */}
+      <div className="flex items-center md:hidden">
+        <button
+          type="button"
+          onClick={() => setIsOpen((prev) => !prev)}
+          className="inline-flex items-center justify-center rounded-xs border border-dark-red/40 bg-near-black/5 p-2 text-near-black transition-colors hover:border-medium-red hover:text-medium-red focus:outline-none dark:border-dark-red/50 dark:bg-mist/5 dark:text-mist"
+          aria-expanded={isOpen}
+          aria-label="Toggle navigation menu"
+        >
+          {isOpen ? (
+            // Close (X) Icon
+            <svg
+              className="h-5 w-5"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+              aria-hidden="true"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M6 18L18 6M6 6l12 12"
+              />
+            </svg>
+          ) : (
+            // Hamburger Icon
+            <svg
+              className="h-5 w-5"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+              aria-hidden="true"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M4 6h16M4 12h16M4 18h16"
+              />
+            </svg>
+          )}
+        </button>
+      </div>
+
+      {/* Mobile Dropdown Menu */}
+      {isOpen && (
+        <div className="absolute top-full left-0 z-50 w-full border-b-2 border-dark-red/40 bg-mist/98 px-5 py-4 shadow-xl backdrop-blur-lg md:hidden dark:bg-near-black/98">
+          <nav className="flex flex-col space-y-3 font-mono text-sm font-semibold tracking-wider">
+            {navLinks.map((link) => {
+              const active = isLinkActive(link.id)
+              return (
+                <Link
+                  key={link.id}
+                  to={`/#${link.id}`}
+                  onClick={() => handleClick(link.id)}
+                  className={`flex items-center justify-between border-l-2 py-2 pl-3 uppercase transition-colors duration-150 ${
+                    active
+                      ? 'border-medium-red bg-medium-red/10 font-bold text-medium-red'
+                      : 'border-transparent text-near-black/80 hover:border-medium-red/50 hover:text-medium-red dark:text-mist/80 dark:hover:text-medium-red'
+                  }`}
+                >
+                  <span>{link.label}</span>
+                  {active && (
+                    <span className="text-[10px] text-medium-red">// ACTIVE</span>
+                  )}
+                </Link>
+              )
+            })}
+
+            <div className="pt-2">
+              <Link
+                to="/#events"
+                onClick={() => handleClick('events')}
+                className="flex w-full items-center justify-center rounded-xs border border-medium-red bg-medium-red px-4 py-2.5 text-center font-mono text-xs font-bold tracking-widest text-mist uppercase shadow-[0_0_12px_rgba(170,52,48,0.35)] transition-all hover:bg-dark-red active:scale-98"
+              >
+                REGISTER NOW
+              </Link>
+            </div>
+          </nav>
+        </div>
+      )}
     </header>
   )
 }
