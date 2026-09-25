@@ -104,6 +104,9 @@ export default function HeroLogo3D({
       rendererInstance.domElement.style.inset = '0'
       rendererInstance.domElement.style.width = '100%'
       rendererInstance.domElement.style.height = '100%'
+      // Fade in once ready so the canvas never pops over the fallback image.
+      rendererInstance.domElement.style.opacity = '0'
+      rendererInstance.domElement.style.transition = 'opacity 700ms ease'
       container.appendChild(rendererInstance.domElement)
 
       const scene = new THREE.Scene()
@@ -179,6 +182,9 @@ export default function HeroLogo3D({
       const bounds = { halfW: 3.2, halfH: 1.8 }
       // Vertical center for the logo mesh, recomputed by updateFit.
       const aim = { y: 0.32 }
+      // Smoothed copy the mesh actually follows — glides instead of jumping
+      // when measurements land or the layout reflows.
+      const smooth = { y: 0.32 }
       const updateFit = () => {
         const vH =
           2 *
@@ -329,6 +335,9 @@ export default function HeroLogo3D({
       }
 
       setWebglReady(true)
+      requestAnimationFrame(() => {
+        if (!cancelled) rendererInstance.domElement.style.opacity = '1'
+      })
 
       const clock = new THREE.Clock()
       let flashValue = 0
@@ -397,10 +406,11 @@ export default function HeroLogo3D({
         bolt.visible = flashValue > 0.03
 
         // Gentle float around the measured halfway point between the
-        // navbar and the text block.
+        // navbar and the text block. Eased so reflows glide, never jump.
         pointer.x += (pointer.tx - pointer.x) * 0.06
         pointer.y += (pointer.ty - pointer.y) * 0.06
-        logoMesh.position.y = aim.y + Math.sin(clock.elapsedTime * 0.8) * 0.03
+        smooth.y += (aim.y - smooth.y) * 0.08
+        logoMesh.position.y = smooth.y + Math.sin(clock.elapsedTime * 0.8) * 0.03
         logoMesh.rotation.y = pointer.x * 0.08
         logoMesh.rotation.x = -pointer.y * 0.05
 
