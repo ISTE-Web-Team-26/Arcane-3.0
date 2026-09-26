@@ -21,7 +21,7 @@ function ScrollToHash() {
 
 export default function Layout() {
   return (
-    <div className="underground flex min-h-svh w-full flex-col font-content text-near-black/70 dark:text-mist/70">
+    <div className="underground flex min-h-svh w-full flex-col font-content text-mist/70">
       <Navbar />
       <main className="flex w-full flex-1 flex-col px-4 pt-[4.5rem] pb-8 sm:px-8 sm:pt-[5rem]">
         <ScrollToHash />

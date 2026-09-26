@@ -68,11 +68,12 @@ export default function Events({ events = DEFAULT_EVENTS }: EventsProps) {
             </p>
           </div>
 
-          {/* Total Events Counter Pill */}
-          {/* <div className="flex items-center gap-2 self-start rounded-lg border border-dark-red/40 bg-near-black/70 px-3.5 py-1.5 font-mono text-xs font-semibold text-mist/80 lg:self-end">
-            <span className="h-2 w-2 rounded-full bg-medium-red animate-pulse" />
-            <span>LIVE TRACKS: {events.length}</span>
-          </div> */}
+          <h2
+            id={`${sectionId}-heading`}
+            className="font-heading text-3xl font-bold text-mist underline underline-offset-8 decoration-medium-red sm:text-4xl md:text-5xl"
+          >
+            EVENTS
+          </h2>
         </div>
 
         {/* Category Filter Pills with interactive animation */}
