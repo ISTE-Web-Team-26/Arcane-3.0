@@ -40,11 +40,11 @@ export default function Navbar() {
           className="logo-shimmer relative flex items-center"
           style={{ '--logo-url': `url(${arcaneLogo})` } as React.CSSProperties}
         >
-          <img
-            src={arcaneLogo}
-            alt="Arcane 3.0 Logo"
-            className="h-8 w-auto sm:h-9 object-contain drop-shadow-[0_0_8px_rgba(170,52,48,0.3)] transition-all duration-300 group-hover:brightness-110 group-hover:drop-shadow-[0_0_16px_rgba(238,39,33,0.6)]"
-          />
+            <img
+              src={arcaneLogo}
+              alt="Arcane 3.0 Logo"
+              className="h-10 w-auto sm:h-12 object-contain drop-shadow-[0_0_10px_rgba(170,52,48,0.35)] transition-all duration-300 group-hover:brightness-110 group-hover:drop-shadow-[0_0_22px_rgba(238,39,33,0.65)]"
+            />
         </div>
       </Link>
 
