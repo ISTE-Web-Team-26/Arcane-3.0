@@ -368,44 +368,24 @@ export default function HeroLogo3D({ anchor = null }: HeroLogo3DProps) {
         const targetFlash = flashing ? 1 : 0
         flashVal += (targetFlash - flashVal) * (flashing ? 0.65 : 0.14)
 
-        // Strike light-up adapted from the original 3D shader: the logo
-        // mixes toward white through the envelope, then slams to pure
-        // white for a few frames at the peak. Direct DOM writes.
-        const f = Math.round(flashVal * 100) / 100
-        const logoEl = logoImgRef.current
-        if (logoEl) {
-          let nextFilter = ''
-          if (f > 0.02) {
-            const peak = Math.max(0, (f - 0.55) / 0.45)
-            const sat = Math.max(0, 1 - f * 1.6)
-            const bri = 1 + f * 1.8 + peak * peak * 28
-            nextFilter = `saturate(${sat.toFixed(2)}) brightness(${bri.toFixed(1)})`
-          }
-          if (logoEl.style.filter !== nextFilter) {
-            logoEl.style.filter = nextFilter
-          }
-        }
-
-        // Rain falls the full height of the hero and exits below the fold
+        // Rain falls out of the sky and dies where it hits the ground at
+        // the bottom of the hero — streaks taper into the soil instead of
+        // wrapping through it.
         const topEdge = bounds.halfH + 0.3
-        const bottomEdge = -(bounds.halfH + 0.3)
-        const tanHalfFov = Math.tan(THREE.MathUtils.degToRad(camera.fov / 2))
+        const groundY = -bounds.halfH + 0.02
         for (let i = 0; i < RAIN_COUNT; i += 1) {
           const drop = rainDrops[i]
           drop.y -= drop.speed * dt
-          if (drop.y <= bottomEdge) {
-            // Splash exactly at the fold for this drop's depth: farther
-            // drops need a lower world-Y to land on the same screen line.
-            const halfHAtDrop = (camera.position.z - drop.z) * tanHalfFov
-            spawnSplash(drop.x, -halfHAtDrop, drop.z)
+          if (drop.y < groundY) {
             drop.y = topEdge
             drop.x = randomX()
           }
+          const taper = Math.min(1, Math.max(0, (drop.y - groundY) / 0.35))
           rainPositions[i * 6] = drop.x
           rainPositions[i * 6 + 1] = drop.y
           rainPositions[i * 6 + 2] = drop.z
           rainPositions[i * 6 + 3] = drop.x
-          rainPositions[i * 6 + 4] = drop.y + drop.len
+          rainPositions[i * 6 + 4] = drop.y + drop.len * taper
           rainPositions[i * 6 + 5] = drop.z
         }
         rainGeometry.attributes.position.needsUpdate = true
@@ -434,15 +414,20 @@ export default function HeroLogo3D({ anchor = null }: HeroLogo3DProps) {
         for (let i = 0; i < FLASH_COUNT; i += 1) {
           const drop = flashDrops[i]
           drop.y -= drop.speed * dt
-          if (drop.y <= bottomEdge) {
+          if (drop.y < groundY) {
             drop.y = topEdge
             drop.x = randomX()
           }
+          // Diagonal slant -> the ASCII `╱`.
+          const flashTaper = Math.min(
+            1,
+            Math.max(0, (drop.y - groundY) / 0.35),
+          )
           flashPositions[i * 6] = drop.x
           flashPositions[i * 6 + 1] = drop.y
           flashPositions[i * 6 + 2] = drop.z
           flashPositions[i * 6 + 3] = drop.x + 0.045
-          flashPositions[i * 6 + 4] = drop.y + drop.len
+          flashPositions[i * 6 + 4] = drop.y + drop.len * flashTaper
           flashPositions[i * 6 + 5] = drop.z
         }
         flashGeometry.attributes.position.needsUpdate = true
