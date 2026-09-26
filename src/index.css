@@ -36,14 +36,14 @@ body {
   background: linear-gradient(
     115deg,
     transparent 0%,
-    transparent 25%,
-    rgba(255, 255, 255, 0.4) 45%,
+    transparent 30%,
+    rgba(255, 255, 255, 0.35) 46%,
     rgba(255, 255, 255, 0.95) 50%,
-    rgba(255, 120, 120, 0.7) 56%,
-    transparent 75%,
+    rgba(255, 120, 120, 0.65) 54%,
+    transparent 70%,
     transparent 100%
   );
-  background-size: 250% 100%;
+  background-size: 220% 100%;
   -webkit-mask-image: var(--logo-url);
   -webkit-mask-size: contain;
   -webkit-mask-repeat: no-repeat;
@@ -52,28 +52,28 @@ body {
   mask-size: contain;
   mask-repeat: no-repeat;
   mask-position: center;
-  animation: logo-shimmer-sweep 3.2s ease-in-out infinite;
+  animation: logo-shimmer-sweep 2.6s ease-in-out infinite;
   pointer-events: none;
   mix-blend-mode: screen;
 }
 
 @keyframes logo-shimmer-sweep {
   0% {
-    background-position: 200% 0;
+    background-position: 180% 0;
     opacity: 0;
   }
-  15% {
+  12% {
     opacity: 1;
   }
-  60% {
+  55% {
     opacity: 1;
   }
-  75% {
-    background-position: -200% 0;
+  70% {
+    background-position: -180% 0;
     opacity: 0;
   }
   100% {
-    background-position: -200% 0;
+    background-position: -180% 0;
     opacity: 0;
   }
 }
