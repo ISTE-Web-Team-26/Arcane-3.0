@@ -1,7 +1,5 @@
 import { Link, useLocation } from 'react-router'
 import arcaneLogo from '../assets/arcane-logo.png'
-import fisatCrest from '../assets/fisat-crest.png'
-import isteLogo from '../assets/iste-logo.png'
 
 const navLinks = [
   { id: 'home', label: 'HOME' },
@@ -30,64 +28,25 @@ export default function Navbar() {
   }
 
   return (
-    <header className="fixed inset-x-0 top-0 z-50 flex min-h-[4.5rem] w-full items-center justify-between gap-4 border-b border-dark-red/15 bg-mist/20 px-4 py-3.5 font-content backdrop-blur-sm sm:min-h-[5rem] sm:px-8 dark:border-white/10 dark:bg-near-black/20">
-      {/* Left: Non-rounded Logo & Partner pills */}
-      <div className="flex items-center gap-2 sm:gap-3">
-        <Link
-          to="/"
-          onClick={() => handleClick('home')}
-          className="group flex items-center gap-3 transition-transform active:scale-95"
-          aria-label="Arcane 3.0 Home"
-        >
-          <div
-            className="logo-shimmer relative flex items-center"
-            style={{ '--logo-url': `url(${arcaneLogo})` } as React.CSSProperties}
-          >
-            <img
-              src={arcaneLogo}
-              alt="Arcane 3.0 Logo"
-              className="h-10 w-auto sm:h-12 object-contain drop-shadow-[0_0_8px_rgba(170,52,48,0.3)] transition-all duration-300 group-hover:brightness-110 group-hover:drop-shadow-[0_0_16px_rgba(238,39,33,0.6)]"
-            />
-          </div>
-
-          {/* <span className="hidden rounded-xs border border-mist/10 bg-near-black/80 px-2 py-0.5 font-mono text-[11px] font-semibold tracking-widest text-mist/70 uppercase sm:inline-block">
-            //:SYS.RUN
-          </span> */}
-        </Link>
-
-        <a
-          href="https://www.isteonline.in/"
-          target="_blank"
-          rel="noreferrer"
-          aria-label="ISTE — Indian Society for Technical Education"
-          className="hidden items-center gap-2 rounded-full border border-medium-red/50 bg-white/70 py-1.5 pr-3 pl-1.5 shadow-[0_0_14px_rgba(170,52,48,0.35)] transition-transform active:scale-95 sm:flex dark:border-mist/25 dark:bg-white/10"
+    <header className="sticky top-0 z-50 flex min-h-[4.5rem] items-center justify-between gap-4 border-b border-dark-red/30 bg-mist/95 px-4 py-3.5 font-content backdrop-blur-md sm:min-h-[5rem] sm:px-8 dark:border-dark-red/40 dark:bg-near-black/95">
+      {/* Left: Non-rounded Logo & System Tag */}
+      <Link
+        to="/"
+        onClick={() => handleClick('home')}
+        className="group flex items-center gap-3 transition-transform active:scale-95"
+        aria-label="Arcane 3.0 Home"
+      >
+        <div
+          className="logo-shimmer relative flex items-center"
+          style={{ '--logo-url': `url(${arcaneLogo})` } as React.CSSProperties}
         >
           <img
-            src={isteLogo}
-            alt="ISTE logo"
-            className="h-8 w-8 rounded-full object-cover"
+            src={arcaneLogo}
+            alt="Arcane 3.0 Logo"
+            className="h-8 w-auto sm:h-9 object-contain drop-shadow-[0_0_8px_rgba(170,52,48,0.3)] transition-all duration-300 group-hover:brightness-110 group-hover:drop-shadow-[0_0_16px_rgba(238,39,33,0.6)]"
           />
-          <span className="font-mono text-xs font-bold tracking-widest text-near-black uppercase dark:text-mist">
-            ISTE
-          </span>
-        </a>
-        <a
-          href="https://fisat.ac.in/"
-          target="_blank"
-          rel="noreferrer"
-          aria-label="FISAT — Federal Institute of Science and Technology"
-          className="hidden items-center gap-2 rounded-full border border-medium-red/50 bg-white/70 py-1.5 pr-3 pl-1.5 shadow-[0_0_14px_rgba(170,52,48,0.35)] transition-transform active:scale-95 sm:flex dark:border-mist/25 dark:bg-white/10"
-        >
-          <img
-            src={fisatCrest}
-            alt="FISAT crest"
-            className="h-8 w-8 rounded-full bg-white object-cover"
-          />
-          <span className="font-mono text-xs font-bold tracking-widest text-near-black uppercase dark:text-mist">
-            FISAT
-          </span>
-        </a>
-      </div>
+        </div>
+      </Link>
 
       {/* Right: Nav Links + Register Button */}
       <div className="flex items-center gap-4 sm:gap-6 md:gap-8">
@@ -99,13 +58,20 @@ export default function Navbar() {
                 key={link.id}
                 to={`/#${link.id}`}
                 onClick={() => handleClick(link.id)}
-                className={`transition-colors uppercase ${
+                className={`group/navlink relative inline-block py-1 uppercase transition-all duration-200 hover:scale-105 active:scale-95 ${
                   active
-                    ? 'text-medium-red dark:text-mist font-bold'
-                    : 'text-near-black/70 hover:text-near-black dark:text-mist/60 dark:hover:text-mist'
+                    ? 'font-bold text-medium-red'
+                    : 'text-near-black/70 hover:text-medium-red dark:text-mist/70 dark:hover:text-medium-red'
                 }`}
               >
                 {link.label}
+                <span
+                  className={`absolute bottom-0 left-0 h-[2px] bg-medium-red transition-all duration-300 ease-out ${
+                    active
+                      ? 'w-full shadow-[0_0_8px_rgba(170,52,48,0.6)]'
+                      : 'w-0 group-hover/navlink:w-full shadow-[0_0_8px_rgba(170,52,48,0.4)]'
+                  }`}
+                />
               </Link>
             )
           })}
