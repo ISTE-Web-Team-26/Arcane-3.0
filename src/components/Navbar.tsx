@@ -36,16 +36,11 @@ export default function Navbar() {
         className="group flex items-center gap-3 transition-transform active:scale-95"
         aria-label="Arcane 3.0 Home"
       >
-        <div
-          className="logo-shimmer relative flex items-center"
-          style={{ '--logo-url': `url(${arcaneLogo})` } as React.CSSProperties}
-        >
-            <img
-              src={arcaneLogo}
-              alt="Arcane 3.0 Logo"
-              className="h-10 w-auto sm:h-12 object-contain drop-shadow-[0_0_10px_rgba(170,52,48,0.35)] transition-all duration-300 group-hover:brightness-110 group-hover:drop-shadow-[0_0_22px_rgba(238,39,33,0.65)]"
-            />
-        </div>
+          <img
+            src={arcaneLogo}
+            alt="Arcane 3.0 Logo"
+            className="h-10 w-auto sm:h-12 object-contain drop-shadow-[0_0_10px_rgba(170,52,48,0.35)] transition-all duration-300 group-hover:brightness-110 group-hover:drop-shadow-[0_0_22px_rgba(238,39,33,0.65)]"
+          />
       </Link>
 
       {/* Right: Nav Links + Register Button */}
