@@ -43,7 +43,7 @@ export default function Hero() {
     <section
       ref={sectionRef}
       id="home"
-      className="relative -mx-4 -mt-[4.5rem] flex h-[100svh] min-h-[640px] max-w-none flex-col items-center justify-end overflow-hidden text-center sm:-mx-8 sm:-mt-[5rem]"
+      className="relative -mx-4 -mt-[4.5rem] flex max-w-none flex-col items-center justify-end overflow-x-clip text-center sm:-mx-8 sm:-mt-[5rem] min-h-[calc(100svh-4.5rem)] sm:min-h-[calc(100svh-5rem)]"
     >
       <h1 className="sr-only">Arcane 3.0</h1>
 
