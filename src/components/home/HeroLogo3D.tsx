@@ -94,7 +94,77 @@ export default function HeroLogo3D({ anchor = null }: HeroLogo3DProps) {
       const camera = new THREE.PerspectiveCamera(34, LOGO_ASPECT, 0.1, 50)
       camera.position.set(0, 0, 5.2)
 
-      // Bounds (rain, bolt and flash rain span the full view)
+      // --- Logo plane -------------------------------------------------
+      let texture: import('three').Texture
+      try {
+        texture = await new THREE.TextureLoader().loadAsync(logoUrl)
+      } catch {
+        if (!cancelled) setWebglFailed(true)
+        rendererInstance.dispose()
+        rendererInstance.domElement.remove()
+        return
+      }
+      if (cancelled) {
+        texture.dispose()
+        rendererInstance.dispose()
+        return
+      }
+      texture.colorSpace = THREE.SRGBColorSpace
+      texture.anisotropy = rendererInstance.capabilities.getMaxAnisotropy()
+
+      const uniforms = {
+        uMap: { value: texture },
+        uFlash: { value: 0 },
+        uTime: { value: 0 },
+      }
+      const logoMaterial = new THREE.ShaderMaterial({
+        uniforms,
+        transparent: true,
+        depthWrite: false,
+        // Drawn last, ignoring depth: the logo always sits above the
+        // rain and lightning. Transparent texels are discarded in-shader,
+        // so the storm still shows through around the artwork.
+        depthTest: false,
+        vertexShader: /* glsl */ `
+          varying vec2 vUv;
+          void main() {
+            vUv = uv;
+            gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+          }
+        `,
+        fragmentShader: /* glsl */ `
+          uniform sampler2D uMap;
+          uniform float uFlash;
+          uniform float uTime;
+          varying vec2 vUv;
+          void main() {
+            vec4 tex = texture2D(uMap, vUv);
+            if (tex.a < 0.02) discard;
+            // Subtle electric shimmer so the logo never looks dead flat.
+            float shimmer = sin(vUv.y * 120.0 + uTime * 8.0) * 0.5 + 0.5;
+            vec3 flashed = mix(tex.rgb, vec3(1.0), uFlash * 0.9);
+            flashed += uFlash * vec3(0.35, 0.37, 0.48) * (0.5 + 0.5 * shimmer);
+            flashed += tex.rgb * 0.07 * (0.5 + 0.5 * sin(uTime * 2.0));
+            gl_FragColor = vec4(flashed, tex.a);
+          }
+        `,
+      })
+      disposables.push(logoMaterial, texture)
+      // Slightly bigger than before: 5.5 world units wide.
+      // `updateFit` below scales it down on narrow/tall screens so it never
+      // overflows, and caps its height so the date/countdown block keeps clear space.
+      const BASE_W = 5.5
+      const BASE_H = BASE_W / LOGO_ASPECT
+      const logoMesh = new THREE.Mesh(
+        new THREE.PlaneGeometry(BASE_W, BASE_H),
+        logoMaterial,
+      )
+      disposables.push(logoMesh.geometry)
+      logoMesh.renderOrder = 2
+      scene.add(logoMesh)
+
+      // Visible-world bounds, refreshed on resize so rain + bolt always
+      // cover the full viewport on both landscape (PC) and portrait (mobile).
       const bounds = { halfW: 3.2, halfH: 1.8 }
 
       const updateFit = () => {
@@ -133,9 +203,9 @@ export default function HeroLogo3D({ anchor = null }: HeroLogo3DProps) {
         depthWrite: false,
       })
       disposables.push(rainGeometry, rainMaterial)
-      const rainSegments = new THREE.LineSegments(rainGeometry, rainMaterial)
-      rainSegments.renderOrder = 1
-      scene.add(rainSegments)
+      const rainLines = new THREE.LineSegments(rainGeometry, rainMaterial)
+      rainLines.renderOrder = 0
+      scene.add(rainLines)
 
       // Rain Splash Particle Pool (bursts where drops hit the ground strip)
       const SPLASH_POOL_SIZE = 60
@@ -202,9 +272,9 @@ export default function HeroLogo3D({ anchor = null }: HeroLogo3DProps) {
         depthWrite: false,
       })
       disposables.push(flashGeometry, flashMaterial)
-      const flashSegments = new THREE.LineSegments(flashGeometry, flashMaterial)
-      flashSegments.renderOrder = 1
-      scene.add(flashSegments)
+      const flashLines = new THREE.LineSegments(flashGeometry, flashMaterial)
+      flashLines.renderOrder = 0
+      scene.add(flashLines)
 
       // --- Lightning Bolt Arc (fat line, 3px) ---------------------------
       const BOLT_SEGMENTS = 14
@@ -221,6 +291,7 @@ export default function HeroLogo3D({ anchor = null }: HeroLogo3DProps) {
       bolt.position.z = -0.35
       bolt.renderOrder = 1
       bolt.frustumCulled = false
+      bolt.renderOrder = 1
       scene.add(bolt)
 
       const rebuildBolt = () => {
