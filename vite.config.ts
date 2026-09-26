@@ -1,7 +1,6 @@
 import tailwindcss from '@tailwindcss/vite'
 import react, { reactCompilerPreset } from '@vitejs/plugin-react'
 import babel from '@rolldown/plugin-babel'
-import { fileURLToPath } from 'node:url'
 import { defineConfig } from 'vite'
 
 // https://vite.dev/config/
@@ -11,9 +10,4 @@ export default defineConfig({
     babel({ presets: [reactCompilerPreset()] }),
     tailwindcss(),
   ],
-  resolve: {
-    alias: {
-      '@external': fileURLToPath(new URL('./external', import.meta.url)),
-    },
-  },
 })

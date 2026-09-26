@@ -1,7 +1,7 @@
 @import "tailwindcss";
 
 @theme {
-  --font-heading: "Pixelify Sans", system-ui, sans-serif;
+  --font-heading: "Jersey 20", sans-serif;
   --font-content: "Geist Pixel", "Pixelify Sans", system-ui, sans-serif;
 
   --color-medium-red: #aa3430;
@@ -18,3 +18,63 @@ body {
   margin: 0;
   font-family: var(--font-content);
 }
+
+.font-heading {
+  letter-spacing: 0.08em;
+}
+
+.logo-shimmer {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+}
+
+.logo-shimmer::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    115deg,
+    transparent 0%,
+    transparent 25%,
+    rgba(255, 255, 255, 0.4) 45%,
+    rgba(255, 255, 255, 0.95) 50%,
+    rgba(255, 120, 120, 0.7) 56%,
+    transparent 75%,
+    transparent 100%
+  );
+  background-size: 250% 100%;
+  -webkit-mask-image: var(--logo-url);
+  -webkit-mask-size: contain;
+  -webkit-mask-repeat: no-repeat;
+  -webkit-mask-position: center;
+  mask-image: var(--logo-url);
+  mask-size: contain;
+  mask-repeat: no-repeat;
+  mask-position: center;
+  animation: logo-shimmer-sweep 3.2s ease-in-out infinite;
+  pointer-events: none;
+  mix-blend-mode: screen;
+}
+
+@keyframes logo-shimmer-sweep {
+  0% {
+    background-position: 200% 0;
+    opacity: 0;
+  }
+  15% {
+    opacity: 1;
+  }
+  60% {
+    opacity: 1;
+  }
+  75% {
+    background-position: -200% 0;
+    opacity: 0;
+  }
+  100% {
+    background-position: -200% 0;
+    opacity: 0;
+  }
+}
+

@@ -36,15 +36,16 @@ export default function Navbar() {
         className="group flex items-center gap-3 transition-transform active:scale-95"
         aria-label="Arcane 3.0 Home"
       >
-        <img
-          src={arcaneLogo}
-          alt="Arcane 3.0 Logo"
-          className="h-10 w-auto sm:h-12 object-contain"
-        />
-
-        {/* <span className="hidden rounded-xs border border-mist/10 bg-near-black/80 px-2 py-0.5 font-mono text-[11px] font-semibold tracking-widest text-mist/70 uppercase sm:inline-block">
-          //:SYS.RUN
-        </span> */}
+        <div
+          className="logo-shimmer relative flex items-center"
+          style={{ '--logo-url': `url(${arcaneLogo})` } as React.CSSProperties}
+        >
+          <img
+            src={arcaneLogo}
+            alt="Arcane 3.0 Logo"
+            className="h-8 w-auto sm:h-9 object-contain drop-shadow-[0_0_8px_rgba(170,52,48,0.3)] transition-all duration-300 group-hover:brightness-110 group-hover:drop-shadow-[0_0_16px_rgba(238,39,33,0.6)]"
+          />
+        </div>
       </Link>
 
       {/* Right: Nav Links + Register Button */}
@@ -57,13 +58,20 @@ export default function Navbar() {
                 key={link.id}
                 to={`/#${link.id}`}
                 onClick={() => handleClick(link.id)}
-                className={`transition-colors uppercase ${
+                className={`group/navlink relative inline-block py-1 uppercase transition-all duration-200 hover:scale-105 active:scale-95 ${
                   active
-                    ? 'text-medium-red dark:text-mist font-bold'
-                    : 'text-near-black/70 hover:text-near-black dark:text-mist/60 dark:hover:text-mist'
+                    ? 'font-bold text-medium-red'
+                    : 'text-near-black/70 hover:text-medium-red dark:text-mist/70 dark:hover:text-medium-red'
                 }`}
               >
                 {link.label}
+                <span
+                  className={`absolute bottom-0 left-0 h-[2px] bg-medium-red transition-all duration-300 ease-out ${
+                    active
+                      ? 'w-full shadow-[0_0_8px_rgba(170,52,48,0.6)]'
+                      : 'w-0 group-hover/navlink:w-full shadow-[0_0_8px_rgba(170,52,48,0.4)]'
+                  }`}
+                />
               </Link>
             )
           })}
