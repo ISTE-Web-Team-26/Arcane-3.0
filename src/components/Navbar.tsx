@@ -36,11 +36,27 @@ export default function Navbar() {
         className="group flex items-center gap-3 transition-transform active:scale-95"
         aria-label="Arcane 3.0 Home"
       >
+        <div className="relative flex items-center">
           <img
             src={arcaneLogo}
             alt="Arcane 3.0 Logo"
             className="h-10 w-auto sm:h-12 object-contain drop-shadow-[0_0_10px_rgba(170,52,48,0.35)] transition-all duration-300 group-hover:brightness-110 group-hover:drop-shadow-[0_0_22px_rgba(238,39,33,0.65)]"
           />
+          <span
+            className="pointer-events-none absolute inset-0 animate-logo-shimmer mix-blend-screen opacity-70 transition-opacity duration-300 group-hover:opacity-100"
+            style={{
+              maskImage: `url(${arcaneLogo})`,
+              WebkitMaskImage: `url(${arcaneLogo})`,
+              maskSize: 'contain',
+              WebkitMaskSize: 'contain',
+              maskRepeat: 'no-repeat',
+              WebkitMaskRepeat: 'no-repeat',
+              maskPosition: 'center',
+              WebkitMaskPosition: 'center',
+            }}
+            aria-hidden="true"
+          />
+        </div>
       </Link>
 
       {/* Right: Nav Links + Register Button */}

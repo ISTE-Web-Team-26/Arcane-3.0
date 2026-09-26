@@ -1,36 +1,46 @@
 import { useEffect, useRef, useState } from 'react'
 import logoUrl from '../../assets/arcane-logo.png'
+import soilTextureUrl from '../../assets/soil-texture.jpg'
 
 const LOGO_ASPECT = 2400 / 1023
-const RAIN_COLOR = 0x5876a8
-const BOLT_COLOR = 0xffffff // white bolt, fat line for extra width
+const RAIN_COLOR = 0x6a88bc
+const BOLT_COLOR = 0xffffff
+
+export interface LogoAnchor {
+  top: number
+  bottom: number
+}
+
+interface HeroLogo3DProps {
+  anchor?: LogoAnchor | null
+}
 
 /**
- * Thunderstorm logo rendered with Three.js.
- *
- * Faithful port of the tte-js `thunderstorm` ASCII effect:
- * - blue-grey rain streaks falling in front of the logo
- * - periodic lightning flash every 13 x 110ms tick that blows the logo
- *   out to white (glow 20 in the ASCII renderer) and turns every 8th
- *   drop into a white diagonal (`╱`)
- * - a jagged white thunderbolt (fat line, 3px) only visible on flash frames
- *
- * Three.js is dynamically imported so it stays off the critical path.
- * A static <img> is rendered until WebGL is ready (and as a fallback).
+ * Organic ground contour defining the soil surface line inside the hero.
+ * Sits in the lower ~25-30% of the viewport and connects seamlessly to the page soil.
+ */
+function getGroundY(x: number): number {
+  return (
+    -0.82 +
+    Math.sin(x * 0.75) * 0.08 +
+    Math.sin(x * 2.1 + 0.8) * 0.04 +
+    Math.cos(x * 3.4) * 0.02
+  )
+}
+
+/**
+ * Enhanced 3D Hero Scene with Thunderstorm, Rain Impact Splashes,
+ * Soil Foundation inside Hero, and 3D Logo Pointer Tilt.
  */
 export default function HeroLogo3D({
   anchor = null,
-}: {
-  /** Free zone (px from container top/bottom) the logo should center in. */
-  anchor?: { top: number; bottom: number } | null
-}) {
+}: HeroLogo3DProps) {
   const containerRef = useRef<HTMLDivElement>(null)
   const [webglReady, setWebglReady] = useState(false)
   const [webglFailed, setWebglFailed] = useState(false)
   const anchorRef = useRef(anchor)
   const refreshFitRef = useRef<() => void>(() => {})
 
-  // Mirror the measured free zone and re-fit the logo when it changes.
   useEffect(() => {
     anchorRef.current = anchor
     refreshFitRef.current()
@@ -83,40 +93,49 @@ export default function HeroLogo3D({
       }
       if (cancelled || !containerRef.current) return
 
-      const testCanvas = document.createElement('canvas')
-      const gl =
-        testCanvas.getContext('webgl2') ?? testCanvas.getContext('webgl')
-      if (!gl) {
-        setWebglFailed(true)
-        return
-      }
+      const isMobile = window.innerWidth < 768
 
       const rendererInstance = new THREE.WebGLRenderer({
         alpha: true,
-        antialias: true,
+        antialias: !isMobile,
         powerPreference: 'high-performance',
       })
       renderer = rendererInstance
       rendererInstance.setClearColor(0x000000, 0)
-      rendererInstance.setPixelRatio(Math.min(window.devicePixelRatio, 2))
+      rendererInstance.setPixelRatio(
+        Math.min(window.devicePixelRatio, isMobile ? 1.5 : 2),
+      )
       rendererInstance.domElement.setAttribute('aria-hidden', 'true')
       rendererInstance.domElement.style.position = 'absolute'
       rendererInstance.domElement.style.inset = '0'
       rendererInstance.domElement.style.width = '100%'
       rendererInstance.domElement.style.height = '100%'
-      // Fade in once ready so the canvas never pops over the fallback image.
       rendererInstance.domElement.style.opacity = '0'
       rendererInstance.domElement.style.transition = 'opacity 700ms ease'
       container.appendChild(rendererInstance.domElement)
 
       const scene = new THREE.Scene()
-      const camera = new THREE.PerspectiveCamera(32, LOGO_ASPECT, 0.1, 50)
+      const camera = new THREE.PerspectiveCamera(34, LOGO_ASPECT, 0.1, 50)
       camera.position.set(0, 0, 5.2)
 
-      // --- Logo plane -------------------------------------------------
+      // --- Lighting ----------------------------------------------------
+      const ambientLight = new THREE.AmbientLight(0xd9c8b8, 1.4)
+      scene.add(ambientLight)
+
+      const dirLight = new THREE.DirectionalLight(0xffffff, 1.6)
+      dirLight.position.set(2, 5, 4)
+      scene.add(dirLight)
+
+      // --- 3D Logo plane & Soil Texture Loading ------------------------
       let texture: import('three').Texture
+      let soilTexture: import('three').Texture
       try {
-        texture = await new THREE.TextureLoader().loadAsync(logoUrl)
+        const [tex, sTex] = await Promise.all([
+          new THREE.TextureLoader().loadAsync(logoUrl),
+          new THREE.TextureLoader().loadAsync(soilTextureUrl),
+        ])
+        texture = tex
+        soilTexture = sTex
       } catch {
         if (!cancelled) setWebglFailed(true)
         rendererInstance.dispose()
@@ -125,19 +144,26 @@ export default function HeroLogo3D({
       }
       if (cancelled) {
         texture.dispose()
+        soilTexture.dispose()
         rendererInstance.dispose()
         return
       }
       texture.colorSpace = THREE.SRGBColorSpace
       texture.anisotropy = rendererInstance.capabilities.getMaxAnisotropy()
 
-      const uniforms = {
+      soilTexture.wrapS = THREE.RepeatWrapping
+      soilTexture.wrapT = THREE.RepeatWrapping
+      soilTexture.colorSpace = THREE.SRGBColorSpace
+      soilTexture.anisotropy = rendererInstance.capabilities.getMaxAnisotropy()
+
+      const logoUniforms = {
         uMap: { value: texture },
         uFlash: { value: 0 },
         uTime: { value: 0 },
+        uOpacity: { value: 1.0 },
       }
       const logoMaterial = new THREE.ShaderMaterial({
-        uniforms,
+        uniforms: logoUniforms,
         transparent: true,
         depthWrite: false,
         vertexShader: /* glsl */ `
@@ -151,23 +177,21 @@ export default function HeroLogo3D({
           uniform sampler2D uMap;
           uniform float uFlash;
           uniform float uTime;
+          uniform float uOpacity;
           varying vec2 vUv;
           void main() {
             vec4 tex = texture2D(uMap, vUv);
             if (tex.a < 0.02) discard;
-            // Subtle electric shimmer so the logo never looks dead flat.
             float shimmer = sin(vUv.y * 120.0 + uTime * 8.0) * 0.5 + 0.5;
             vec3 flashed = mix(tex.rgb, vec3(1.0), uFlash * 0.9);
             flashed += uFlash * vec3(0.35, 0.37, 0.48) * (0.5 + 0.5 * shimmer);
             flashed += tex.rgb * 0.07 * (0.5 + 0.5 * sin(uTime * 2.0));
-            gl_FragColor = vec4(flashed, tex.a);
+            gl_FragColor = vec4(flashed, tex.a * uOpacity);
           }
         `,
       })
-      disposables.push(logoMaterial, texture)
-      // Slightly bigger than before: 5.5 world units wide.
-      // `updateFit` below scales it down on narrow/tall screens so it never
-      // overflows, and caps its height so the date/countdown block keeps clear space.
+      disposables.push(logoMaterial, texture, soilTexture)
+
       const BASE_W = 5.5
       const BASE_H = BASE_W / LOGO_ASPECT
       const logoMesh = new THREE.Mesh(
@@ -177,14 +201,11 @@ export default function HeroLogo3D({
       disposables.push(logoMesh.geometry)
       scene.add(logoMesh)
 
-      // Visible-world bounds, refreshed on resize so rain + bolt always
-      // cover the full viewport on both landscape (PC) and portrait (mobile).
+      // Bounds & sizing
       const bounds = { halfW: 3.2, halfH: 1.8 }
-      // Vertical center for the logo mesh, recomputed by updateFit.
-      const aim = { y: 0.32 }
-      // Smoothed copy the mesh actually follows — glides instead of jumping
-      // when measurements land or the layout reflows.
-      const smooth = { y: 0.32 }
+      const aim = { y: 0.38 }
+      const smooth = { y: 0.38 }
+
       const updateFit = () => {
         const vH =
           2 *
@@ -193,12 +214,11 @@ export default function HeroLogo3D({
         const vW = vH * camera.aspect
         bounds.halfW = vW / 2
         bounds.halfH = vH / 2
-        // Center the logo halfway between the navbar and the text block.
-        // Without measurements yet, fall back to a slight lift above center.
+
         const Hpx = containerRef.current?.clientHeight ?? 0
         const a = anchorRef.current
-        let centerY = 0.32
-        let maxH = vH * 0.62
+        let centerY = 0.38
+        let maxH = vH * 0.58
         if (a && Hpx > 0) {
           const avail = Math.max(80, Hpx - a.top - a.bottom)
           const midFromTop = a.top + avail / 2
@@ -212,24 +232,78 @@ export default function HeroLogo3D({
       }
       refreshFitRef.current = updateFit
 
-      const updateResolutions = () => {
-        const size = rendererInstance.getDrawingBufferSize(
-          new THREE.Vector2(),
-        )
-        boltMaterial.resolution.copy(size)
+      // --- Soil Ground Foundation inside the Hero ----------------------
+      const soilUniforms = {
+        uSoilMap: { value: soilTexture },
+        uTime: { value: 0 },
+        uFlash: { value: 0 },
       }
 
-      // --- Rain streaks (thin blue-grey lines) ---------------------------
-      const RAIN_COUNT = 300
-      const randomX = () => (Math.random() * 2 - 1) * (bounds.halfW + 0.3)
-      const randomY = () => (Math.random() * 2 - 1) * (bounds.halfH + 0.3)
+      const soilVertexShader = /* glsl */ `
+        varying vec2 vUv;
+        varying vec3 vWorldPos;
+        varying vec3 vNormal;
+        void main() {
+          vUv = uv;
+          vec4 wp = modelMatrix * vec4(position, 1.0);
+          vWorldPos = wp.xyz;
+          vNormal = normalize(normalMatrix * normal);
+          gl_Position = projectionMatrix * viewMatrix * wp;
+        }
+      `
+
+      const soilFragmentShader = /* glsl */ `
+        uniform sampler2D uSoilMap;
+        uniform float uTime;
+        uniform float uFlash;
+        varying vec2 vUv;
+        varying vec3 vWorldPos;
+        varying vec3 vNormal;
+
+        void main() {
+          float surfaceY = -0.82 + sin(vWorldPos.x * 0.75) * 0.08 + sin(vWorldPos.x * 2.1 + 0.8) * 0.04 + cos(vWorldPos.x * 3.4) * 0.02;
+          
+          if (vWorldPos.y > surfaceY) {
+            discard;
+          }
+
+          vec2 texUv = vWorldPos.xy * vec2(0.48, 0.48);
+          vec4 texSample = texture2D(uSoilMap, texUv);
+          vec3 soil = mix(vec3(0.015, 0.008, 0.012), texSample.rgb, 0.24);
+
+          // Lightning flash illumination
+          soil += uFlash * vec3(0.28, 0.3, 0.36);
+
+          gl_FragColor = vec4(soil, 1.0);
+        }
+      `
+
+      const soilGeo = new THREE.PlaneGeometry(24, 12, 32, 32)
+      const soilMat = new THREE.ShaderMaterial({
+        uniforms: soilUniforms,
+        vertexShader: soilVertexShader,
+        fragmentShader: soilFragmentShader,
+        transparent: true,
+        side: THREE.DoubleSide,
+      })
+      disposables.push(soilGeo, soilMat)
+      const soilMesh = new THREE.Mesh(soilGeo, soilMat)
+      soilMesh.position.set(0, -5.5, -0.05)
+      scene.add(soilMesh)
+
+      // --- Rain streaks (atmospheric thunderstorm) --------------------
+      const RAIN_COUNT = isMobile ? 120 : 280
+      const randomX = () => (Math.random() * 2 - 1) * (bounds.halfW + 0.4)
+      const randomY = () => (Math.random() * 2 - 1) * (bounds.halfH + 0.4)
+
       const rainDrops = Array.from({ length: RAIN_COUNT }, () => ({
         x: randomX(),
         y: randomY(),
-        z: -1 + Math.random() * 1.4,
-        speed: 1.6 + Math.random() * 2.2,
-        len: 0.06 + Math.random() * 0.09,
+        z: -0.8 + Math.random() * 1.2,
+        speed: 1.8 + Math.random() * 2.4,
+        len: 0.07 + Math.random() * 0.09,
       }))
+
       const rainPositions = new Float32Array(RAIN_COUNT * 2 * 3)
       const rainGeometry = new THREE.BufferGeometry()
       rainGeometry.setAttribute(
@@ -239,18 +313,58 @@ export default function HeroLogo3D({
       const rainMaterial = new THREE.LineBasicMaterial({
         color: RAIN_COLOR,
         transparent: true,
-        opacity: 0.55,
+        opacity: 0.6,
       })
       disposables.push(rainGeometry, rainMaterial)
       scene.add(new THREE.LineSegments(rainGeometry, rainMaterial))
 
-      // --- Flash rain (every 8th drop becomes a white `╱` on flash) ----
+      // Rain Splash Particle Pool
+      const SPLASH_POOL_SIZE = isMobile ? 25 : 50
+      const splashes = Array.from({ length: SPLASH_POOL_SIZE }, () => ({
+        active: false,
+        x: 0,
+        y: 0,
+        z: 0,
+        vx: 0,
+        vy: 0,
+        life: 0,
+      }))
+      let splashIdx = 0
+
+      const spawnSplash = (x: number, y: number, z: number) => {
+        const splash = splashes[splashIdx]
+        splash.active = true
+        splash.x = x
+        splash.y = y + 0.02
+        splash.z = z
+        splash.vx = (Math.random() - 0.5) * 0.5
+        splash.vy = 0.45 + Math.random() * 0.5
+        splash.life = 1.0
+        splashIdx = (splashIdx + 1) % SPLASH_POOL_SIZE
+      }
+
+      const splashPositions = new Float32Array(SPLASH_POOL_SIZE * 2 * 3)
+      const splashGeometry = new THREE.BufferGeometry()
+      splashGeometry.setAttribute(
+        'position',
+        new THREE.BufferAttribute(splashPositions, 3),
+      )
+      const splashMaterial = new THREE.LineBasicMaterial({
+        color: 0x9ec0e6,
+        transparent: true,
+        opacity: 0.75,
+        blending: THREE.AdditiveBlending,
+      })
+      disposables.push(splashGeometry, splashMaterial)
+      scene.add(new THREE.LineSegments(splashGeometry, splashMaterial))
+
+      // --- Flash rain (diagonal slants during lightning) ---------------
       const FLASH_COUNT = Math.floor(RAIN_COUNT / 8)
       const flashDrops = Array.from({ length: FLASH_COUNT }, () => ({
         x: randomX(),
         y: randomY(),
-        z: -0.6 + Math.random() * 1.0,
-        speed: 2.2 + Math.random() * 2.4,
+        z: -0.5 + Math.random() * 0.8,
+        speed: 2.3 + Math.random() * 2.2,
         len: 0.08 + Math.random() * 0.08,
       }))
       const flashPositions = new Float32Array(FLASH_COUNT * 2 * 3)
@@ -269,12 +383,12 @@ export default function HeroLogo3D({
       disposables.push(flashGeometry, flashMaterial)
       scene.add(new THREE.LineSegments(flashGeometry, flashMaterial))
 
-      // --- Lightning bolt (visible only on flash frames, fat line 3px) --
+      // --- Lightning bolt ----------------------------------------------
       const BOLT_SEGMENTS = 14
       const boltGeometry = new LineGeometry()
       const boltMaterial = new LineMaterial({
         color: BOLT_COLOR,
-        linewidth: 3,
+        linewidth: isMobile ? 2.5 : 3.5,
         transparent: true,
         opacity: 0,
         blending: THREE.AdditiveBlending,
@@ -289,7 +403,7 @@ export default function HeroLogo3D({
       const rebuildBolt = () => {
         const strikeX = (Math.random() * 2 - 1) * bounds.halfW * 0.7
         const top = bounds.halfH + 0.5
-        const bottom = -bounds.halfH - 0.5
+        const bottom = getGroundY(strikeX)
         const pts: number[] = []
         for (let i = 0; i <= BOLT_SEGMENTS; i += 1) {
           const t = i / BOLT_SEGMENTS
@@ -303,6 +417,13 @@ export default function HeroLogo3D({
         boltGeometry.setPositions(pts)
       }
       rebuildBolt()
+
+      const updateResolutions = () => {
+        const size = rendererInstance.getDrawingBufferSize(
+          new THREE.Vector2(),
+        )
+        boltMaterial.resolution.copy(size)
+      }
 
       const resize = () => {
         const el = containerRef.current
@@ -346,31 +467,55 @@ export default function HeroLogo3D({
       const tick = () => {
         if (cancelled) return
         raf = requestAnimationFrame(tick)
-        if (!visible || document.hidden) {
+        if (document.hidden) {
           clock.getDelta()
           return
         }
-        const dt = Math.min(clock.getDelta(), 0.05)
+
         const elapsedMs = clock.elapsedTime * 1000
 
-        // Same cadence as tte-js thunderstorm:
-        // Math.floor(elapsed / 110) % 13 === 0
+        // --- Lightning Flash Calculation -------------------------------
         const flashing = Math.floor(elapsedMs / 110) % 13 === 0
-        if (flashing && !wasFlashing) rebuildBolt()
+        if (flashing && !wasFlashing && visible) rebuildBolt()
         wasFlashing = flashing
 
-        const target = flashing ? 1 : 0
-        flashValue += (target - flashValue) * (flashing ? 0.65 : 0.14)
-        uniforms.uFlash.value = flashValue
-        uniforms.uTime.value = clock.elapsedTime
+        const targetFlash = flashing ? 1 : 0
+        flashValue += (targetFlash - flashValue) * (flashing ? 0.65 : 0.14)
 
-        // Rain falls and wraps across the full viewport.
+        if (!visible) {
+          clock.getDelta()
+          return
+        }
+
+        const dt = Math.min(clock.getDelta(), 0.05)
+
+        camera.position.set(0, 0, 5.2)
+        camera.lookAt(0, 0, 0)
+
+        logoUniforms.uFlash.value = flashValue
+        logoUniforms.uTime.value = clock.elapsedTime
+        soilUniforms.uFlash.value = flashValue
+        soilUniforms.uTime.value = clock.elapsedTime
+
+        logoUniforms.uOpacity.value = 1.0
+        pointer.x += (pointer.tx - pointer.x) * 0.08
+        pointer.y += (pointer.ty - pointer.y) * 0.08
+        smooth.y += (aim.y - smooth.y) * 0.08
+        logoMesh.position.y =
+          smooth.y + Math.sin(clock.elapsedTime * 0.8) * 0.03
+
+        // Tilt effect ONLY on the hero logo
+        logoMesh.rotation.y = pointer.x * 0.12
+        logoMesh.rotation.x = -pointer.y * 0.08
+
+        // --- Rain Physics & Ground Impacts -----------------------------
         const topEdge = bounds.halfH + 0.3
-        const bottomEdge = -bounds.halfH - 0.3
         for (let i = 0; i < RAIN_COUNT; i += 1) {
           const drop = rainDrops[i]
           drop.y -= drop.speed * dt
-          if (drop.y < bottomEdge) {
+          const groundY = getGroundY(drop.x)
+          if (drop.y <= groundY) {
+            spawnSplash(drop.x, groundY, drop.z)
             drop.y = topEdge
             drop.x = randomX()
           }
@@ -383,14 +528,35 @@ export default function HeroLogo3D({
         }
         rainGeometry.attributes.position.needsUpdate = true
 
+        // Update Splash Particles
+        for (let i = 0; i < SPLASH_POOL_SIZE; i += 1) {
+          const s = splashes[i]
+          if (s.active) {
+            s.x += s.vx * dt
+            s.y += s.vy * dt
+            s.vy -= 4.0 * dt // gravity
+            s.life -= dt * 3.8
+            if (s.life <= 0) s.active = false
+          }
+          const base = i * 6
+          splashPositions[base] = s.x
+          splashPositions[base + 1] = s.y
+          splashPositions[base + 2] = s.z
+          splashPositions[base + 3] = s.x + s.vx * 0.03
+          splashPositions[base + 4] = s.y + s.vy * 0.03
+          splashPositions[base + 5] = s.z
+        }
+        splashGeometry.attributes.position.needsUpdate = true
+
+        // Flash Rain Updates
         for (let i = 0; i < FLASH_COUNT; i += 1) {
           const drop = flashDrops[i]
           drop.y -= drop.speed * dt
-          if (drop.y < bottomEdge) {
+          const groundY = getGroundY(drop.x)
+          if (drop.y <= groundY) {
             drop.y = topEdge
             drop.x = randomX()
           }
-          // Diagonal slant -> the ASCII `╱`.
           flashPositions[i * 6] = drop.x
           flashPositions[i * 6 + 1] = drop.y
           flashPositions[i * 6 + 2] = drop.z
@@ -400,19 +566,10 @@ export default function HeroLogo3D({
         }
         flashGeometry.attributes.position.needsUpdate = true
         flashMaterial.opacity = flashValue * 0.95
-        rainMaterial.opacity = 0.55 - flashValue * 0.2
+        rainMaterial.opacity = 0.6 - flashValue * 0.2
 
         boltMaterial.opacity = flashValue
         bolt.visible = flashValue > 0.03
-
-        // Gentle float around the measured halfway point between the
-        // navbar and the text block. Eased so reflows glide, never jump.
-        pointer.x += (pointer.tx - pointer.x) * 0.06
-        pointer.y += (pointer.ty - pointer.y) * 0.06
-        smooth.y += (aim.y - smooth.y) * 0.08
-        logoMesh.position.y = smooth.y + Math.sin(clock.elapsedTime * 0.8) * 0.03
-        logoMesh.rotation.y = pointer.x * 0.08
-        logoMesh.rotation.x = -pointer.y * 0.05
 
         renderer?.render(scene, camera)
       }
@@ -453,24 +610,24 @@ export default function HeroLogo3D({
   return (
     <div
       ref={containerRef}
-      className="absolute inset-0 h-full w-full overflow-hidden"
+      className="absolute inset-0 h-full w-full overflow-hidden pointer-events-none"
       role="img"
-      aria-label="Arcane 3.0"
+      aria-label="Arcane 3.0 Hero Environment"
     >
-      {/* Static fallback: visible until WebGL takes over or if it fails. */}
+      {/* Static fallback: visible until WebGL takes over */}
       <img
         src={logoUrl}
         alt="Arcane 3.0 pixel logo"
         style={
           anchor ? { top: anchor.top, bottom: anchor.bottom } : undefined
         }
-        className={`absolute inset-x-0 m-auto h-auto w-[94%] max-w-5xl object-contain transition-opacity duration-500 ${
+        className={`absolute inset-x-0 m-auto h-auto w-[94%] max-w-5xl object-contain transition-opacity duration-500 pointer-events-auto ${
           anchor ? '' : '-translate-y-[10%] '
         }${webglReady && !webglFailed ? 'opacity-0' : 'opacity-100'}`}
         draggable={false}
       />
       {!webglReady && !webglFailed && (
-        <span className="sr-only">Loading lightning effect…</span>
+        <span className="sr-only">Loading underground environment…</span>
       )}
     </div>
   )

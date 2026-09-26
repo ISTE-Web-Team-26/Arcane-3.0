@@ -21,13 +21,15 @@ function ScrollToHash() {
 
 export default function Layout() {
   return (
-    <div className="flex min-h-svh w-full flex-col bg-mist font-content text-near-black/70 dark:bg-near-black dark:text-mist/70">
+    <div className="relative flex min-h-svh w-full flex-col bg-near-black font-content text-mist antialiased">
       <Navbar />
       <main className="flex w-full flex-1 flex-col px-4 pt-[4.5rem] pb-8 sm:px-8 sm:pt-[5rem]">
         <ScrollToHash />
         <Outlet />
       </main>
-      <Contact />
+      <div className="soil-bg-layer">
+        <Contact />
+      </div>
     </div>
   )
 }

@@ -41,15 +41,20 @@ export default function Hero() {
     <section
       ref={sectionRef}
       id="home"
-      className="relative -mx-4 -mt-[4.5rem] flex h-[100svh] max-w-none flex-col items-center justify-end overflow-x-clip text-center sm:-mx-8 sm:-mt-[5rem]"
+      className="relative -mx-4 -mt-[4.5rem] flex h-[100svh] min-h-[560px] max-h-[1080px] max-w-none flex-col items-center justify-between overflow-hidden text-center sm:-mx-8 sm:-mt-[5rem]"
     >
       <h1 className="sr-only">Arcane 3.0</h1>
       <HeroLogo3D anchor={anchor} />
+
+      {/* Spacer zone where 3D Logo floats */}
+      <div className="flex-1" aria-hidden="true" />
+
+      {/* Hero Foreground Content - guaranteed to fit within first viewport */}
       <div
         ref={contentRef}
-        className="relative z-10 flex flex-col items-center px-4 pb-[7svh]"
+        className="relative z-20 flex flex-col items-center px-4 pb-4 sm:pb-6"
       >
-        <p className="flex items-center gap-2.5 font-mono text-[11px] font-semibold tracking-[0.3em] text-medium-red uppercase sm:text-xs dark:text-mist/80">
+        <p className="flex items-center gap-2 font-mono text-[10px] font-semibold tracking-[0.3em] text-medium-red uppercase sm:text-xs">
           <span
             className="inline-block h-1.5 w-1.5 animate-pulse bg-medium-red"
             aria-hidden="true"
@@ -60,13 +65,15 @@ export default function Hero() {
             aria-hidden="true"
           />
         </p>
-        <p className="mt-4 font-content text-4xl font-bold tracking-normal text-near-black [text-shadow:0_0_28px_rgba(170,52,48,0.45)] sm:text-6xl dark:text-mist">
+
+        <p className="mt-1 font-content text-3xl font-bold tracking-normal text-mist [text-shadow:0_0_24px_rgba(170,52,48,0.55)] sm:text-5xl lg:text-6xl">
           29<sup className="text-[0.55em]">TH</sup> SEPTEMBER 2026
         </p>
-        <p className="mt-4 flex items-center gap-2 font-mono text-sm font-semibold tracking-[0.25em] text-near-black/70 uppercase sm:text-base dark:text-mist/70">
+
+        <p className="mt-1 flex items-center gap-1.5 font-mono text-xs font-semibold tracking-[0.25em] text-mist/80 uppercase sm:text-sm">
           <svg
-            width="16"
-            height="16"
+            width="14"
+            height="14"
             viewBox="0 0 24 24"
             fill="none"
             stroke="currentColor"
@@ -81,13 +88,15 @@ export default function Hero() {
           </svg>
           FISAT, Angamaly
         </p>
-        <p className="mt-5 max-w-xl font-heading text-sm tracking-wide text-near-black/80 sm:text-base dark:text-mist/80">
+
+        <p className="mt-1.5 max-w-xl font-heading text-xs tracking-wide text-mist/85 sm:text-sm">
           Sparks to ignite. Limits to break.{' '}
-          <span className="text-medium-red dark:text-mist">
+          <span className="text-medium-red font-semibold">
             One arena, endless ascents.
           </span>
         </p>
-        <div className="mt-6">
+
+        <div className="mt-2.5 sm:mt-3">
           <Countdown />
         </div>
       </div>

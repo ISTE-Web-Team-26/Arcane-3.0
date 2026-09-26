@@ -23,3 +23,40 @@ body {
   letter-spacing: 0.08em;
 }
 
+@keyframes logo-shimmer {
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
+}
+
+.animate-logo-shimmer {
+  background: linear-gradient(
+    115deg,
+    transparent 0%,
+    transparent 35%,
+    rgba(255, 255, 255, 0.35) 45%,
+    rgba(255, 255, 255, 0.95) 50%,
+    rgba(255, 210, 210, 0.5) 55%,
+    transparent 65%,
+    transparent 100%
+  );
+  background-size: 250% 100%;
+  animation: logo-shimmer 3.5s ease-in-out infinite;
+}
+
+.soil-bg-layer {
+  position: relative;
+  background-color: #040203;
+  background-image: 
+    linear-gradient(to bottom, rgba(4, 2, 3, 0.76), rgba(4, 2, 3, 0.76)),
+    url('./assets/soil-texture.jpg');
+  background-repeat: repeat;
+  background-size: 520px;
+}
+
+
+
+
