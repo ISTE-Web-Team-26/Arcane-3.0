@@ -50,7 +50,7 @@ export default function Hero() {
       {/* Compacted topsoil lip the rain sinks into. */}
       <div
         aria-hidden="true"
-        className="pointer-events-none absolute inset-x-0 bottom-0 z-[5] h-12 bg-gradient-to-b from-transparent to-[#9a7a53] dark:to-[#150d07]"
+        className="pointer-events-none absolute inset-x-0 bottom-0 z-[5] h-12 bg-gradient-to-b from-transparent to-[#9a7a53] dark:to-[#120b06]"
       />
       <div
         ref={contentRef}
