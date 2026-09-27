@@ -283,7 +283,16 @@ export default function HeroLogo3D({ anchor = null }: HeroLogo3DProps) {
           maxH = avail * worldPerPx * 0.88
         }
         aim.y = centerY
-        const s = Math.min((vW * 0.86) / BASE_W, maxH / BASE_H, 0.9)
+        let s = Math.min((vW * 0.86) / BASE_W, maxH / BASE_H, 0.9)
+        // Desktop: never magnify past the texture's native resolution —
+        // cap the plane so 1 texel maps to at most 1 device pixel.
+        if (!isMobile && Hpx > 0) {
+          const texW =
+            (logoTexture.image as { width?: number } | undefined)?.width ??
+            1835
+          const worldPerDevicePx = vH / (Hpx * rendererInstance.getPixelRatio())
+          s = Math.min(s, (texW * worldPerDevicePx) / BASE_W)
+        }
         logoMesh.scale.setScalar(Math.max(s, 0.2))
       }
       refreshFitRef.current = updateFit
