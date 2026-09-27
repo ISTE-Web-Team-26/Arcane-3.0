@@ -91,7 +91,7 @@ export default function FAQ() {
     <section
       id="faq"
       aria-labelledby="faq-heading"
-      className="relative w-full scroll-mt-20 py-12 sm:py-16"
+      className="relative w-full scroll-mt-20 py-8 sm:py-10"
     >
       {/* Header with Scroll Reveal */}
       <motion.div

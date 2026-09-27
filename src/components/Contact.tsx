@@ -355,8 +355,14 @@ export default function Contact() {
           </motion.div>
         </div>
 
-        {/* Footer Bottom Bar */}
-        <div className="flex flex-col gap-6 border-t border-dark-red/30 pt-8 sm:flex-row sm:items-center sm:justify-between">
+        {/* Footer Bottom Bar with Scroll Reveal */}
+        <motion.div
+          initial={{ opacity: 0, y: 30 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true, margin: '-60px' }}
+          transition={{ duration: 0.65, ease: [0.16, 1, 0.3, 1] as const }}
+          className="flex flex-col gap-6 border-t border-dark-red/30 pt-8 sm:flex-row sm:items-center sm:justify-between"
+        >
           <div className="flex flex-col gap-1">
             <p className="font-heading text-lg font-bold tracking-wider text-mist uppercase">
               ARCANE 3.0
@@ -400,7 +406,7 @@ export default function Contact() {
               Contact
             </Link>
           </nav>
-        </div>
+        </motion.div>
       </div>
     </footer>
   )

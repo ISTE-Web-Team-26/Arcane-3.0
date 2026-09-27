@@ -16,7 +16,7 @@ export default function Home() {
         <BackgroundParticles density={18} />
 
         <Suspense fallback={null}>
-          <div className="relative z-10 space-y-16 sm:space-y-24">
+          <div className="relative z-10 space-y-8 sm:space-y-12">
             <About />
 
             {/* Strata Transition Line */}

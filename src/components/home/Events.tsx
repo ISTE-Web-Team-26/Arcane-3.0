@@ -30,7 +30,7 @@ export default function Events({ events = DEFAULT_EVENTS }: EventsProps) {
     <section
       id="events"
       aria-labelledby={`${sectionId}-heading`}
-      className="relative w-full scroll-mt-20 py-12 sm:py-16"
+      className="relative w-full scroll-mt-20 py-8 sm:py-10"
     >
       {/* Header with Scroll Reveal */}
       <motion.div
