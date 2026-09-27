@@ -15,6 +15,9 @@ import {
 } from 'three/tsl'
 import logoUrl from '../../assets/arcane-logo.png'
 import soilTextureUrl from '../../assets/soil-texture.jpg'
+import { Line2 } from 'three/addons/lines/webgpu/Line2.js'
+import { LineGeometry } from 'three/addons/lines/LineGeometry.js'
+import { Line2NodeMaterial } from 'three/webgpu'
 
 // Exact natural aspect ratio of src/assets/arcane-logo.png (1835w x 533h)
 const LOGO_ASPECT = 1835 / 533
@@ -383,52 +386,36 @@ export default function HeroLogo3D({ anchor = null }: HeroLogo3DProps) {
       flashSegments.renderOrder = 1
       scene.add(flashSegments)
 
-      // --- Lightning Bolt Arc -----------------------------------------
+      // --- Lightning Bolt Arc (fat line, 3px) ---------------------------
       const BOLT_SEGMENTS = 14
-      const boltPositions = new Float32Array(BOLT_SEGMENTS * 2 * 3)
-      const boltGeometry = new THREE.BufferGeometry()
-      boltGeometry.setAttribute(
-        'position',
-        new THREE.BufferAttribute(boltPositions, 3),
-      )
-      const boltMaterial = new THREE.LineBasicMaterial({
+      const boltGeometry = new LineGeometry()
+      const boltMaterial = new Line2NodeMaterial({
         color: BOLT_COLOR,
+        linewidth: 3,
         transparent: true,
         opacity: 0,
         depthWrite: false,
       })
       disposables.push(boltGeometry, boltMaterial)
-      const boltSegments = new THREE.LineSegments(boltGeometry, boltMaterial)
-      boltSegments.position.z = -0.35
-      boltSegments.renderOrder = 1
-      boltSegments.frustumCulled = false
-      scene.add(boltSegments)
+      const bolt = new Line2(boltGeometry, boltMaterial)
+      bolt.position.z = -0.35
+      bolt.renderOrder = 1
+      bolt.frustumCulled = false
+      scene.add(bolt)
 
       const rebuildBolt = () => {
         const strikeX = (Math.random() * 2 - 1) * bounds.halfW * 0.7
         const top = bounds.halfH + 0.5
         const bottom = getGroundY(strikeX)
-        let prevX = strikeX
-        let prevY = top
-
-        for (let i = 1; i <= BOLT_SEGMENTS; i += 1) {
+        const pts: number[] = []
+        for (let i = 0; i <= BOLT_SEGMENTS; i += 1) {
           const t = i / BOLT_SEGMENTS
-          const nextY = top - t * (top - bottom)
-          const jitter = i === BOLT_SEGMENTS ? 0 : (Math.random() - 0.5) * 0.36
-          const nextX = strikeX + jitter + t * 0.25
-
-          const base = (i - 1) * 6
-          boltPositions[base] = prevX
-          boltPositions[base + 1] = prevY
-          boltPositions[base + 2] = 0
-          boltPositions[base + 3] = nextX
-          boltPositions[base + 4] = nextY
-          boltPositions[base + 5] = 0
-
-          prevX = nextX
-          prevY = nextY
+          const y = top - t * (top - bottom)
+          const jitter =
+            i === 0 || i === BOLT_SEGMENTS ? 0 : (Math.random() - 0.5) * 0.36
+          pts.push(strikeX + jitter + t * 0.25, y, 0)
         }
-        boltGeometry.attributes.position.needsUpdate = true
+        boltGeometry.setPositions(pts)
       }
       rebuildBolt()
 
@@ -561,7 +548,7 @@ export default function HeroLogo3D({ anchor = null }: HeroLogo3DProps) {
         rainMaterial.opacity = 0.6 - flashVal * 0.2
 
         boltMaterial.opacity = flashVal
-        boltSegments.visible = flashVal > 0.03
+        bolt.visible = flashVal > 0.03
 
         renderer?.render(scene, camera)
       }
