@@ -286,7 +286,7 @@ export default function HeroLogo3D({ anchor = null }: HeroLogo3DProps) {
       refreshFitRef.current = updateFit
 
       // --- Rain Streaks (Atmospheric Thunderstorm Behind Logo) ----------
-      const RAIN_COUNT = isMobile ? 50 : 120
+      const RAIN_COUNT = 300
       const randomX = () => (Math.random() * 2 - 1) * (bounds.halfW + 0.4)
       const randomY = () => (Math.random() * 2 - 1) * (bounds.halfH + 0.4)
 
