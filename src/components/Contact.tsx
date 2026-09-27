@@ -6,30 +6,27 @@ interface ContactPerson {
   name: string
   designation: string
   phone: string
-  email: string
+  email?: string
 }
 
 const CONTACT_PERSONS: ContactPerson[] = [
   {
-    role: 'STUDENT CONVENER',
-    name: 'Lead Coordinator',
-    designation: 'ISTE FISAT Student Chapter',
-    phone: '+91 98460 12345',
-    email: 'convener.arcane@fisat.ac.in',
+    role: 'CHAIRPERSON',
+    name: 'Aswin Radhakrishnan',
+    designation: 'Lead Coordinator',
+    phone: '+91 79025 47904',
   },
   {
-    role: 'TECHNICAL HEAD',
-    name: 'Technical Coordinator',
-    designation: 'Arcane Tech Operations',
-    phone: '+91 98460 67890',
-    email: 'tech.arcane@fisat.ac.in',
+    role: 'SECRETARY',
+    name: 'Abhirami N K',
+    designation: 'Assistant Coordinator',
+    phone: '+91 85907 15898',
   },
   {
-    role: 'EVENT & LOGISTICS LEAD',
-    name: 'Events Coordinator',
-    designation: 'Hospitality & Arena Management',
-    phone: '+91 98460 54321',
-    email: 'events.arcane@fisat.ac.in',
+    role: 'TREASURER',
+    name: 'Aakash S Nair',
+    designation: 'Assistant Coordinator',
+    phone: '+91 97473 28094',
   },
 ]
 
@@ -47,9 +44,14 @@ export default function Contact() {
     <footer
       id="contact"
       aria-labelledby="contact-heading"
-      className="soil-bg-layer scroll-mt-20 border-t border-dark-red/30 px-4 pt-12 pb-8 font-content sm:px-8 sm:pt-16"
+      className="soil-bg-layer scroll-mt-20 px-4 pt-0 pb-8 font-content sm:px-8"
     >
-      <div className="w-full">
+      {/* Strata Transition Line (matches the Events–FAQ divider) */}
+      <div
+        aria-hidden="true"
+        className="h-[1px] w-full bg-gradient-to-r from-transparent via-dark-red/30 to-transparent animate-strata-pulse"
+      />
+      <div className="w-full pt-12 sm:pt-16">
         {/* Header Tag with Scroll Reveal */}
         <motion.div
           initial={{ opacity: 0, y: 30 }}
@@ -323,6 +325,7 @@ export default function Contact() {
                       </a>
                     </div>
 
+                    {person.email && (
                     <div className="flex items-center gap-2 text-mist/80">
                       <svg
                         className="h-3.5 w-3.5 text-medium-red shrink-0"
@@ -344,6 +347,7 @@ export default function Contact() {
                         {person.email}
                       </a>
                     </div>
+                    )}
                   </div>
                 </div>
 
