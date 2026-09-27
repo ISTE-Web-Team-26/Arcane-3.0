@@ -37,7 +37,7 @@ export default function Navbar() {
   }
 
   return (
-    <header className="sticky top-0 z-50 flex min-h-[4.5rem] flex-col border-b border-white/10 bg-near-black/55 font-content text-mist shadow-[0_8px_32px_rgba(0,0,0,0.35)] backdrop-blur-xl sm:min-h-[5rem]">
+    <header className="fixed inset-x-0 top-0 z-50 flex min-h-[4.5rem] flex-col border-b border-white/10 bg-near-black/55 font-content text-mist shadow-[0_8px_32px_rgba(0,0,0,0.35)] backdrop-blur-xl sm:min-h-[5rem]">
       <div className="flex w-full items-center justify-between px-4 py-3.5 sm:px-8">
         {/* Left: Non-rounded Logo */}
         <Link

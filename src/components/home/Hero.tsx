@@ -73,7 +73,7 @@ export default function Hero() {
         </p>
 
         <p className="mt-2 font-content text-3xl font-bold tracking-normal text-mist [text-shadow:0_0_28px_rgba(170,52,48,0.55)] sm:text-5xl md:text-6xl leading-tight">
-          29<sup className="text-[0.55em]">TH</sup> SEPTEMBER 2026
+          6<sup className="text-[0.55em]">TH</sup> – 8<sup className="text-[0.55em]">TH</sup> OCTOBER 2026
         </p>
 
         <p className="mt-2 flex items-center gap-2 font-mono text-xs font-semibold tracking-[0.25em] text-mist/80 uppercase sm:text-sm">

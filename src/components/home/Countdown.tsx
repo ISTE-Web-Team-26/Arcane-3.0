@@ -1,7 +1,8 @@
 import { useEffect, useState } from 'react'
 
-// Arcane 3.0 goes down on 29th September 2026 (local midnight).
-const TARGET = new Date(2026, 8, 29, 0, 0, 0)
+// Arcane 3.0 opens 6th October 2026, midnight IST (fixed +05:30 offset,
+// so visitors in any timezone count down to the same instant).
+const TARGET = new Date('2026-10-06T00:00:00+05:30')
 
 const pad = (n: number) => String(n).padStart(2, '0')
 

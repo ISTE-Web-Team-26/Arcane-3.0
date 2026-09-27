@@ -12,6 +12,13 @@
 
 html {
   color-scheme: dark;
+  scroll-padding-top: 4.5rem;
+}
+
+@media (min-width: 640px) {
+  html {
+    scroll-padding-top: 5rem;
+  }
 }
 
 body {
@@ -19,6 +26,7 @@ body {
   font-family: var(--font-content);
   background-color: var(--color-near-black);
   color: var(--color-mist);
+  overflow-x: clip;
 }
 
 .font-heading {

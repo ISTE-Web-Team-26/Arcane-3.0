@@ -348,19 +348,25 @@ export default function HeroLogo3D({ anchor = null }: HeroLogo3DProps) {
       role="img"
       aria-label="Arcane 3.0 Hero Environment"
     >
-      {/* 2D logo: gently bobs up and down over the 3D storm */}
-      <img
-        ref={logoImgRef}
-        src={logoUrl}
-        alt="Arcane 3.0 pixel logo"
+      {/* 2D logo: gently bobs up and down over the 3D storm.
+          The wrapper pins it to the free zone between navbar and content
+          so it can never overlap the text or hang off-screen. */}
+      <div
+        className="absolute inset-x-0 z-10 px-[7.7%] md:px-[6.25%]"
         style={
-          anchor ? { top: anchor.top, bottom: anchor.bottom } : undefined
+          anchor
+            ? { top: anchor.top, bottom: anchor.bottom }
+            : { top: 0, bottom: 0 }
         }
-        className={`animate-logo-bob absolute inset-x-0 z-10 m-auto h-auto w-[94%] max-w-5xl object-contain pointer-events-auto md:w-[87.5%] md:max-w-[60rem] ${
-          anchor ? '' : '-translate-y-[10%] '
-        }opacity-100`}
-        draggable={false}
-      />
+      >
+        <img
+          ref={logoImgRef}
+          src={logoUrl}
+          alt="Arcane 3.0 pixel logo"
+          className="animate-logo-bob mx-auto h-full w-full object-contain pointer-events-auto md:max-w-[60rem]"
+          draggable={false}
+        />
+      </div>
       {!gpuReady && !gpuFailed && (
         <span className="sr-only">Loading underground environment…</span>
       )}
