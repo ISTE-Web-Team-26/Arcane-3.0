@@ -52,6 +52,7 @@ function getGroundY(x: number): number {
  */
 export default function HeroLogo3D({ anchor = null }: HeroLogo3DProps) {
   const containerRef = useRef<HTMLDivElement>(null)
+  const logoImgRef = useRef<HTMLImageElement>(null)
   const [gpuReady, setGpuReady] = useState(false)
   const [gpuFailed, setGpuFailed] = useState(false)
 
@@ -190,7 +191,7 @@ export default function HeroLogo3D({ anchor = null }: HeroLogo3DProps) {
       }
 
       // --- Rain Streaks (Atmospheric Thunderstorm Behind Logo) ----------
-      const RAIN_COUNT = 300
+      const RAIN_COUNT = 260
       const randomX = () => (Math.random() * 2 - 1) * (bounds.halfW + 0.4)
       const randomY = () => (Math.random() * 2 - 1) * (bounds.halfH + 0.4)
 
@@ -378,6 +379,20 @@ export default function HeroLogo3D({ anchor = null }: HeroLogo3DProps) {
 
         uFlash.value = flashVal
 
+        // Light up the 2D logo on lightning strikes (mirrors the old
+        // white-blowout shader). Direct DOM write — no re-render.
+        const logoEl = logoImgRef.current
+        if (logoEl) {
+          const f = Math.round(flashVal * 100) / 100
+          const nextFilter =
+            f > 0.02
+              ? `brightness(${(1 + f * 1.6).toFixed(2)}) drop-shadow(0 0 ${(f * 28).toFixed(1)}px rgba(255,255,255,${(f * 0.9).toFixed(2)}))`
+              : ''
+          if (logoEl.style.filter !== nextFilter) {
+            logoEl.style.filter = nextFilter
+          }
+        }
+
         // Rain simulation across ground contour
         const topEdge = bounds.halfH + 0.3
         for (let i = 0; i < RAIN_COUNT; i += 1) {
@@ -485,12 +500,13 @@ export default function HeroLogo3D({ anchor = null }: HeroLogo3DProps) {
     >
       {/* 2D logo: gently bobs up and down over the 3D storm */}
       <img
+        ref={logoImgRef}
         src={logoUrl}
         alt="Arcane 3.0 pixel logo"
         style={
           anchor ? { top: anchor.top, bottom: anchor.bottom } : undefined
         }
-        className={`animate-logo-bob absolute inset-x-0 m-auto h-auto w-[94%] max-w-5xl object-contain pointer-events-auto md:w-[70%] md:max-w-3xl ${
+        className={`animate-logo-bob absolute inset-x-0 z-10 m-auto h-auto w-[94%] max-w-5xl object-contain pointer-events-auto md:w-[87.5%] md:max-w-[60rem] ${
           anchor ? '' : '-translate-y-[10%] '
         }opacity-100`}
         draggable={false}

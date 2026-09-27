@@ -61,7 +61,7 @@ body {
 
 .animate-logo-bob {
   animation: logo-bob 6s ease-in-out infinite;
-  will-change: transform;
+  will-change: transform, filter;
 }
 
 .soil-bg-layer {
