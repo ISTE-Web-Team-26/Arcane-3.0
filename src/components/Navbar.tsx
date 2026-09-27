@@ -37,7 +37,7 @@ export default function Navbar() {
   }
 
   return (
-    <header className="sticky top-0 z-50 flex min-h-[4.5rem] flex-col border-b border-dark-red/40 bg-near-black/95 font-content text-mist backdrop-blur-md sm:min-h-[5rem]">
+    <header className="sticky top-0 z-50 flex min-h-[4.5rem] flex-col border-b border-white/10 bg-near-black/55 font-content text-mist shadow-[0_8px_32px_rgba(0,0,0,0.35)] backdrop-blur-xl sm:min-h-[5rem]">
       <div className="flex w-full items-center justify-between px-4 py-3.5 sm:px-8">
         {/* Left: Non-rounded Logo */}
         <Link
@@ -138,8 +138,8 @@ export default function Navbar() {
 
       {/* Mobile Drawer Menu */}
       <div
-        className={`overflow-hidden transition-all duration-300 ease-in-out md:hidden ${
-          isOpen ? 'max-h-72 border-t border-dark-red/25 opacity-100' : 'max-h-0 opacity-0'
+        className={`overflow-hidden bg-near-black/55 backdrop-blur-xl transition-all duration-300 ease-in-out md:hidden ${
+          isOpen ? 'max-h-72 border-t border-white/10 opacity-100' : 'max-h-0 opacity-0'
         }`}
       >
         <nav className="flex flex-col space-y-1 px-4 py-3 font-mono text-xs font-semibold tracking-wider">

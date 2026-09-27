@@ -87,7 +87,6 @@ export default function HeroLogo3D({ anchor = null }: HeroLogo3DProps) {
       if (!container) return
 
       const isMobile = window.innerWidth < 768
-      const isLowEnd = isMobile || (navigator.hardwareConcurrency !== undefined && navigator.hardwareConcurrency <= 4)
 
       let rendererInstance: THREE.WebGPURenderer
       try {
@@ -118,9 +117,7 @@ export default function HeroLogo3D({ anchor = null }: HeroLogo3DProps) {
 
       renderer = rendererInstance
       rendererInstance.setClearColor(0x000000, 0)
-      rendererInstance.setPixelRatio(
-        Math.min(window.devicePixelRatio, isLowEnd ? 1 : 1.5),
-      )
+      rendererInstance.setPixelRatio(window.devicePixelRatio)
       rendererInstance.domElement.setAttribute('aria-hidden', 'true')
       rendererInstance.domElement.style.position = 'absolute'
       rendererInstance.domElement.style.inset = '0'
@@ -167,6 +164,8 @@ export default function HeroLogo3D({ anchor = null }: HeroLogo3DProps) {
       }
 
       logoTexture.colorSpace = THREE.SRGBColorSpace
+      // Sharper logo at tilted viewing angles (renderer clamps to HW max).
+      logoTexture.anisotropy = 8
       soilTexture.wrapS = THREE.RepeatWrapping
       soilTexture.wrapT = THREE.RepeatWrapping
       soilTexture.colorSpace = THREE.SRGBColorSpace
