@@ -11,52 +11,72 @@ interface FAQItem {
 const FAQS: FAQItem[] = [
   {
     id: 'faq-1',
-    question: 'Who can participate in ARCANE 3.0?',
+    question: 'What is Arcane 3.0?',
     answer:
-      'ARCANE 3.0 is open to all undergraduate and postgraduate students from any recognized college or university across India. Tech enthusiasts, coders, designers, and gamers across all disciplines are welcome to participate.',
-    category: 'ELIGIBILITY',
+      'Arcane 3.0 is the premier technical fest organized by ISTE FISAT, an event bringing together tech enthusiasts, students, and innovators for competitions, workshops, and networking opportunities centered around technology and creativity.',
+    category: 'OVERVIEW',
   },
   {
     id: 'faq-2',
-    question: 'How do I register for events and competitions?',
+    question: 'When and where will Arcane 3.0 be held?',
     answer:
-      'You can register directly through our website by navigating to the Events section and clicking the REGISTER button on your desired event card. Follow the instructions to enter your team/individual details and lock in your slot.',
-    category: 'REGISTRATION',
-  },
-  {
-    id: 'faq-3',
-    question: 'Is there a registration fee?',
-    answer:
-      'Registration fees vary depending on the specific event track. Some flagship hackathons and workshops have nominal entry fees, while select events are completely free. Exact fee details are listed on individual event registration pages.',
-    category: 'PAYMENTS',
-  },
-  {
-    id: 'faq-4',
-    question: 'Can I participate in multiple events?',
-    answer:
-      'Yes! You are encouraged to participate in multiple technical hackathons, coding contests, workshops, and gaming tournaments, provided their schedules and time slots do not clash.',
+      'Arcane 3.0 will take place on 6,7,8 October at FISAT. Detailed venue information and a campus map will be shared closer to the event.',
     category: 'SCHEDULE',
   },
   {
-    id: 'faq-5',
-    question: 'What are the prizes and certificates provided?',
+    id: 'faq-3',
+    question: 'Who can participate in Arcane 3.0?',
+    answer: 'Arcane 3.0 is open to all students of any academic background.',
+    category: 'ELIGIBILITY',
+  },
+  {
+    id: 'faq-4',
+    question: 'How do I register for Arcane 3.0?',
     answer:
-      'ARCANE 3.0 features a prize pool of ₹100K+ in cash rewards, sponsor bounties, certificates, and trophies. All verified participants will receive official certificates of participation recognized by ISTE FISAT.',
-    category: 'REWARDS',
+      'You can register through our official website by filling out the registration form and selecting the events/workshops you wish to participate in. Registration links will also be shared on our social media handles.',
+    category: 'REGISTRATION',
+  },
+  {
+    id: 'faq-5',
+    question: 'Is there a registration fee?',
+    answer:
+      'Registration fees vary depending on the event or workshop you choose. Full pricing details are available on the registration page.',
+    category: 'PAYMENTS',
   },
   {
     id: 'faq-6',
-    question: 'Where is ARCANE 3.0 being hosted?',
+    question: 'What events and competitions are part of Arcane 3.0?',
     answer:
-      'ARCANE 3.0 is conducted on-campus at Federal Institute of Science And Technology (FISAT), Hormis Nagar, Mookkannoor, Angamaly, Kerala. Select preliminary rounds for specific coding tracks may be conducted online.',
-    category: 'VENUE',
+      'Arcane 3.0 features a mix of technical competitions, workshops on emerging technologies and non-technical events — along with expert talks and networking sessions. Check the "Events" page for the full list.',
+    category: 'EVENTS',
   },
   {
     id: 'faq-7',
-    question: 'Will accommodation and travel assistance be provided?',
+    question: 'Can I participate as a team, or only individually?',
     answer:
-      'Accommodation facilities can be arranged for participants traveling from distant institutions upon prior request during registration. Please reach out to our hospitality team via the Contact section for arrangements.',
+      'This depends on the specific event. Some competitions allow team participation with a defined team size limit, while others are individual. Team size and rules are listed under each event\u2019s details.',
+    category: 'TEAMS',
+  },
+  {
+    id: 'faq-8',
+    question: 'Will certificates be provided to participants?',
+    answer:
+      'Yes, participation and winner certificates will be provided for all registered events and workshops.',
+    category: 'REWARDS',
+  },
+  {
+    id: 'faq-9',
+    question: 'Do I need to bring my own laptop or equipment for workshops?',
+    answer:
+      'For hands-on technical workshops, participants are advised to bring their own laptops with the required software pre-installed. Specific requirements will be communicated after registration for each workshop.',
     category: 'LOGISTICS',
+  },
+  {
+    id: 'faq-10',
+    question: 'Who do I contact for more information or queries?',
+    answer:
+      'For any queries, you can reach out to us directly on our official Instagram/social media handles.',
+    category: 'SUPPORT',
   },
 ]
 

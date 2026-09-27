@@ -27,6 +27,7 @@ interface HeroLogo3DProps {
 export default function HeroLogo3D({ anchor = null }: HeroLogo3DProps) {
   const containerRef = useRef<HTMLDivElement>(null)
   const logoImgRef = useRef<HTMLImageElement>(null)
+  const groundFlashRef = useRef<HTMLDivElement>(null)
   const [gpuReady, setGpuReady] = useState(false)
   const [gpuFailed, setGpuFailed] = useState(false)
 
@@ -251,17 +252,28 @@ export default function HeroLogo3D({ anchor = null }: HeroLogo3DProps) {
         const targetFlash = flashing ? 1 : 0
         flashVal += (targetFlash - flashVal) * (flashing ? 0.65 : 0.14)
 
-        // Light up the 2D logo on lightning strikes (mirrors the old
-        // white-blowout shader). Direct DOM write — no re-render.
+        // Light up the 2D logo and the ground strip on lightning strikes
+        // (mirrors the old white-blowout shader). Direct DOM writes —
+        // no re-render.
+        const f = Math.round(flashVal * 100) / 100
         const logoEl = logoImgRef.current
         if (logoEl) {
-          const f = Math.round(flashVal * 100) / 100
           const nextFilter =
             f > 0.02
               ? `brightness(${(1 + f * 1.6).toFixed(2)}) drop-shadow(0 0 ${(f * 28).toFixed(1)}px rgba(255,255,255,${(f * 0.9).toFixed(2)}))`
               : ''
           if (logoEl.style.filter !== nextFilter) {
             logoEl.style.filter = nextFilter
+          }
+        }
+        // Flash overlay on the ground strip: opacity (not brightness —
+        // multiplying near-black stays near-black, so this blends toward
+        // pale blue-white instead).
+        const groundFlashEl = groundFlashRef.current
+        if (groundFlashEl) {
+          const nextOpacity = f > 0.02 ? (f * 0.85).toFixed(2) : ''
+          if (groundFlashEl.style.opacity !== nextOpacity) {
+            groundFlashEl.style.opacity = nextOpacity
           }
         }
 
@@ -348,7 +360,20 @@ export default function HeroLogo3D({ anchor = null }: HeroLogo3DProps) {
       role="img"
       aria-label="Arcane 3.0 Hero Environment"
     >
-      {/* 2D logo: gently bobs up and down over the 3D storm.
+      {/* Thin ground line at the hero's foot: same soil as the main
+          ground, darkened, and flashing on lightning strikes */}
+      <div
+        aria-hidden="true"
+        className="soil-bg-layer absolute inset-x-0 bottom-0 z-[5] h-[10px] border-t border-white/10"
+      >
+        <div aria-hidden="true" className="absolute inset-0 bg-black/60" />
+        <div
+          ref={groundFlashRef}
+          aria-hidden="true"
+          className="absolute inset-0 bg-[#cfd8ff] opacity-0"
+        />
+      </div>
+      {/* 2D logo: gently bobs up and down over the storm.
           The wrapper pins it to the free zone between navbar and content
           so it can never overlap the text or hang off-screen. */}
       <div
