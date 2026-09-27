@@ -1,17 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 import * as THREE from 'three/webgpu'
-import {
-  cos,
-  float,
-  positionWorld,
-  select,
-  sin,
-  texture,
-  vec2,
-  vec3,
-} from 'three/tsl'
 import logoUrl from '../../assets/arcane-logo.png'
-import soilTextureUrl from '../../assets/soil-texture.jpg'
 import { Line2 } from 'three/addons/lines/webgpu/Line2.js'
 import { LineGeometry } from 'three/addons/lines/LineGeometry.js'
 import { Line2NodeMaterial } from 'three/webgpu'
@@ -31,23 +20,9 @@ interface HeroLogo3DProps {
 }
 
 /**
- * Organic ground contour defining the soil surface line inside the hero.
- * Sits in the lower ~25% of the viewport and connects seamlessly to the page soil.
- */
-function getGroundY(x: number): number {
-  return (
-    -0.88 +
-    Math.sin(x * 0.75) * 0.08 +
-    Math.sin(x * 2.1 + 0.8) * 0.04 +
-    Math.cos(x * 3.4) * 0.02
-  )
-}
-
-/**
- * 3D Hero thunderstorm environment powered by WebGPU (with automatic
- * fallback to WebGL2), featuring TSL node shaders, Organic Curvy Soil
- * Terrain, Rain Physics and Lightning. The logo itself stays a flat 2D
- * image with a gentle up-down bob — no 3D tilt.
+ * 3D Hero rain-and-lightning environment powered by WebGPU (with automatic
+ * fallback to WebGL2). The logo itself stays a flat 2D image with a gentle
+ * up-down bob — no 3D tilt — and the page CSS provides the only ground.
  */
 export default function HeroLogo3D({ anchor = null }: HeroLogo3DProps) {
   const containerRef = useRef<HTMLDivElement>(null)
@@ -118,60 +93,7 @@ export default function HeroLogo3D({ anchor = null }: HeroLogo3DProps) {
       const camera = new THREE.PerspectiveCamera(34, LOGO_ASPECT, 0.1, 50)
       camera.position.set(0, 0, 5.2)
 
-      // --- Textures ----------------------------------------------------
-      let soilTexture: THREE.Texture
-      try {
-        soilTexture = await new THREE.TextureLoader().loadAsync(soilTextureUrl)
-      } catch {
-        if (!cancelled) setGpuFailed(true)
-        rendererInstance.dispose()
-        rendererInstance.domElement.remove()
-        return
-      }
-
-      if (cancelled) {
-        soilTexture.dispose()
-        rendererInstance.dispose()
-        return
-      }
-
-      soilTexture.wrapS = THREE.RepeatWrapping
-      soilTexture.wrapT = THREE.RepeatWrapping
-      soilTexture.colorSpace = THREE.SRGBColorSpace
-      soilTexture.needsUpdate = true
-
-      // --- Curvy Soil Ground Terrain (TSL Node Material) ---------------
-      const surfaceYNode = sin(positionWorld.x.mul(0.75))
-        .mul(0.08)
-        .add(sin(positionWorld.x.mul(2.1).add(0.8)).mul(0.04))
-        .add(cos(positionWorld.x.mul(3.4)).mul(0.02))
-        .sub(0.82)
-
-      const isBelowSurface = positionWorld.y.lessThanEqual(surfaceYNode)
-      const soilOpacity = select(isBelowSurface, float(1.0), float(0.0))
-
-      const soilUvNode = positionWorld.xy.mul(vec2(0.48, 0.48))
-      const soilTexSample = texture(soilTexture, soilUvNode)
-      const baseSoilColor = soilTexSample.rgb
-        .mul(vec3(0.022, 0.012, 0.011))
-        .add(vec3(0.0015, 0.0008, 0.0012))
-
-      const soilGeo = new THREE.PlaneGeometry(28, 14, 16, 16)
-      const soilMat = new THREE.MeshBasicNodeMaterial({
-        transparent: true,
-        side: THREE.DoubleSide,
-        alphaTest: 0.5,
-      })
-      soilMat.colorNode = baseSoilColor
-      soilMat.opacityNode = soilOpacity
-      disposables.push(soilGeo, soilMat, soilTexture)
-
-      const soilMesh = new THREE.Mesh(soilGeo, soilMat)
-      soilMesh.position.set(0, -5.5, -0.05)
-      soilMesh.renderOrder = 2
-      scene.add(soilMesh)
-
-      // Bounds (rain, splashes, bolt and flash rain span the view)
+      // Bounds (rain, bolt and flash rain span the full view)
       const bounds = { halfW: 3.2, halfH: 1.8 }
 
       const updateFit = () => {
@@ -213,48 +135,6 @@ export default function HeroLogo3D({ anchor = null }: HeroLogo3DProps) {
       const rainSegments = new THREE.LineSegments(rainGeometry, rainMaterial)
       rainSegments.renderOrder = 1
       scene.add(rainSegments)
-
-      // Rain Splash Particle Pool
-      const SPLASH_POOL_SIZE = isMobile ? 12 : 25
-      const splashes = Array.from({ length: SPLASH_POOL_SIZE }, () => ({
-        active: false,
-        x: 0,
-        y: 0,
-        z: 0,
-        vx: 0,
-        vy: 0,
-        life: 0,
-      }))
-      let splashIdx = 0
-
-      const spawnSplash = (x: number, y: number, z: number) => {
-        const splash = splashes[splashIdx]
-        splash.active = true
-        splash.x = x
-        splash.y = y + 0.02
-        splash.z = z
-        splash.vx = (Math.random() - 0.5) * 0.5
-        splash.vy = 0.45 + Math.random() * 0.5
-        splash.life = 1.0
-        splashIdx = (splashIdx + 1) % SPLASH_POOL_SIZE
-      }
-
-      const splashPositions = new Float32Array(SPLASH_POOL_SIZE * 2 * 3)
-      const splashGeometry = new THREE.BufferGeometry()
-      splashGeometry.setAttribute(
-        'position',
-        new THREE.BufferAttribute(splashPositions, 3),
-      )
-      const splashMaterial = new THREE.LineBasicMaterial({
-        color: 0x9ec0e6,
-        transparent: true,
-        opacity: 0.75,
-        depthWrite: false,
-      })
-      disposables.push(splashGeometry, splashMaterial)
-      const splashSegments = new THREE.LineSegments(splashGeometry, splashMaterial)
-      splashSegments.renderOrder = 1
-      scene.add(splashSegments)
 
       // --- Flash Rain (Diagonal slants during lightning, behind logo) ---
       const FLASH_COUNT = Math.floor(RAIN_COUNT / 8)
@@ -302,7 +182,7 @@ export default function HeroLogo3D({ anchor = null }: HeroLogo3DProps) {
       const rebuildBolt = () => {
         const strikeX = (Math.random() * 2 - 1) * bounds.halfW * 0.7
         const top = bounds.halfH + 0.5
-        const bottom = getGroundY(strikeX)
+        const bottom = -(bounds.halfH + 0.5)
         const pts: number[] = []
         for (let i = 0; i <= BOLT_SEGMENTS; i += 1) {
           const t = i / BOLT_SEGMENTS
@@ -385,14 +265,13 @@ export default function HeroLogo3D({ anchor = null }: HeroLogo3DProps) {
           }
         }
 
-        // Rain simulation across ground contour
+        // Rain falls the full height of the hero and exits below the fold
         const topEdge = bounds.halfH + 0.3
+        const bottomEdge = -(bounds.halfH + 0.3)
         for (let i = 0; i < RAIN_COUNT; i += 1) {
           const drop = rainDrops[i]
           drop.y -= drop.speed * dt
-          const groundY = getGroundY(drop.x)
-          if (drop.y <= groundY) {
-            spawnSplash(drop.x, groundY, drop.z)
+          if (drop.y <= bottomEdge) {
             drop.y = topEdge
             drop.x = randomX()
           }
@@ -405,32 +284,11 @@ export default function HeroLogo3D({ anchor = null }: HeroLogo3DProps) {
         }
         rainGeometry.attributes.position.needsUpdate = true
 
-        // Splash updates
-        for (let i = 0; i < SPLASH_POOL_SIZE; i += 1) {
-          const s = splashes[i]
-          if (s.active) {
-            s.x += s.vx * dt
-            s.y += s.vy * dt
-            s.vy -= 4.0 * dt // gravity
-            s.life -= dt * 3.8
-            if (s.life <= 0) s.active = false
-          }
-          const base = i * 6
-          splashPositions[base] = s.x
-          splashPositions[base + 1] = s.y
-          splashPositions[base + 2] = s.z
-          splashPositions[base + 3] = s.x + s.vx * 0.03
-          splashPositions[base + 4] = s.y + s.vy * 0.03
-          splashPositions[base + 5] = s.z
-        }
-        splashGeometry.attributes.position.needsUpdate = true
-
         // Flash Rain Updates
         for (let i = 0; i < FLASH_COUNT; i += 1) {
           const drop = flashDrops[i]
           drop.y -= drop.speed * dt
-          const groundY = getGroundY(drop.x)
-          if (drop.y <= groundY) {
+          if (drop.y <= bottomEdge) {
             drop.y = topEdge
             drop.x = randomX()
           }
