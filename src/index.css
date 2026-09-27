@@ -27,10 +27,10 @@ body {
 
 @keyframes logo-shimmer {
   0% {
-    background-position: -200% 0;
+    transform: translateX(-150%);
   }
   100% {
-    background-position: 200% 0;
+    transform: translateX(350%);
   }
 }
 
@@ -45,8 +45,8 @@ body {
     transparent 65%,
     transparent 100%
   );
-  background-size: 250% 100%;
-  animation: logo-shimmer 3.5s ease-in-out infinite;
+  animation: logo-shimmer 3.5s linear infinite;
+  will-change: transform;
 }
 
 .soil-bg-layer {

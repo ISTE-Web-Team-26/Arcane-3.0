@@ -53,7 +53,7 @@ export default function Navbar() {
               className="h-9 w-auto sm:h-12 object-contain drop-shadow-[0_0_10px_rgba(170,52,48,0.35)] transition-all duration-300 group-hover:brightness-110 group-hover:drop-shadow-[0_0_22px_rgba(238,39,33,0.65)]"
             />
             <span
-              className="pointer-events-none absolute inset-0 animate-logo-shimmer mix-blend-screen opacity-70 transition-opacity duration-300 group-hover:opacity-100"
+              className="pointer-events-none absolute inset-0 overflow-hidden opacity-70 mix-blend-screen transition-opacity duration-300 group-hover:opacity-100"
               style={{
                 maskImage: `url(${arcaneLogo})`,
                 WebkitMaskImage: `url(${arcaneLogo})`,
@@ -65,7 +65,12 @@ export default function Navbar() {
                 WebkitMaskPosition: 'center',
               }}
               aria-hidden="true"
-            />
+            >
+              <span
+                className="animate-logo-shimmer absolute inset-y-0 left-0 w-[45%]"
+                aria-hidden="true"
+              />
+            </span>
           </div>
         </Link>
 
