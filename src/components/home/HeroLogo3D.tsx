@@ -293,7 +293,7 @@ export default function HeroLogo3D({ anchor = null }: HeroLogo3DProps) {
           const worldPerDevicePx = vH / (Hpx * rendererInstance.getPixelRatio())
           s = Math.min(s, (texW * worldPerDevicePx) / BASE_W)
         }
-        logoMesh.scale.setScalar(Math.max(s, 0.2))
+        logoMesh.scale.setScalar(Math.max(s * (isMobile ? 1 : 0.75), 0.2))
       }
       refreshFitRef.current = updateFit
 
@@ -609,7 +609,7 @@ export default function HeroLogo3D({ anchor = null }: HeroLogo3DProps) {
         style={
           anchor ? { top: anchor.top, bottom: anchor.bottom } : undefined
         }
-        className={`absolute inset-x-0 m-auto h-auto w-[94%] max-w-5xl object-contain transition-opacity duration-500 pointer-events-auto ${
+        className={`absolute inset-x-0 m-auto h-auto w-[94%] max-w-5xl object-contain transition-opacity duration-500 pointer-events-auto md:w-[70%] md:max-w-3xl ${
           anchor ? '' : '-translate-y-[10%] '
         }${gpuReady && !gpuFailed ? 'opacity-0' : 'opacity-100'}`}
         draggable={false}
