@@ -13,11 +13,46 @@ const navLinks = [
 export default function Navbar() {
   const { pathname, hash } = useLocation()
   const [isOpen, setIsOpen] = useState(false)
+  const [visibleSection, setVisibleSection] = useState<string | null>(null)
 
   // Auto close mobile menu when path or hash changes
   useEffect(() => {
     setIsOpen(false)
   }, [pathname, hash])
+
+  // Scrollspy: highlight the link for whichever section is in view.
+  // Below-the-fold sections are lazy-loaded, so re-scan as the DOM grows.
+  useEffect(() => {
+    if (pathname !== '/') {
+      setVisibleSection(null)
+      return
+    }
+    const observed = new Set<Element>()
+    const io = new IntersectionObserver(
+      (entries) => {
+        for (const entry of entries) {
+          if (entry.isIntersecting) setVisibleSection(entry.target.id)
+        }
+      },
+      { rootMargin: '-45% 0px -50% 0px', threshold: 0 },
+    )
+    const scan = () => {
+      for (const { id } of navLinks) {
+        const el = document.getElementById(id)
+        if (el && !observed.has(el)) {
+          observed.add(el)
+          io.observe(el)
+        }
+      }
+    }
+    scan()
+    const mo = new MutationObserver(scan)
+    mo.observe(document.body, { childList: true, subtree: true })
+    return () => {
+      mo.disconnect()
+      io.disconnect()
+    }
+  }, [pathname])
 
   const handleClick = (id: string) => {
     setIsOpen(false)
@@ -29,11 +64,11 @@ export default function Navbar() {
   }
 
   const isLinkActive = (id: string) => {
-    if (pathname === '/') {
-      if (id === 'home') return !hash || hash === '#home'
-      return hash === `#${id}`
-    }
-    return false
+    if (pathname !== '/') return false
+    // Once the observer has reported, scroll position wins over the hash.
+    if (visibleSection) return visibleSection === id
+    if (id === 'home') return !hash || hash === '#home'
+    return hash === `#${id}`
   }
 
   return (

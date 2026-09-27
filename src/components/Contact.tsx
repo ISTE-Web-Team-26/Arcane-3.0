@@ -47,9 +47,9 @@ export default function Contact() {
     <footer
       id="contact"
       aria-labelledby="contact-heading"
-      className="scroll-mt-20 border-t border-dark-red/30 px-4 pt-12 pb-8 font-content sm:px-8 sm:pt-16"
+      className="soil-bg-layer scroll-mt-20 border-t border-dark-red/30 px-4 pt-12 pb-8 font-content sm:px-8 sm:pt-16"
     >
-      <div className="mx-auto max-w-7xl">
+      <div className="w-full">
         {/* Header Tag with Scroll Reveal */}
         <motion.div
           initial={{ opacity: 0, y: 30 }}
