@@ -1,4 +1,6 @@
 import { motion, type Variants } from 'framer-motion'
+import BackgroundParticles from '../BackgroundParticles.tsx'
+import FlashCollage from './FlashCollage.tsx'
 
 export default function About() {
   const containerVariants: Variants = {
@@ -288,6 +290,17 @@ export default function About() {
           </div>
         </motion.div>
       </motion.div>
+
+      {/* Arcane 2.0 archive collage */}
+      <FlashCollage />
+
+      {/* Ember particles drifting below the collage */}
+      <div
+        aria-hidden="true"
+        className="relative mt-8 h-36 overflow-hidden sm:mt-10 sm:-mx-8 sm:h-44"
+      >
+        <BackgroundParticles density={12} />
+      </div>
     </section>
   )
 }
