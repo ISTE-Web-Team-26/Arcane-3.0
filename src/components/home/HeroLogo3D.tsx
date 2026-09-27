@@ -3,13 +3,11 @@ import * as THREE from 'three/webgpu'
 import {
   cos,
   float,
-  mix,
   positionWorld,
   select,
   sin,
   texture,
   uniform,
-  uv,
   vec2,
   vec3,
 } from 'three/tsl'
@@ -47,20 +45,15 @@ function getGroundY(x: number): number {
 }
 
 /**
- * 3D Hero Scene powered by WebGPU (with automatic fallback to WebGL2),
- * featuring TSL node shaders, Organic Curvy Soil Terrain, Rain Physics, Lightning, and 3D Logo Tilt.
+ * 3D Hero thunderstorm environment powered by WebGPU (with automatic
+ * fallback to WebGL2), featuring TSL node shaders, Organic Curvy Soil
+ * Terrain, Rain Physics and Lightning. The logo itself stays a flat 2D
+ * image with a gentle up-down bob — no 3D tilt.
  */
 export default function HeroLogo3D({ anchor = null }: HeroLogo3DProps) {
   const containerRef = useRef<HTMLDivElement>(null)
   const [gpuReady, setGpuReady] = useState(false)
   const [gpuFailed, setGpuFailed] = useState(false)
-  const anchorRef = useRef(anchor)
-  const refreshFitRef = useRef<() => void>(() => {})
-
-  useEffect(() => {
-    anchorRef.current = anchor
-    refreshFitRef.current()
-  }, [anchor])
 
   useEffect(() => {
     if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
@@ -74,16 +67,7 @@ export default function HeroLogo3D({ anchor = null }: HeroLogo3DProps) {
     let observer: IntersectionObserver | null = null
     let resizeObserver: ResizeObserver | null = null
     let removeResizeListener: (() => void) | null = null
-    const pointer = { x: 0, y: 0, tx: 0, ty: 0 }
     const disposables: { dispose(): void }[] = []
-
-    const onPointerMove = (e: PointerEvent) => {
-      const el = containerRef.current
-      if (!el) return
-      const rect = el.getBoundingClientRect()
-      pointer.tx = ((e.clientX - rect.left) / rect.width - 0.5) * 2
-      pointer.ty = ((e.clientY - rect.top) / rect.height - 0.5) * 2
-    }
 
     const start = async () => {
       const container = containerRef.current
@@ -134,24 +118,10 @@ export default function HeroLogo3D({ anchor = null }: HeroLogo3DProps) {
       const camera = new THREE.PerspectiveCamera(34, LOGO_ASPECT, 0.1, 50)
       camera.position.set(0, 0, 5.2)
 
-      // --- Lighting ----------------------------------------------------
-      const ambientLight = new THREE.AmbientLight(0xd9c8b8, 1.4)
-      scene.add(ambientLight)
-
-      const dirLight = new THREE.DirectionalLight(0xffffff, 1.6)
-      dirLight.position.set(2, 5, 4)
-      scene.add(dirLight)
-
       // --- Textures ----------------------------------------------------
-      let logoTexture: THREE.Texture
       let soilTexture: THREE.Texture
       try {
-        const [tex, sTex] = await Promise.all([
-          new THREE.TextureLoader().loadAsync(logoUrl),
-          new THREE.TextureLoader().loadAsync(soilTextureUrl),
-        ])
-        logoTexture = tex
-        soilTexture = sTex
+        soilTexture = await new THREE.TextureLoader().loadAsync(soilTextureUrl)
       } catch {
         if (!cancelled) setGpuFailed(true)
         rendererInstance.dispose()
@@ -160,70 +130,19 @@ export default function HeroLogo3D({ anchor = null }: HeroLogo3DProps) {
       }
 
       if (cancelled) {
-        logoTexture.dispose()
         soilTexture.dispose()
         rendererInstance.dispose()
         return
       }
 
-      logoTexture.colorSpace = THREE.SRGBColorSpace
-      // Sharper logo at tilted viewing angles (renderer clamps to HW max).
-      logoTexture.anisotropy = 8
       soilTexture.wrapS = THREE.RepeatWrapping
       soilTexture.wrapT = THREE.RepeatWrapping
       soilTexture.colorSpace = THREE.SRGBColorSpace
       soilTexture.needsUpdate = true
 
       // --- TSL Uniforms ------------------------------------------------
+      // uFlash blows the soil out to white on lightning frames.
       const uFlash = uniform(0)
-      const uTime = uniform(0)
-
-      // --- 3D Logo Node Material (TSL) ---------------------------------
-      const logoTexNode = texture(logoTexture, uv())
-      const shimmer = sin(uv().y.mul(120).add(uTime.mul(8)))
-        .mul(0.5)
-        .add(0.5)
-      const flashedLogo = mix(logoTexNode.rgb, vec3(1.0), uFlash.mul(0.9))
-        .add(uFlash.mul(vec3(0.35, 0.37, 0.48)).mul(shimmer.mul(0.5).add(0.5)))
-        .add(
-          logoTexNode.rgb.mul(0.07).mul(sin(uTime.mul(2.0)).mul(0.5).add(0.5)),
-        )
-
-      const logoOpacity = select(
-        logoTexNode.a.greaterThan(0.02),
-        logoTexNode.a,
-        float(0.0),
-      )
-
-      const logoMaterial = new THREE.MeshBasicNodeMaterial({
-        transparent: true,
-        depthWrite: false,
-        alphaTest: 0.02,
-      })
-      logoMaterial.colorNode = flashedLogo
-      logoMaterial.opacityNode = logoOpacity
-
-      disposables.push(logoMaterial, logoTexture, soilTexture)
-
-      const actualAspect =
-        (logoTexture.image as { width?: number; height?: number } | undefined)
-          ?.width &&
-        (logoTexture.image as { width?: number; height?: number } | undefined)
-          ?.height
-          ? (logoTexture.image as { width: number; height: number }).width /
-            (logoTexture.image as { width: number; height: number }).height
-          : LOGO_ASPECT
-
-      const BASE_W = 5.5
-      const BASE_H = BASE_W / actualAspect
-      const logoMesh = new THREE.Mesh(
-        new THREE.PlaneGeometry(BASE_W, BASE_H),
-        logoMaterial,
-      )
-      logoMesh.position.z = 0.05
-      logoMesh.renderOrder = 10
-      disposables.push(logoMesh.geometry)
-      scene.add(logoMesh)
 
       // --- Curvy Soil Ground Terrain (TSL Node Material) ---------------
       const surfaceYNode = sin(positionWorld.x.mul(0.75))
@@ -250,17 +169,15 @@ export default function HeroLogo3D({ anchor = null }: HeroLogo3DProps) {
       })
       soilMat.colorNode = litSoilColor
       soilMat.opacityNode = soilOpacity
-      disposables.push(soilGeo, soilMat)
+      disposables.push(soilGeo, soilMat, soilTexture)
 
       const soilMesh = new THREE.Mesh(soilGeo, soilMat)
       soilMesh.position.set(0, -5.5, -0.05)
       soilMesh.renderOrder = 2
       scene.add(soilMesh)
 
-      // Bounds & sizing
+      // Bounds (rain, splashes, bolt and flash rain span the view)
       const bounds = { halfW: 3.2, halfH: 1.8 }
-      const aim = { y: 0.38 }
-      const smooth = { y: 0.38 }
 
       const updateFit = () => {
         const vH =
@@ -270,32 +187,7 @@ export default function HeroLogo3D({ anchor = null }: HeroLogo3DProps) {
         const vW = vH * camera.aspect
         bounds.halfW = vW / 2
         bounds.halfH = vH / 2
-
-        const Hpx = containerRef.current?.clientHeight ?? 0
-        const a = anchorRef.current
-        let centerY = 0.45
-        let maxH = vH * 0.44
-        if (a && Hpx > 0) {
-          const avail = Math.max(60, Hpx - a.top - a.bottom)
-          const midFromTop = a.top + avail * 0.42
-          const worldPerPx = vH / Hpx
-          centerY = (Hpx / 2 - midFromTop) * worldPerPx
-          maxH = avail * worldPerPx * 0.88
-        }
-        aim.y = centerY
-        let s = Math.min((vW * 0.86) / BASE_W, maxH / BASE_H, 0.9)
-        // Desktop: never magnify past the texture's native resolution —
-        // cap the plane so 1 texel maps to at most 1 device pixel.
-        if (!isMobile && Hpx > 0) {
-          const texW =
-            (logoTexture.image as { width?: number } | undefined)?.width ??
-            1835
-          const worldPerDevicePx = vH / (Hpx * rendererInstance.getPixelRatio())
-          s = Math.min(s, (texW * worldPerDevicePx) / BASE_W)
-        }
-        logoMesh.scale.setScalar(Math.max(s * (isMobile ? 1 : 0.75), 0.2))
       }
-      refreshFitRef.current = updateFit
 
       // --- Rain Streaks (Atmospheric Thunderstorm Behind Logo) ----------
       const RAIN_COUNT = 300
@@ -448,7 +340,6 @@ export default function HeroLogo3D({ anchor = null }: HeroLogo3DProps) {
       }
       window.addEventListener('resize', resize)
       removeResizeListener = () => window.removeEventListener('resize', resize)
-      window.addEventListener('pointermove', onPointerMove)
 
       if ('IntersectionObserver' in window) {
         observer = new IntersectionObserver((entries) => {
@@ -486,15 +377,6 @@ export default function HeroLogo3D({ anchor = null }: HeroLogo3DProps) {
         flashVal += (targetFlash - flashVal) * (flashing ? 0.65 : 0.14)
 
         uFlash.value = flashVal
-        uTime.value = clock.elapsedTime
-
-        // Logo Tilt & Float
-        pointer.x += (pointer.tx - pointer.x) * 0.08
-        pointer.y += (pointer.ty - pointer.y) * 0.08
-        smooth.y += (aim.y - smooth.y) * 0.08
-        logoMesh.position.y = smooth.y + Math.sin(clock.elapsedTime * 0.8) * 0.03
-        logoMesh.rotation.y = pointer.x * 0.1
-        logoMesh.rotation.x = -pointer.y * 0.06
 
         // Rain simulation across ground contour
         const topEdge = bounds.halfH + 0.3
@@ -587,7 +469,6 @@ export default function HeroLogo3D({ anchor = null }: HeroLogo3DProps) {
       observer?.disconnect()
       resizeObserver?.disconnect()
       removeResizeListener?.()
-      window.removeEventListener('pointermove', onPointerMove)
       for (const d of disposables) d.dispose()
       renderer?.dispose()
       renderer?.domElement.remove()
@@ -602,16 +483,16 @@ export default function HeroLogo3D({ anchor = null }: HeroLogo3DProps) {
       role="img"
       aria-label="Arcane 3.0 Hero Environment"
     >
-      {/* Static fallback: visible until WebGPU takes over */}
+      {/* 2D logo: gently bobs up and down over the 3D storm */}
       <img
         src={logoUrl}
         alt="Arcane 3.0 pixel logo"
         style={
           anchor ? { top: anchor.top, bottom: anchor.bottom } : undefined
         }
-        className={`absolute inset-x-0 m-auto h-auto w-[94%] max-w-5xl object-contain transition-opacity duration-500 pointer-events-auto md:w-[70%] md:max-w-3xl ${
+        className={`animate-logo-bob absolute inset-x-0 m-auto h-auto w-[94%] max-w-5xl object-contain pointer-events-auto md:w-[70%] md:max-w-3xl ${
           anchor ? '' : '-translate-y-[10%] '
-        }${gpuReady && !gpuFailed ? 'opacity-0' : 'opacity-100'}`}
+        }opacity-100`}
         draggable={false}
       />
       {!gpuReady && !gpuFailed && (

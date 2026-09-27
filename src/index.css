@@ -49,6 +49,21 @@ body {
   will-change: transform;
 }
 
+@keyframes logo-bob {
+  0%,
+  100% {
+    transform: translateY(-10px);
+  }
+  50% {
+    transform: translateY(10px);
+  }
+}
+
+.animate-logo-bob {
+  animation: logo-bob 6s ease-in-out infinite;
+  will-change: transform;
+}
+
 .soil-bg-layer {
   position: relative;
   background-color: #040203;
