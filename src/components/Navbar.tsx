@@ -3,8 +3,9 @@ import arcaneLogo from '../assets/arcane-logo.png'
 
 const navLinks = [
   { id: 'home', label: 'HOME' },
-  { id: 'events', label: 'EVENTS' },
   { id: 'about', label: 'ABOUT' },
+  { id: 'events', label: 'EVENTS' },
+  { id: 'faq', label: 'FAQ' },
   { id: 'contact', label: 'CONTACT' },
 ]
 
