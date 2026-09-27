@@ -7,7 +7,6 @@ import {
   select,
   sin,
   texture,
-  uniform,
   vec2,
   vec3,
 } from 'three/tsl'
@@ -141,10 +140,6 @@ export default function HeroLogo3D({ anchor = null }: HeroLogo3DProps) {
       soilTexture.colorSpace = THREE.SRGBColorSpace
       soilTexture.needsUpdate = true
 
-      // --- TSL Uniforms ------------------------------------------------
-      // uFlash blows the soil out to white on lightning frames.
-      const uFlash = uniform(0)
-
       // --- Curvy Soil Ground Terrain (TSL Node Material) ---------------
       const surfaceYNode = sin(positionWorld.x.mul(0.75))
         .mul(0.08)
@@ -160,7 +155,6 @@ export default function HeroLogo3D({ anchor = null }: HeroLogo3DProps) {
       const baseSoilColor = soilTexSample.rgb
         .mul(vec3(0.022, 0.012, 0.011))
         .add(vec3(0.0015, 0.0008, 0.0012))
-      const litSoilColor = baseSoilColor.add(uFlash.mul(vec3(0.2, 0.22, 0.28)))
 
       const soilGeo = new THREE.PlaneGeometry(28, 14, 16, 16)
       const soilMat = new THREE.MeshBasicNodeMaterial({
@@ -168,7 +162,7 @@ export default function HeroLogo3D({ anchor = null }: HeroLogo3DProps) {
         side: THREE.DoubleSide,
         alphaTest: 0.5,
       })
-      soilMat.colorNode = litSoilColor
+      soilMat.colorNode = baseSoilColor
       soilMat.opacityNode = soilOpacity
       disposables.push(soilGeo, soilMat, soilTexture)
 
@@ -376,8 +370,6 @@ export default function HeroLogo3D({ anchor = null }: HeroLogo3DProps) {
 
         const targetFlash = flashing ? 1 : 0
         flashVal += (targetFlash - flashVal) * (flashing ? 0.65 : 0.14)
-
-        uFlash.value = flashVal
 
         // Light up the 2D logo on lightning strikes (mirrors the old
         // white-blowout shader). Direct DOM write — no re-render.
