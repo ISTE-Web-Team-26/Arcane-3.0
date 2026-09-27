@@ -1,6 +1,5 @@
 import { lazy, Suspense, useLayoutEffect, useRef, useState } from 'react'
 import { motion } from 'framer-motion'
-import BackgroundParticles from '../BackgroundParticles.tsx'
 import Countdown from './Countdown.tsx'
 
 const HeroLogo3D = lazy(() => import('./HeroLogo3D.tsx'))
@@ -52,9 +51,6 @@ export default function Hero() {
       <Suspense fallback={null}>
         <HeroLogo3D anchor={anchor} />
       </Suspense>
-
-      {/* Floating ember particles */}
-      <BackgroundParticles density={16} className="z-10" />
 
       {/* Hero Foreground Content with Framer Motion Entrance */}
       <motion.div
