@@ -52,17 +52,17 @@ export default function Countdown() {
     <div
       role="timer"
       aria-label={`${parts.days} days, ${parts.hours} hours, ${parts.minutes} minutes and ${parts.seconds} seconds remaining until Arcane 3.0`}
-      className="flex items-stretch justify-center gap-2 sm:gap-3"
+      className="flex items-stretch justify-center gap-1.5 sm:gap-2.5"
     >
       {units.map((unit) => (
         <div
           key={unit.label}
-          className="min-w-[4.25rem] rounded-md border border-medium-red/60 bg-near-black/70 px-3 py-2 shadow-[0_0_18px_rgba(170,52,48,0.35)] backdrop-blur-sm sm:min-w-[5.5rem] sm:px-4 sm:py-3"
+          className="min-w-[3.4rem] rounded-md border border-medium-red/60 bg-near-black/85 px-2 py-1 shadow-[0_0_14px_rgba(170,52,48,0.35)] backdrop-blur-sm sm:min-w-[4.6rem] sm:px-3 sm:py-2"
         >
-          <div className="font-heading text-2xl font-bold tabular-nums text-mist sm:text-4xl">
+          <div className="font-heading text-lg font-bold tabular-nums text-mist sm:text-2xl lg:text-3xl leading-none">
             {unit.value}
           </div>
-          <div className="mt-1 font-mono text-[10px] tracking-[0.2em] text-mist/60 uppercase sm:text-xs">
+          <div className="mt-0.5 font-mono text-[8px] tracking-[0.2em] text-mist/60 uppercase sm:text-[10px]">
             {unit.label}
           </div>
         </div>
@@ -70,3 +70,5 @@ export default function Countdown() {
     </div>
   )
 }
+
+

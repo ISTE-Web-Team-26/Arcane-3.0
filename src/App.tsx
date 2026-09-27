@@ -1,10 +1,13 @@
+import { lazy, Suspense } from 'react'
 import { BrowserRouter, Route, Routes } from 'react-router'
 import Layout from './components/Layout.tsx'
-import Event1 from './pages/Event1.tsx'
-import Event2 from './pages/Event2.tsx'
-import Event3 from './pages/Event3.tsx'
 import Home from './pages/Home.tsx'
-import NotFound from './pages/NotFound.tsx'
+
+// Lazy-load secondary routes — they're never needed on first paint
+const Event1 = lazy(() => import('./pages/Event1.tsx'))
+const Event2 = lazy(() => import('./pages/Event2.tsx'))
+const Event3 = lazy(() => import('./pages/Event3.tsx'))
+const NotFound = lazy(() => import('./pages/NotFound.tsx'))
 
 function App() {
   return (
@@ -12,10 +15,38 @@ function App() {
       <Routes>
         <Route element={<Layout />}>
           <Route index element={<Home />} />
-          <Route path="event1" element={<Event1 />} />
-          <Route path="event2" element={<Event2 />} />
-          <Route path="event3" element={<Event3 />} />
-          <Route path="*" element={<NotFound />} />
+          <Route
+            path="event1"
+            element={
+              <Suspense fallback={null}>
+                <Event1 />
+              </Suspense>
+            }
+          />
+          <Route
+            path="event2"
+            element={
+              <Suspense fallback={null}>
+                <Event2 />
+              </Suspense>
+            }
+          />
+          <Route
+            path="event3"
+            element={
+              <Suspense fallback={null}>
+                <Event3 />
+              </Suspense>
+            }
+          />
+          <Route
+            path="*"
+            element={
+              <Suspense fallback={null}>
+                <NotFound />
+              </Suspense>
+            }
+          />
         </Route>
       </Routes>
     </BrowserRouter>

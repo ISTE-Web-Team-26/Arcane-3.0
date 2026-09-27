@@ -11,12 +11,14 @@
 }
 
 html {
-  color-scheme: light dark;
+  color-scheme: dark;
 }
 
 body {
   margin: 0;
   font-family: var(--font-content);
+  background-color: var(--color-near-black);
+  color: var(--color-mist);
 }
 
 .font-heading {
@@ -56,6 +58,72 @@ body {
   background-repeat: repeat;
   background-size: 520px;
 }
+
+/* Ambient Strata Pulse Divider between sections */
+@keyframes strata-pulse {
+  0%, 100% {
+    opacity: 0.3;
+    transform: scaleX(0.96);
+  }
+  50% {
+    opacity: 0.65;
+    transform: scaleX(1);
+  }
+}
+
+/* Ambient Strata Pulse Divider between sections */
+@keyframes strata-pulse {
+  0%, 100% {
+    opacity: 0.35;
+    transform: scaleX(0.96);
+  }
+  50% {
+    opacity: 0.75;
+    transform: scaleX(1);
+  }
+}
+
+.animate-strata-pulse {
+  animation: strata-pulse 4s ease-in-out infinite;
+}
+
+/* Smooth Scroll Reveal Animations */
+.reveal-init {
+  opacity: 0;
+  transform: translateY(30px);
+  filter: blur(4px);
+  transition: 
+    opacity 0.85s cubic-bezier(0.16, 1, 0.3, 1),
+    transform 0.85s cubic-bezier(0.16, 1, 0.3, 1),
+    filter 0.85s cubic-bezier(0.16, 1, 0.3, 1);
+  will-change: opacity, transform, filter;
+}
+
+.reveal-visible {
+  opacity: 1;
+  transform: translateY(0);
+  filter: blur(0);
+}
+
+.delay-100 {
+  transition-delay: 100ms;
+}
+
+.delay-200 {
+  transition-delay: 200ms;
+}
+
+.delay-300 {
+  transition-delay: 300ms;
+}
+
+/* Subterranean Depth Vignette */
+.underground-vignette {
+  box-shadow: 
+    inset 0 100px 120px -30px rgba(4, 2, 3, 0.95),
+    inset 0 -100px 120px -30px rgba(4, 2, 3, 0.95);
+}
+
 
 
 

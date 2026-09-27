@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { motion, AnimatePresence } from 'framer-motion'
 
 interface FAQItem {
   id: string
@@ -72,41 +73,59 @@ export default function FAQ() {
       aria-labelledby="faq-heading"
       className="relative w-full scroll-mt-20 py-12 sm:py-16"
     >
-      {/* Top Header Tag */}
-      <div className="mb-2 flex items-center gap-2 font-mono text-xs font-semibold tracking-wider text-medium-red uppercase">
-        <span
-          className="inline-block h-2 w-2 bg-medium-red"
-          aria-hidden="true"
-        />
-        <span>Knowledge Base // FAQ</span>
-      </div>
+      {/* Header with Scroll Reveal */}
+      <motion.div
+        initial={{ opacity: 0, y: 30 }}
+        whileInView={{ opacity: 1, y: 0 }}
+        viewport={{ once: true, margin: '-60px' }}
+        transition={{ duration: 0.65, ease: [0.16, 1, 0.3, 1] as const }}
+      >
+        {/* Top Header Tag */}
+        <div className="mb-2 flex items-center gap-2 font-mono text-xs font-semibold tracking-wider text-medium-red uppercase">
+          <span
+            className="inline-block h-2 w-2 bg-medium-red"
+            aria-hidden="true"
+          />
+          <span>Knowledge Base // FAQ</span>
+        </div>
 
-      {/* Main Section Header */}
-      <div className="mb-8 sm:mb-12">
-        <h2
-          id="faq-heading"
-          className="font-heading text-3xl font-bold tracking-tight text-mist sm:text-4xl md:text-5xl dark:text-mist"
-        >
-          FREQUENTLY ASKED{' '}
-          <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#e05652] via-[#ea6e6b] to-[#f4938f]">
-            QUESTIONS
-          </span>
-        </h2>
-        <p className="mt-2 max-w-3xl font-content text-xs text-mist/70 sm:text-sm md:text-base">
-          Got questions? We have answers. If you can&apos;t find what you are looking for, feel free to reach out to our team via the contact channels below.
-        </p>
-      </div>
+        {/* Main Section Header */}
+        <div className="mb-8 sm:mb-12">
+          <h2
+            id="faq-heading"
+            className="font-heading text-3xl font-bold tracking-tight text-mist sm:text-4xl md:text-5xl dark:text-mist"
+          >
+            FREQUENTLY ASKED{' '}
+            <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#e05652] via-[#ea6e6b] to-[#f4938f]">
+              QUESTIONS
+            </span>
+          </h2>
+          <p className="mt-2 max-w-3xl font-content text-xs text-mist/70 sm:text-sm md:text-base">
+            Got questions? We have answers. If you can&apos;t find what you are
+            looking for, feel free to reach out to our team via the contact
+            channels below.
+          </p>
+        </div>
+      </motion.div>
 
-      {/* Accordion List */}
+      {/* Accordion List with Staggered Scroll Entrance */}
       <div className="space-y-3 sm:space-y-4">
         {FAQS.map((faq, index) => {
           const isOpen = openId === faq.id
           const formattedIndex = String(index + 1).padStart(2, '0')
 
           return (
-            <div
+            <motion.div
               key={faq.id}
-              className={`overflow-hidden rounded-xl border transition-all duration-300 ${
+              initial={{ opacity: 0, y: 25 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true, margin: '-30px' }}
+              transition={{
+                duration: 0.45,
+                delay: index * 0.06,
+                ease: [0.16, 1, 0.3, 1] as const,
+              }}
+              className={`overflow-hidden rounded-xl border transition-colors duration-300 ${
                 isOpen
                   ? 'border-medium-red/70 bg-near-black/90 shadow-[0_0_25px_rgba(170,52,48,0.2)]'
                   : 'border-dark-red/30 bg-near-black/70 hover:border-medium-red/50 hover:bg-near-black/80'
@@ -135,16 +154,18 @@ export default function FAQ() {
                       {faq.category}
                     </span>
                   )}
-                  {/* Chevron / Toggle Icon */}
-                  <div
-                    className={`flex h-7 w-7 items-center justify-center rounded-lg border transition-all duration-300 ${
+                  {/* Chevron Toggle Icon */}
+                  <motion.div
+                    animate={{ rotate: isOpen ? 180 : 0 }}
+                    transition={{ duration: 0.25 }}
+                    className={`flex h-7 w-7 items-center justify-center rounded-lg border ${
                       isOpen
-                        ? 'border-medium-red bg-medium-red text-mist shadow-[0_0_12px_rgba(170,52,48,0.6)] rotate-180'
+                        ? 'border-medium-red bg-medium-red text-mist shadow-[0_0_12px_rgba(170,52,48,0.6)]'
                         : 'border-dark-red/40 bg-near-black/50 text-mist/70 hover:border-medium-red/60 hover:text-mist'
                     }`}
                   >
                     <svg
-                      className="h-4 w-4 transition-transform duration-300"
+                      className="h-4 w-4"
                       fill="none"
                       viewBox="0 0 24 24"
                       stroke="currentColor"
@@ -156,28 +177,32 @@ export default function FAQ() {
                         d="M19 9l-7 7-7-7"
                       />
                     </svg>
-                  </div>
+                  </motion.div>
                 </div>
               </button>
 
-              {/* Accordion Content Panel */}
-              <div
-                id={`faq-answer-${faq.id}`}
-                role="region"
-                aria-labelledby={faq.id}
-                className={`grid transition-all duration-300 ease-in-out ${
-                  isOpen ? 'grid-rows-[1fr] opacity-100' : 'grid-rows-[0fr] opacity-0'
-                }`}
-              >
-                <div className="overflow-hidden">
-                  <div className="border-t border-dark-red/20 px-4 pt-3 pb-5 sm:px-5 sm:pb-6">
-                    <p className="font-content text-xs sm:text-sm leading-relaxed text-mist/80">
-                      {faq.answer}
-                    </p>
-                  </div>
-                </div>
-              </div>
-            </div>
+              {/* Accordion Content Panel with Framer Motion AnimatePresence */}
+              <AnimatePresence initial={false}>
+                {isOpen && (
+                  <motion.div
+                    id={`faq-answer-${faq.id}`}
+                    role="region"
+                    aria-labelledby={faq.id}
+                    initial={{ height: 0, opacity: 0 }}
+                    animate={{ height: 'auto', opacity: 1 }}
+                    exit={{ height: 0, opacity: 0 }}
+                    transition={{ duration: 0.3, ease: [0.16, 1, 0.3, 1] as const }}
+                    className="overflow-hidden"
+                  >
+                    <div className="border-t border-dark-red/20 px-4 pt-3 pb-5 sm:px-5 sm:pb-6">
+                      <p className="font-content text-xs sm:text-sm leading-relaxed text-mist/80">
+                        {faq.answer}
+                      </p>
+                    </div>
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </motion.div>
           )
         })}
       </div>

@@ -1,6 +1,9 @@
-import { useLayoutEffect, useRef, useState } from 'react'
+import { lazy, Suspense, useLayoutEffect, useRef, useState } from 'react'
+import { motion } from 'framer-motion'
+import BackgroundParticles from '../BackgroundParticles.tsx'
 import Countdown from './Countdown.tsx'
-import HeroLogo3D from './HeroLogo3D.tsx'
+
+const HeroLogo3D = lazy(() => import('./HeroLogo3D.tsx'))
 
 export interface LogoAnchor {
   /** Free-zone inset from the viewport top (below the navbar), in px. */
@@ -9,14 +12,14 @@ export interface LogoAnchor {
   bottom: number
 }
 
+
 export default function Hero() {
   const sectionRef = useRef<HTMLElement>(null)
   const contentRef = useRef<HTMLDivElement>(null)
   const [anchor, setAnchor] = useState<LogoAnchor | null>(null)
 
   // Measure the free zone between the navbar and the text block so the
-  // 3D logo can sit exactly halfway between them. Layout effect: measured
-  // before first paint, so nothing ever renders at a placeholder spot.
+  // 3D logo can sit exactly halfway between them.
   useLayoutEffect(() => {
     const measure = () => {
       const section = sectionRef.current
@@ -24,7 +27,7 @@ export default function Hero() {
       if (!section || !content) return
       const navH =
         document.querySelector('header')?.getBoundingClientRect().height ?? 72
-      setAnchor({ top: navH, bottom: content.offsetHeight })
+      setAnchor({ top: navH, bottom: content.offsetHeight + 12 })
     }
     measure()
     window.addEventListener('resize', measure)
@@ -41,20 +44,27 @@ export default function Hero() {
     <section
       ref={sectionRef}
       id="home"
-      className="relative -mx-4 -mt-[4.5rem] flex h-[100svh] min-h-[560px] max-h-[1080px] max-w-none flex-col items-center justify-between overflow-hidden text-center sm:-mx-8 sm:-mt-[5rem]"
+      className="relative -mx-4 -mt-[4.5rem] flex h-[100svh] min-h-[640px] max-w-none flex-col items-center justify-end overflow-hidden text-center sm:-mx-8 sm:-mt-[5rem]"
     >
       <h1 className="sr-only">Arcane 3.0</h1>
-      <HeroLogo3D anchor={anchor} />
 
-      {/* Spacer zone where 3D Logo floats */}
-      <div className="flex-1" aria-hidden="true" />
+      {/* Lazy-load the heavy 3D scene — mobile gets static fallback only */}
+      <Suspense fallback={null}>
+        <HeroLogo3D anchor={anchor} />
+      </Suspense>
 
-      {/* Hero Foreground Content - guaranteed to fit within first viewport */}
-      <div
+      {/* Floating ember particles */}
+      <BackgroundParticles density={16} className="z-10" />
+
+      {/* Hero Foreground Content with Framer Motion Entrance */}
+      <motion.div
         ref={contentRef}
-        className="relative z-20 flex flex-col items-center px-4 pb-4 sm:pb-6"
+        initial={{ opacity: 0, y: 35 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.85, delay: 0.25, ease: [0.16, 1, 0.3, 1] as const }}
+        className="relative z-20 flex flex-col items-center px-4 pb-6 sm:pb-8 md:pb-10"
       >
-        <p className="flex items-center gap-2 font-mono text-[10px] font-semibold tracking-[0.3em] text-medium-red uppercase sm:text-xs">
+        <p className="flex items-center gap-2 font-mono text-[11px] font-semibold tracking-[0.3em] text-medium-red uppercase sm:text-xs">
           <span
             className="inline-block h-1.5 w-1.5 animate-pulse bg-medium-red"
             aria-hidden="true"
@@ -66,11 +76,11 @@ export default function Hero() {
           />
         </p>
 
-        <p className="mt-1 font-content text-3xl font-bold tracking-normal text-mist [text-shadow:0_0_24px_rgba(170,52,48,0.55)] sm:text-5xl lg:text-6xl">
+        <p className="mt-2 font-content text-3xl font-bold tracking-normal text-mist [text-shadow:0_0_28px_rgba(170,52,48,0.55)] sm:text-5xl md:text-6xl leading-tight">
           29<sup className="text-[0.55em]">TH</sup> SEPTEMBER 2026
         </p>
 
-        <p className="mt-1 flex items-center gap-1.5 font-mono text-xs font-semibold tracking-[0.25em] text-mist/80 uppercase sm:text-sm">
+        <p className="mt-2 flex items-center gap-2 font-mono text-xs font-semibold tracking-[0.25em] text-mist/80 uppercase sm:text-sm">
           <svg
             width="14"
             height="14"
@@ -89,17 +99,17 @@ export default function Hero() {
           FISAT, Angamaly
         </p>
 
-        <p className="mt-1.5 max-w-xl font-heading text-xs tracking-wide text-mist/85 sm:text-sm">
+        <p className="mt-2 max-w-xl font-heading text-xs tracking-wide text-mist/85 sm:text-sm">
           Sparks to ignite. Limits to break.{' '}
           <span className="text-medium-red font-semibold">
             One arena, endless ascents.
           </span>
         </p>
 
-        <div className="mt-2.5 sm:mt-3">
+        <div className="mt-4">
           <Countdown />
         </div>
-      </div>
+      </motion.div>
     </section>
   )
 }

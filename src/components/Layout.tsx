@@ -27,9 +27,7 @@ export default function Layout() {
         <ScrollToHash />
         <Outlet />
       </main>
-      <div className="soil-bg-layer">
-        <Contact />
-      </div>
+      <Contact />
     </div>
   )
 }
