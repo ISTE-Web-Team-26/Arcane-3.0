@@ -211,7 +211,7 @@ export default function HeroLogo3D({ anchor = null }: HeroLogo3DProps) {
       const boltGeometry = new LineGeometry()
       const boltMaterial = new Line2NodeMaterial({
         color: BOLT_COLOR,
-        linewidth: 3,
+        linewidth: 4,
         transparent: true,
         opacity: 0,
         depthWrite: false,
