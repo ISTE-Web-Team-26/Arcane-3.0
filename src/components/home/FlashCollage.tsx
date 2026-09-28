@@ -63,7 +63,7 @@ export default function FlashCollage() {
               alt={shot.alt}
               loading="lazy"
               draggable={false}
-              className={`h-full w-full object-cover opacity-25 saturate-[0.6] ${shot.img}`}
+              className={`h-full w-full object-cover ${shot.img}`}
             />
           </figure>
         ))}
