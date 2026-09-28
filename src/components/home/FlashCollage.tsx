@@ -52,11 +52,35 @@ export default function FlashCollage() {
         <span>// Arcane 2.0 Archives</span>
       </div>
 
-      <div className="mx-auto grid w-full grid-cols-12 gap-4 sm:gap-5">
+      <motion.div
+        initial="hidden"
+        whileInView="visible"
+        viewport={{ once: true, margin: '-60px' }}
+        variants={{
+          hidden: { opacity: 0 },
+          visible: {
+            opacity: 1,
+            transition: { staggerChildren: 0.1, delayChildren: 0.15 },
+          },
+        }}
+        className="mx-auto grid w-full grid-cols-12 gap-4 sm:gap-5"
+      >
         {SHOTS.map((shot) => (
-          <figure
+          <motion.figure
             key={shot.src}
-            className={`overflow-hidden rounded-xl border border-dark-red/30 bg-near-black/80 ${shot.frame}`}
+            variants={{
+              hidden: { opacity: 0, y: 30 },
+              visible: {
+                opacity: 1,
+                y: 0,
+                transition: {
+                  duration: 0.65,
+                  ease: [0.16, 1, 0.3, 1] as const,
+                },
+              },
+            }}
+            whileHover={{ y: -5, scale: 1.015 }}
+            className={`overflow-hidden rounded-xl border border-dark-red/30 bg-near-black/80 transition-colors duration-300 hover:border-medium-red/60 hover:shadow-[0_0_25px_rgba(170,52,48,0.18)] ${shot.frame}`}
           >
             <img
               src={shot.src}
@@ -65,9 +89,9 @@ export default function FlashCollage() {
               draggable={false}
               className={`h-full w-full object-cover ${shot.img}`}
             />
-          </figure>
+          </motion.figure>
         ))}
-      </div>
+      </motion.div>
     </motion.div>
   )
 }
