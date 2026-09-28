@@ -256,7 +256,7 @@ export default function Contact() {
           <motion.a
             variants={itemVariants}
             whileHover={{ y: -5, scale: 1.015 }}
-            href="https://linkedin.com/company/iste-fisat"
+            href="https://www.linkedin.com/company/iste-fisat-student-chapter/"
             target="_blank"
             rel="noopener noreferrer"
             className="group relative flex flex-col justify-between rounded-xl border border-dark-red/30 bg-near-black/80 p-5 transition-colors duration-300 hover:border-medium-red/60 hover:shadow-[0_0_25px_rgba(170,52,48,0.18)]"
