@@ -28,7 +28,7 @@
  *   venue, poster_img, min_team_members, max_team_members, enabled,
  *   registration_fee (integer, 0 = free).
  * Every column lands in events.json: display-ready fields (title, prize,
- * time, fee, squad, image) plus raw detail fields (dbId, longDescription,
+ * time, fee, team, image) plus raw detail fields (dbId, longDescription,
  * feeAmount, prizeAmount, paymentImage, teamMin/Max, startsAt, createdAt,
  * updatedAt) for the individual event pages. Both poster_img and payment_img
  * assets are downloaded into public/events/.
@@ -90,8 +90,8 @@ interface EventItem {
   prize: string
   description: string
   track: string
-  squadLabel?: string
-  squad: string
+  teamLabel?: string
+  team: string
   venue: string
   time: string
   fee?: string
@@ -240,7 +240,7 @@ function toTeamCount(value: unknown): number | null {
   return Number.isInteger(n) && n >= 1 ? n : null
 }
 
-function formatSquad(min: unknown, max: unknown): string {
+function formatTeam(min: unknown, max: unknown): string {
   // A missing side falls back to the other one, so NULLs never render as 0.
   const low = toTeamCount(min) ?? toTeamCount(max)
   const high = toTeamCount(max) ?? toTeamCount(min)
@@ -292,8 +292,8 @@ function mapRow(
     description: pick(row, 'description_short', 'description'),
     // No track column in the schema — pills collapse to ALL until one exists.
     track: pick(row, 'track', 'category'),
-    squadLabel: 'SQUAD',
-    squad: formatSquad(row['min_team_members'], row['max_team_members']),
+    teamLabel: 'TEAM',
+    team: formatTeam(row['min_team_members'], row['max_team_members']),
     venue: pick(row, 'venue', 'location') || 'TO BE ANNOUNCED',
     time: formatTime(row['time']),
     fee: formatFee(row['registration_fee']),

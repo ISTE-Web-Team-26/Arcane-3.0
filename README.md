@@ -34,7 +34,7 @@ build time — no Supabase credentials ever reach the browser.
    - reads every row from the `events` table (override with
      `SUPABASE_EVENTS_TABLE`),
    - normalizes rows to the `EventItem` shape (`src/data/events.ts`):
-     display-ready `title`/`prize`/`time`/`fee`/`squad`/`image` plus every
+     display-ready `title`/`prize`/`time`/`fee`/`team`/`image` plus every
      raw column (`dbId`, `longDescription`, `feeAmount`, `prizeAmount`,
      `teamMin`/`teamMax`, `startsAt`, timestamps) for the detail pages,
      only `enabled` rows, ordered by `time`,

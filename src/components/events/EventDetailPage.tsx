@@ -17,7 +17,7 @@ export interface EventDetailData {
   date: string
   time: string
   reportingTime?: string
-  squad: string
+  team: string
   description: string
   longDescription?: string[]
   guidelines:
@@ -47,12 +47,12 @@ export const DEFAULT_EVENT_DATA: EventDetailData = {
   status: 'SLOTS OPEN',
   image: '/events/byte-surge.jpg',
   prize: '₹50,000 POOL',
-  fee: '₹300 / SQUAD',
+  fee: '₹300 / TEAM',
   venue: 'LAB_04 // ADVANCED COMPUTING WING, FISAT',
   date: '29TH SEPTEMBER 2026',
   time: '09:30 AM - 09:30 AM (24 HOURS)',
   reportingTime: '08:45 AM SHARP',
-  squad: '2 - 4 OPERATIVES',
+  team: '2 - 4 MEMBERS',
   description:
     'Enter the underground code foundry of Arcane 3.0. BYTE_SURGE is a high-octane 24-hour continuous hackathon demanding rapid prototyping, decentralized algorithms, and low-latency system design. Compete against top university engineering teams, build production-grade web3 or terminal artifacts, and survive the midnight evaluation checkpoint.',
   longDescription: [
@@ -62,8 +62,8 @@ export const DEFAULT_EVENT_DATA: EventDetailData = {
   ],
   guidelines: [
     'Open to all currently enrolled undergraduate and postgraduate students with a valid college identity card.',
-    'Squads must consist of 2 to 4 members. Inter-college and inter-departmental teams are strictly permitted.',
-    'Every operative must carry their original college photo ID for verification at the security checkpoint.',
+    'Teams must consist of 2 to 4 members. Inter-college and inter-departmental teams are strictly permitted.',
+    'Every member must carry their original college photo ID for verification at the security checkpoint.',
     'All application code, architectures, and assets must be developed exclusively within the 24-hour hackathon window.',
     'Public open-source libraries, frameworks, and APIs are allowed provided they are declared in the project README.',
     'Pre-built private repositories or plagiarized boilerplate will lead to immediate disqualification by the audit panel.',
@@ -72,14 +72,14 @@ export const DEFAULT_EVENT_DATA: EventDetailData = {
     'Evaluation breakdown: Innovation & Concept (30%), Technical Depth (30%), Execution & Stability (25%), Presentation (15%).',
     'Participants must bring their own laptops, chargers, and development hardware/peripherals.',
     'High-speed Wi-Fi, power strips, and sleeping/rest bays are arranged on-campus throughout the 24-hour duration.',
-    'Food, midnight energy drinks, and breakfast are included with the squad registration fee.',
+    'Food, midnight energy drinks, and breakfast are included with the team registration fee.',
     'Judges reserve full authority over tie-breaks, prize distribution, and security disqualifications.',
   ],
   timeline: [
     {
       time: '08:45 AM',
       phase: 'CHECK-IN & TERMINAL VERIFICATION',
-      detail: 'Operative badging, desk allocation, and network authentication at Lab 04 entrance.',
+      detail: 'Member badging, desk allocation, and network authentication at Lab 04 entrance.',
     },
     {
       time: '09:30 AM',
@@ -140,7 +140,7 @@ export default function EventDetailPage({
     email: '',
     phone: '',
     college: '',
-    squadSize: '2',
+    teamSize: '2',
     notes: '',
   })
 
@@ -157,33 +157,34 @@ export default function EventDetailPage({
       email: '',
       phone: '',
       college: '',
-      squadSize: '2',
+      teamSize: '2',
       notes: '',
     })
   }
 
   return (
-    <div className="relative -mx-4 -mt-[4.5rem] sm:-mx-8 sm:-mt-[5rem] -mb-8 overflow-hidden soil-bg-layer px-4 pt-8 pb-16 sm:px-8 sm:pt-12">
+    <div className="relative -mx-4 -mt-[4.5rem] sm:-mx-8 sm:-mt-[5rem] -mb-8 overflow-hidden soil-bg-layer px-4 pt-[calc(4.5rem+2rem)] pb-16 sm:px-8 sm:pt-[calc(5rem+3rem)]">
       {/* Ambient floating ember particles */}
       <BackgroundParticles density={14} className="z-0" />
 
       {/* Main Container */}
-      <div className="relative z-10 mx-auto max-w-6xl">
-        {/* Navigation Breadcrumb */}
-        <motion.div
-          initial={{ opacity: 0, y: -15 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] as const }}
-          className="mb-6 flex flex-wrap items-center justify-between gap-3 font-mono text-xs text-mist/60 sm:mb-8"
-        >
-          <Link
-            to="/#events"
-            className="group flex items-center gap-2 rounded-lg border border-dark-red/30 bg-near-black/70 px-3 py-1.5 transition-all duration-200 hover:border-medium-red/60 hover:text-mist hover:shadow-[0_0_12px_rgba(170,52,48,0.3)]"
+      <div className="relative z-10 mx-auto w-full max-w-7xl">
+        {/* Full-width Event Poster */}
+        {event.image && (
+          <motion.div
+            initial={{ opacity: 0, y: 25 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.65, delay: 0.1, ease: [0.16, 1, 0.3, 1] as const }}
+            className="mb-8 overflow-hidden rounded-2xl border border-dark-red/35 bg-black/60 shadow-[0_0_25px_rgba(0,0,0,0.6)] sm:mb-10"
           >
-            <span className="transition-transform group-hover:-translate-x-1">←</span>
-            <span>BACK TO ALL ARENAS</span>
-          </Link>
-        </motion.div>
+            <img
+              src={event.image}
+              alt={`${event.title} poster`}
+              loading="eager"
+              className="max-h-[75vh] w-full object-contain"
+            />
+          </motion.div>
+        )}
 
         {/* Hero Header: Title, Telemetry, Quick Register */}
         <motion.div
@@ -201,13 +202,13 @@ export default function EventDetailPage({
           </h1>
 
           {event.subtitle && (
-            <p className="mt-2.5 max-w-3xl font-mono text-xs font-medium text-mist/80 sm:text-sm md:text-base">
+            <p className="mt-2.5 w-full font-mono text-xs font-medium text-mist/80 sm:text-sm md:text-base">
               {event.subtitle}
             </p>
           )}
 
-          {/* Key Telemetry Badges Grid (Date/Time, Venue, Fee, Prize Pool) */}
-          <div className="mt-6 grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4 sm:gap-4">
+          {/* Key Telemetry Badges Grid (Date/Time, Venue, Team Size, Fee, Prize Pool) */}
+          <div className="mt-6 grid w-full grid-cols-1 gap-3 sm:grid-cols-2 sm:gap-4 lg:grid-cols-5">
             {/* Date & Time */}
             <div className="flex flex-col justify-start rounded-xl border border-dark-red/35 bg-near-black/80 p-4 transition-all duration-200 hover:border-medium-red/50">
               <span className="block font-mono text-[10px] font-semibold tracking-wider text-mist/50 uppercase">
@@ -231,6 +232,16 @@ export default function EventDetailPage({
               </span>
               <span className="mt-0.5 block font-mono text-[11px] text-mist/60">
                 REPORT: {event.reportingTime || '08:45 AM'}
+              </span>
+            </div>
+
+            {/* Team Size */}
+            <div className="flex flex-col justify-start rounded-xl border border-dark-red/35 bg-near-black/80 p-4 transition-all duration-200 hover:border-medium-red/50">
+              <span className="block font-mono text-[10px] font-semibold tracking-wider text-mist/50 uppercase">
+                TEAM SIZE
+              </span>
+              <span className="mt-1 font-mono text-xs font-bold text-mist sm:text-sm">
+                {event.team}
               </span>
             </div>
 
@@ -320,7 +331,7 @@ export default function EventDetailPage({
           </h2>
 
           <p className="mt-2 max-w-2xl font-content text-xs text-mist/70 sm:text-sm">
-            All operatives entering this track must strictly comply with the following regulations. Breach of protocol leads to immediate revocation of terminal credentials.
+            All participants entering this track must strictly comply with the following regulations. Breach of protocol leads to immediate revocation of terminal credentials.
           </p>
 
           {/* Single Unified Guidelines Box */}
@@ -429,18 +440,18 @@ export default function EventDetailPage({
             <div>
               <div className="flex items-center gap-2 font-mono text-xs text-medium-red">
                 <span className="h-2 w-2 rounded-full bg-medium-red animate-pulse" />
-                <span>REGISTRATION OPEN // LIMITED SQUAD SLOTS</span>
+                <span>REGISTRATION OPEN // LIMITED TEAM SLOTS</span>
               </div>
 
               <h3 className="mt-2 font-heading text-3xl font-bold tracking-tight text-mist sm:text-4xl uppercase">
-                LOCK IN YOUR SQUAD FOR{' '}
+                LOCK IN YOUR TEAM FOR{' '}
                 <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#e05652] to-[#f4938f]">
                   {event.title}
                 </span>
               </h3>
 
               <p className="mt-2 font-content text-xs text-mist/75 sm:text-sm">
-                Slots are assigned on a first-confirmed basis. Entry fee covers technical infrastructure, official certificates, kit access, and refreshments for the entire squad.
+                Slots are assigned on a first-confirmed basis. Entry fee covers technical infrastructure, official certificates, kit access, and refreshments for the entire team.
               </p>
 
               <div className="mt-4 flex flex-wrap items-center gap-4 font-mono text-xs">
@@ -542,7 +553,7 @@ export default function EventDetailPage({
                 <>
                   <div className="mb-4">
                     <span className="font-mono text-xs font-semibold tracking-wider text-medium-red uppercase">
-                      OPERATIVE REGISTRATION // {event.code || '•EVT'}
+                      TEAM REGISTRATION // {event.code || '•EVT'}
                     </span>
                     <h3 className="mt-1 font-heading text-2xl font-bold tracking-tight text-mist sm:text-3xl uppercase">
                       REGISTER FOR {event.title}
@@ -555,7 +566,7 @@ export default function EventDetailPage({
                   <form onSubmit={handleSubmit} className="space-y-4">
                     <div>
                       <label className="block font-mono text-xs font-semibold text-mist/80 uppercase">
-                        Squad Lead Name *
+                        Team Lead Name *
                       </label>
                       <input
                         type="text"
@@ -614,17 +625,17 @@ export default function EventDetailPage({
 
                       <div>
                         <label className="block font-mono text-xs font-semibold text-mist/80 uppercase">
-                          Squad Size *
+                          Team Size *
                         </label>
                         <select
-                          value={formData.squadSize}
-                          onChange={(e) => setFormData({ ...formData, squadSize: e.target.value })}
+                          value={formData.teamSize}
+                          onChange={(e) => setFormData({ ...formData, teamSize: e.target.value })}
                           className="mt-1.5 w-full rounded-lg border border-dark-red/40 bg-near-black px-3.5 py-2 font-mono text-xs text-mist focus:border-medium-red focus:outline-hidden"
                         >
-                          <option value="1">1 Operative (Solo)</option>
-                          <option value="2">2 Operatives (Duo)</option>
-                          <option value="3">3 Operatives (Trio)</option>
-                          <option value="4">4 Operatives (Full Squad)</option>
+                          <option value="1">1 Member</option>
+                          <option value="2">2 Members</option>
+                          <option value="3">3 Members</option>
+                          <option value="4">4 Members</option>
                         </select>
                       </div>
                     </div>
@@ -665,7 +676,7 @@ export default function EventDetailPage({
                   </span>
 
                   <h3 className="mt-2 font-heading text-2xl font-bold tracking-tight text-mist uppercase sm:text-3xl">
-                    SQUAD ENROLLED IN {event.title}
+                    TEAM ENROLLED IN {event.title}
                   </h3>
 
                   <p className="mt-2 font-content text-xs text-mist/75">

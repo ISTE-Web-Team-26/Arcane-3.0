@@ -9,8 +9,8 @@ export interface EventItem {
   prize: string
   description: string
   track: string
-  squadLabel?: string
-  squad: string
+  teamLabel?: string
+  team: string
   venue: string
   time: string
   fee?: string
@@ -44,8 +44,8 @@ export const DEFAULT_EVENTS: EventItem[] = [
     description:
       'Autonomous rapid code forge. Build robust decentralized or terminal-level artifacts in 24 continuous hours.',
     track: '01 // CODE',
-    squadLabel: 'SQUAD',
-    squad: '2-4 DEVS',
+    teamLabel: 'TEAM',
+    team: '2-4 MEMBERS',
     venue: 'LAB_04',
     time: '09:30',
     actionText: 'REGISTER',
@@ -63,8 +63,8 @@ export const DEFAULT_EVENTS: EventItem[] = [
     description:
       'Competitive zero-latency Valorant brackets chained into brutal legacy Street Fighter coin-op gauntlets.',
     track: '02 // GAME',
-    squadLabel: 'SQUAD',
-    squad: '5 MAN_RIG',
+    teamLabel: 'TEAM',
+    team: '5 MEMBERS',
     venue: 'ARENA_01',
     time: '11:15',
     actionText: 'REGISTER',
@@ -82,8 +82,8 @@ export const DEFAULT_EVENTS: EventItem[] = [
     description:
       'High-kinetic 15kg combat bot collisions plus ultra-precise high-speed autonomous infrared line tracers.',
     track: '03 // ROBO',
-    squadLabel: 'WEIGHT',
-    squad: '< 15.0 KG',
+    teamLabel: 'WEIGHT',
+    team: '< 15.0 KG',
     venue: 'OUTDOOR_PIT',
     time: '13:00',
     actionText: 'REGISTER',
@@ -101,8 +101,8 @@ export const DEFAULT_EVENTS: EventItem[] = [
     description:
       'Penetrate air-gapped web targets, analyze memory dumps, and crack cryptic steganographic anomalies.',
     track: '04 // SEC',
-    squadLabel: 'SQUAD',
-    squad: '1-2 OPER',
+    teamLabel: 'TEAM',
+    team: '1-2 MEMBERS',
     venue: 'LAB_02',
     time: '14:00',
     actionText: 'REGISTER',
@@ -120,8 +120,8 @@ export const DEFAULT_EVENTS: EventItem[] = [
     description:
       'Adversarial LLM steering, jailbreaking safety boundaries, and precision generative rendering under pressure.',
     track: '05 // AI',
-    squadLabel: 'SQUAD',
-    squad: 'SOLO_PILOT',
+    teamLabel: 'TEAM',
+    team: '1 MEMBER',
     venue: 'SEMINAR_03',
     time: '16:30',
     actionText: 'REGISTER',
@@ -139,8 +139,8 @@ export const DEFAULT_EVENTS: EventItem[] = [
     description:
       '60-minute hardcore design sprint: teardown legacy enterprise monstrosities into brutal hyper-ergonomic displays.',
     track: '06 // DSGN',
-    squadLabel: 'SQUAD',
-    squad: '1-2 DESIGN',
+    teamLabel: 'TEAM',
+    team: '1-2 MEMBERS',
     venue: 'DESIGN_HUB',
     time: '10:45',
     actionText: 'LOCKED',

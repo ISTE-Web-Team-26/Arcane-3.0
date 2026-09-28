@@ -44,7 +44,7 @@ export default function Contact() {
     <footer
       id="contact"
       aria-labelledby="contact-heading"
-      className="soil-bg-layer scroll-mt-20 px-4 pt-0 pb-8 font-content sm:px-8"
+      className="soil-bg-layer scroll-mt-24 px-4 pt-0 pb-8 font-content sm:px-8"
     >
       {/* Strata Transition Line (matches the Events–FAQ divider) */}
       <div

@@ -28,7 +28,7 @@ export default function About() {
     <section
       id="about"
       aria-labelledby="about-heading"
-      className="relative w-full scroll-mt-20 py-8 sm:py-10"
+      className="relative w-full scroll-mt-24 py-8 sm:py-10"
     >
       {/* Top Header Tag & Intro */}
       <motion.div

@@ -5,7 +5,7 @@ import NotFound from './NotFound.tsx'
 
 function LoadingSkeleton() {
   return (
-    <div className="relative -mx-4 -mt-[4.5rem] sm:-mx-8 sm:-mt-[5rem] -mb-8 soil-bg-layer px-4 pt-8 pb-16 sm:px-8 sm:pt-12">
+    <div className="relative -mx-4 -mt-[4.5rem] sm:-mx-8 sm:-mt-[5rem] -mb-8 soil-bg-layer px-4 pt-[calc(4.5rem+2rem)] pb-16 sm:px-8 sm:pt-[calc(5rem+3rem)]">
       <div className="mx-auto max-w-6xl animate-pulse space-y-6">
         <div className="h-8 w-48 rounded-lg bg-dark-red/20" />
         <div className="h-16 w-3/4 rounded-xl bg-dark-red/20 sm:h-20" />

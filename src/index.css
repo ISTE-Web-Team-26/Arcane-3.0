@@ -12,12 +12,12 @@
 
 html {
   color-scheme: dark;
-  scroll-padding-top: 4.5rem;
+  scroll-padding-top: calc(4.5rem + 0.75rem);
 }
 
 @media (min-width: 640px) {
   html {
-    scroll-padding-top: 5rem;
+    scroll-padding-top: calc(5rem + 0.75rem);
   }
 }
 

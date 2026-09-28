@@ -1,5 +1,4 @@
 import { useState } from 'react'
-import { Link } from 'react-router'
 import { motion, AnimatePresence } from 'framer-motion'
 import BackgroundParticles from '../BackgroundParticles.tsx'
 import EventMarkdown from './EventMarkdown.tsx'
@@ -47,7 +46,7 @@ export default function SyncedEventDetail({ event }: { event: EventItem }) {
     email: '',
     phone: '',
     college: '',
-    squadSize: '2',
+    teamSize: '2',
     notes: '',
   })
 
@@ -66,7 +65,7 @@ export default function SyncedEventDetail({ event }: { event: EventItem }) {
       email: '',
       phone: '',
       college: '',
-      squadSize: '2',
+      teamSize: '2',
       notes: '',
     })
   }
@@ -75,35 +74,42 @@ export default function SyncedEventDetail({ event }: { event: EventItem }) {
     (event.startsAt ? formatFullDate(event.startsAt) : null) ?? 'OCT 6, 7, 8'
   const feeLine =
     event.feeAmount != null && event.feeAmount > 0
-      ? `${formatINR(event.feeAmount)} / SQUAD`
+      ? formatINR(event.feeAmount)
       : (event.fee ?? 'FREE')
   const prizeLine =
     event.prizeAmount != null && event.prizeAmount > 0
       ? `${formatINR(event.prizeAmount)} POOL`
       : (event.prize ?? '')
+  const teamLine =
+    event.teamMin != null || event.teamMax != null
+      ? event.teamMin === event.teamMax
+        ? `${event.teamMin ?? event.teamMax} MEMBER${(event.teamMin ?? event.teamMax) === 1 ? '' : 'S'}`
+        : `${event.teamMin ?? '?'} - ${event.teamMax ?? '?'} MEMBERS`
+      : (event.team ?? '')
 
   return (
-    <div className="relative -mx-4 -mt-[4.5rem] sm:-mx-8 sm:-mt-[5rem] -mb-8 overflow-hidden soil-bg-layer px-4 pt-8 pb-16 sm:px-8 sm:pt-12">
+    <div className="relative -mx-4 -mt-[4.5rem] sm:-mx-8 sm:-mt-[5rem] -mb-8 overflow-hidden soil-bg-layer px-4 pt-[calc(4.5rem+2rem)] pb-16 sm:px-8 sm:pt-[calc(5rem+3rem)]">
       {/* Ambient floating ember particles */}
       <BackgroundParticles density={14} className="z-0" />
 
       {/* Main Container */}
-      <div className="relative z-10 mx-auto max-w-6xl">
-        {/* Navigation Breadcrumb */}
-        <motion.div
-          initial={{ opacity: 0, y: -15 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] as const }}
-          className="mb-6 flex flex-wrap items-center justify-between gap-3 font-mono text-xs text-mist/60 sm:mb-8"
-        >
-          <Link
-            to="/#events"
-            className="group flex items-center gap-2 rounded-lg border border-dark-red/30 bg-near-black/70 px-3 py-1.5 transition-all duration-200 hover:border-medium-red/60 hover:text-mist hover:shadow-[0_0_12px_rgba(170,52,48,0.3)]"
+      <div className="relative z-10 mx-auto w-full max-w-7xl">
+        {/* Full-width Event Poster */}
+        {event.image && (
+          <motion.div
+            initial={{ opacity: 0, y: 25 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.65, delay: 0.1, ease: [0.16, 1, 0.3, 1] as const }}
+            className="mb-8 overflow-hidden rounded-2xl border border-dark-red/35 bg-black/60 shadow-[0_0_25px_rgba(0,0,0,0.6)] sm:mb-10"
           >
-            <span className="transition-transform group-hover:-translate-x-1">←</span>
-            <span>BACK TO ALL ARENAS</span>
-          </Link>
-        </motion.div>
+            <img
+              src={event.image}
+              alt={`${event.title} poster`}
+              loading="eager"
+              className="max-h-[75vh] w-full object-contain"
+            />
+          </motion.div>
+        )}
 
         {/* Hero Header: Title, Telemetry, Quick Register */}
         <motion.div
@@ -113,18 +119,18 @@ export default function SyncedEventDetail({ event }: { event: EventItem }) {
           className="mb-10"
         >
           {/* Main Heading */}
-          <h1 className="font-heading text-4xl font-bold tracking-tight text-mist sm:text-6xl md:text-7xl uppercase">
+          <h1 className="font-heading text-4xl font-bold tracking-tight uppercase sm:text-6xl md:text-7xl text-transparent bg-clip-text bg-gradient-to-r from-white via-[#f4938f] to-[#e05652] [text-shadow:0_0_35px_rgba(170,52,48,0.45)]">
             {event.title}
           </h1>
 
           {event.description && (
-            <p className="mt-2.5 max-w-3xl font-mono text-xs font-medium text-mist/80 sm:text-sm md:text-base">
+            <p className="mt-2.5 w-full font-mono text-xs font-medium text-mist/80 sm:text-sm md:text-base">
               {event.description}
             </p>
           )}
 
-          {/* Key Telemetry Badges Grid (Date/Time, Venue, Fee, Prize Pool) */}
-          <div className="mt-6 grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4 sm:gap-4">
+          {/* Key Telemetry Badges Grid (Date/Time, Venue, Team Size, Fee, Prize Pool) */}
+          <div className="mt-6 grid w-full grid-cols-1 gap-3 sm:grid-cols-2 sm:gap-4 lg:grid-cols-5">
             {/* Date & Time */}
             <div className="flex flex-col justify-start rounded-xl border border-dark-red/35 bg-near-black/80 p-4 transition-all duration-200 hover:border-medium-red/50">
               <span className="block font-mono text-[10px] font-semibold tracking-wider text-mist/50 uppercase">
@@ -146,9 +152,21 @@ export default function SyncedEventDetail({ event }: { event: EventItem }) {
               <span className="mt-1 font-mono text-xs font-bold text-mist sm:text-sm">
                 {event.venue}
               </span>
-              <span className="mt-0.5 block font-mono text-[11px] text-mist/60">
-                SQUAD: {event.squad || '—'}
+            </div>
+
+            {/* Team Size */}
+            <div className="flex flex-col justify-start rounded-xl border border-dark-red/35 bg-near-black/80 p-4 transition-all duration-200 hover:border-medium-red/50">
+              <span className="block font-mono text-[10px] font-semibold tracking-wider text-mist/50 uppercase">
+                TEAM SIZE
               </span>
+              <span className="mt-1 font-mono text-xs font-bold text-mist sm:text-sm">
+                {teamLine}
+              </span>
+              {event.teamLabel && (
+                <span className="mt-0.5 block font-mono text-[11px] text-mist/60">
+                  {event.teamLabel}
+                </span>
+              )}
             </div>
 
             {/* Registration Fee */}
@@ -240,7 +258,7 @@ export default function SyncedEventDetail({ event }: { event: EventItem }) {
                 <>
                   <div className="mb-4">
                     <span className="font-mono text-xs font-semibold tracking-wider text-medium-red uppercase">
-                      OPERATIVE REGISTRATION // {event.code || '•EVT'}
+                      TEAM REGISTRATION // {event.code || '•EVT'}
                     </span>
                     <h3 className="mt-1 font-heading text-2xl font-bold tracking-tight text-mist sm:text-3xl uppercase">
                       REGISTER FOR {event.title}
@@ -253,7 +271,7 @@ export default function SyncedEventDetail({ event }: { event: EventItem }) {
                   <form onSubmit={handleSubmit} className="space-y-4">
                     <div>
                       <label className="block font-mono text-xs font-semibold text-mist/80 uppercase">
-                        Squad Lead Name *
+                        Lead Name *
                       </label>
                       <input
                         type="text"
@@ -312,17 +330,17 @@ export default function SyncedEventDetail({ event }: { event: EventItem }) {
 
                       <div>
                         <label className="block font-mono text-xs font-semibold text-mist/80 uppercase">
-                          Squad Size *
+                          Team Size *
                         </label>
                         <select
-                          value={formData.squadSize}
-                          onChange={(e) => setFormData({ ...formData, squadSize: e.target.value })}
+                          value={formData.teamSize}
+                          onChange={(e) => setFormData({ ...formData, teamSize: e.target.value })}
                           className="mt-1.5 w-full rounded-lg border border-dark-red/40 bg-near-black px-3.5 py-2 font-mono text-xs text-mist focus:border-medium-red focus:outline-hidden"
                         >
-                          <option value="1">1 Operative (Solo)</option>
-                          <option value="2">2 Operatives (Duo)</option>
-                          <option value="3">3 Operatives (Trio)</option>
-                          <option value="4">4 Operatives (Full Squad)</option>
+                          <option value="1">1 Member</option>
+                          <option value="2">2 Members</option>
+                          <option value="3">3 Members</option>
+                          <option value="4">4 Members</option>
                         </select>
                       </div>
                     </div>
@@ -363,7 +381,7 @@ export default function SyncedEventDetail({ event }: { event: EventItem }) {
                   </span>
 
                   <h3 className="mt-2 font-heading text-2xl font-bold tracking-tight text-mist uppercase sm:text-3xl">
-                    SQUAD ENROLLED IN {event.title}
+                    TEAM ENROLLED IN {event.title}
                   </h3>
 
                   <p className="mt-2 font-content text-xs text-mist/75">

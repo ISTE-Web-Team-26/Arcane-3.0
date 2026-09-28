@@ -47,7 +47,7 @@ export default function Events({ events: eventsProp }: EventsProps) {
     <section
       id="events"
       aria-labelledby={`${sectionId}-heading`}
-      className="relative w-full scroll-mt-20 py-8 sm:py-10"
+      className="relative w-full scroll-mt-24 py-8 sm:py-10"
     >
       {/* Header with Scroll Reveal */}
       <motion.div
@@ -193,13 +193,13 @@ export default function Events({ events: eventsProp }: EventsProps) {
 
                   {/* Card Body */}
                   <div className="p-4 sm:p-5">
-                    {/* Track & Squad Info Row */}
+                    {/* Track & Team Info Row */}
                     {/* <div className="mb-2 flex items-center justify-between font-mono text-[11px] text-mist/60">
                       <span className="text-medium-red font-semibold uppercase">
                         {event.track}
                       </span>
                       <span>
-                        {event.squadLabel || 'SQUAD'}: {event.squad}
+                        {event.teamLabel || 'TEAM'}: {event.team}
                       </span>
                     </div> */}
 
