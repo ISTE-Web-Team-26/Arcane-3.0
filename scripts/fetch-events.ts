@@ -27,8 +27,11 @@
  *   id, slug, name, description_short, prize (integer), time (timestamptz),
  *   venue, poster_img, min_team_members, max_team_members, enabled,
  *   registration_fee (integer, 0 = free).
- * Detail-page fields (description_long, payment_img) are
- * intentionally left for the individual event pages.
+ * Every column lands in events.json: display-ready fields (title, prize,
+ * time, fee, squad, image) plus raw detail fields (dbId, longDescription,
+ * feeAmount, prizeAmount, paymentImage, teamMin/Max, startsAt, createdAt,
+ * updatedAt) for the individual event pages. Both poster_img and payment_img
+ * assets are downloaded into public/events/.
  */
 import { createWriteStream, existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs'
 import { basename, extname, join, resolve } from 'node:path'
@@ -95,6 +98,18 @@ interface EventItem {
   actionText?: string
   to: string
   tag?: string
+  // Raw/detail fields synced from Supabase for the individual event pages.
+  dbId?: number
+  longDescription?: string
+  feeAmount?: number | null
+  prizeAmount?: number | null
+  paymentImage?: string
+  teamMin?: number | null
+  teamMax?: number | null
+  startsAt?: string
+  createdAt?: string
+  updatedAt?: string
+  guidelines?: string[]
 }
 
 type Row = Record<string, unknown>
@@ -153,19 +168,18 @@ async function downloadImage(url: string, destBasename: string): Promise<string>
 }
 
 /**
- * Resolve the poster for one row:
+ * Resolve a poster/payment asset for one row:
  * - absolute http(s) URL  -> download into public/events/, rewrite to local path
  * - already-local path (/events/...) -> keep as-is
  * - bare storage path (bucket-relative) -> fetch via public storage URL, download
  */
-async function resolveImage(raw: string, slug: string): Promise<string> {
-  const fallback = `/events/${slug}.jpg`
+async function resolveImage(raw: string, destBasename: string, fallback: string): Promise<string> {
   if (!raw) return fallback
   if (/^https?:\/\//i.test(raw)) {
     try {
-      return await downloadImage(raw, slug)
+      return await downloadImage(raw, destBasename)
     } catch (error) {
-      console.warn(`[fetch-events] poster download failed for "${slug}", keeping remote URL:`, error)
+      console.warn(`[fetch-events] asset download failed for "${destBasename}", keeping remote URL:`, error)
       return raw
     }
   }
@@ -173,13 +187,40 @@ async function resolveImage(raw: string, slug: string): Promise<string> {
   if (STORAGE_BUCKET) {
     const publicUrl = `${SUPABASE_URL}/storage/v1/object/public/${STORAGE_BUCKET}/${raw.replace(/^\//, '')}`
     try {
-      return await downloadImage(publicUrl, slug)
+      return await downloadImage(publicUrl, destBasename)
     } catch (error) {
-      console.warn(`[fetch-events] storage download failed for "${slug}", keeping local path:`, error)
+      console.warn(`[fetch-events] storage download failed for "${destBasename}", keeping local path:`, error)
       return `/events/${basename(raw)}`
     }
   }
   return `/events/${basename(raw)}`
+}
+
+function toNumberOrNull(value: unknown): number | null {
+  if (value == null || value === '') return null
+  const n = typeof value === 'number' ? value : Number(value)
+  return Number.isFinite(n) ? n : null
+}
+
+/** guidelines column -> string[] (accepts arrays or newline-separated text). */
+function toStringArray(value: unknown): string[] {
+  if (Array.isArray(value)) {
+    return value.map((v) => asString(v).trim()).filter(Boolean)
+  }
+  const raw = asString(value).trim()
+  if (!raw) return []
+  try {
+    const parsed: unknown = JSON.parse(raw)
+    if (Array.isArray(parsed)) {
+      return parsed.map((v) => asString(v).trim()).filter(Boolean)
+    }
+  } catch {
+    // Not JSON — fall through to newline splitting.
+  }
+  return raw
+    .split('\n')
+    .map((line) => line.replace(/^[-*•\d.)\s]+/, '').trim())
+    .filter(Boolean)
 }
 
 /** Map one Supabase `events` row to the frontend shape. */
@@ -219,9 +260,9 @@ function formatFee(fee: unknown): string {
 /** timestamptz -> "HH:MM" in the venue timezone (FISAT, Kerala). */
 function formatTime(value: unknown): string {
   const raw = asString(value)
-  if (!raw) return ''
+  if (!raw) return 'Oct 6,7,8'
   const date = new Date(raw)
-  if (Number.isNaN(date.getTime())) return raw
+  if (Number.isNaN(date.getTime())) return 'Oct 6,7,8'
   return new Intl.DateTimeFormat('en-GB', {
     hour: '2-digit',
     minute: '2-digit',
@@ -230,7 +271,10 @@ function formatTime(value: unknown): string {
   }).format(date)
 }
 
-function mapRow(row: Row, index: number): Omit<EventItem, 'image'> & { imageSrc: string } {
+function mapRow(
+  row: Row,
+  index: number,
+): Omit<EventItem, 'image' | 'paymentImage'> & { imageSrc: string; paymentSrc: string } {
   const numericId = asString(row['id'])
   const slug = slugify(
     pick(row, 'slug') || (numericId ? `event-${numericId}` : `event-${index + 1}`),
@@ -250,7 +294,7 @@ function mapRow(row: Row, index: number): Omit<EventItem, 'image'> & { imageSrc:
     track: pick(row, 'track', 'category'),
     squadLabel: 'SQUAD',
     squad: formatSquad(row['min_team_members'], row['max_team_members']),
-    venue: pick(row, 'venue', 'location'),
+    venue: pick(row, 'venue', 'location') || 'TO BE ANNOUNCED',
     time: formatTime(row['time']),
     fee: formatFee(row['registration_fee']),
     actionText: 'REGISTER',
@@ -258,6 +302,18 @@ function mapRow(row: Row, index: number): Omit<EventItem, 'image'> & { imageSrc:
     to: `/events/${slug}`,
     tag: undefined,
     imageSrc: pick(row, 'poster_img', 'image_url'),
+    paymentSrc: pick(row, 'payment_img'),
+    // Every remaining column, raw, for the individual event pages.
+    dbId: toNumberOrNull(row['id']) ?? 0,
+    longDescription: asString(row['description_long']),
+    feeAmount: toNumberOrNull(row['registration_fee']) ?? 0,
+    prizeAmount: toNumberOrNull(row['prize']),
+    teamMin: toTeamCount(row['min_team_members']),
+    teamMax: toTeamCount(row['max_team_members']),
+    startsAt: asString(row['time']),
+    createdAt: asString(row['created_at']),
+    updatedAt: asString(row['updated_at']),
+    guidelines: toStringArray(row['guidelines'] ?? row['rules']),
   }
 }
 
@@ -319,9 +375,10 @@ async function main(): Promise<void> {
   const events: EventItem[] = []
   for (let i = 0; i < rows.length; i++) {
     const mapped = mapRow(rows[i] ?? {}, i)
-    const { imageSrc, ...rest } = mapped
-    const image = await resolveImage(imageSrc, mapped.id)
-    events.push({ ...rest, image })
+    const { imageSrc, paymentSrc, ...rest } = mapped
+    const image = await resolveImage(imageSrc, mapped.id, `/events/${mapped.id}.jpg`)
+    const paymentImage = await resolveImage(paymentSrc, `${mapped.id}-payment`, '')
+    events.push({ ...rest, image, paymentImage })
   }
 
   const payload = {

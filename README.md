@@ -34,12 +34,12 @@ build time — no Supabase credentials ever reach the browser.
    - reads every row from the `events` table (override with
      `SUPABASE_EVENTS_TABLE`),
    - normalizes rows to the `EventItem` shape (`src/data/events.ts`):
-     `slug`→`id`, `name`→`title`, `description_short`→`description`,
-     integer `prize`→`★50K` style, `time`→`HH:MM` (Asia/Kolkata),
-     `min/max_team_members`→squad label, `poster_img`→poster asset,
-     `registration_fee`→fee (`₹300`, `FREE` when 0),
+     display-ready `title`/`prize`/`time`/`fee`/`squad`/`image` plus every
+     raw column (`dbId`, `longDescription`, `feeAmount`, `prizeAmount`,
+     `teamMin`/`teamMax`, `startsAt`, timestamps) for the detail pages,
      only `enabled` rows, ordered by `time`,
-   - downloads remote posters into `public/events/` and rewrites `image`
+   - downloads remote `poster_img`/`payment_img` assets into `public/events/`
+     and rewrites `image`/`paymentImage` to the local paths
      to the local path (already-local `/events/...` paths are kept;
      bare storage paths resolve via `SUPABASE_STORAGE_BUCKET`),
    - writes `public/events.json` (`{ updatedAt, count, events }`), which
@@ -53,11 +53,18 @@ Without credentials the sync logs a warning and exits 0 (build still
 succeeds on fallback data); with credentials but a failing query it exits 1
 so bad data never ships silently.
 
+To re-run the sync manually without a full build:
+
+```bash
+npx tsx scripts/fetch-events.ts
+```
+
 ## Routes
 
 | Path      | File                  | Description   |
 | --------- | --------------------- | ------------- |
 | `/`       | `src/pages/Home.tsx`  | Hero + About + Events sections |
+| `/events/:slug` | `src/pages/Event.tsx` | Synced event detail (from `events.json`) |
 | `/event1` | `src/pages/Event1.tsx`| Event 1 page  |
 | `/event2` | `src/pages/Event2.tsx`| Event 2 page  |
 | `/event3` | `src/pages/Event3.tsx`| Event 3 page  |

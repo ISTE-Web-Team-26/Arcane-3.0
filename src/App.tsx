@@ -4,6 +4,7 @@ import Layout from './components/Layout.tsx'
 import Home from './pages/Home.tsx'
 
 // Lazy-load secondary routes — they're never needed on first paint
+const Event = lazy(() => import('./pages/Event.tsx'))
 const Event1 = lazy(() => import('./pages/Event1.tsx'))
 const Event2 = lazy(() => import('./pages/Event2.tsx'))
 const Event3 = lazy(() => import('./pages/Event3.tsx'))
@@ -36,6 +37,14 @@ function App() {
             element={
               <Suspense fallback={null}>
                 <Event3 />
+              </Suspense>
+            }
+          />
+          <Route
+            path="events/:slug"
+            element={
+              <Suspense fallback={null}>
+                <Event />
               </Suspense>
             }
           />

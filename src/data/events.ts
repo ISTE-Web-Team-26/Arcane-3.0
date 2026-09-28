@@ -17,6 +17,18 @@ export interface EventItem {
   actionText?: string
   to: string
   tag?: string
+  // Raw/detail fields synced from Supabase for the individual event pages.
+  dbId?: number
+  longDescription?: string
+  feeAmount?: number | null
+  prizeAmount?: number | null
+  paymentImage?: string
+  teamMin?: number | null
+  teamMax?: number | null
+  startsAt?: string
+  createdAt?: string
+  updatedAt?: string
+  guidelines?: string[]
 }
 
 export const DEFAULT_EVENTS: EventItem[] = [
