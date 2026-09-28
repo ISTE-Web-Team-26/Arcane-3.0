@@ -27,7 +27,6 @@ interface HeroLogo3DProps {
 export default function HeroLogo3D({ anchor = null }: HeroLogo3DProps) {
   const containerRef = useRef<HTMLDivElement>(null)
   const logoImgRef = useRef<HTMLImageElement>(null)
-  const groundFlashRef = useRef<HTMLDivElement>(null)
   const [gpuReady, setGpuReady] = useState(false)
   const [gpuFailed, setGpuFailed] = useState(false)
 
@@ -136,6 +135,49 @@ export default function HeroLogo3D({ anchor = null }: HeroLogo3DProps) {
       const rainSegments = new THREE.LineSegments(rainGeometry, rainMaterial)
       rainSegments.renderOrder = 1
       scene.add(rainSegments)
+
+      // Rain Splash Particle Pool (bursts where drops hit the ground strip)
+      const SPLASH_POOL_SIZE = 40
+      const splashes = Array.from({ length: SPLASH_POOL_SIZE }, () => ({
+        active: false,
+        x: 0,
+        y: 0,
+        z: 0,
+        vx: 0,
+        vy: 0,
+        life: 0,
+      }))
+      let splashIdx = 0
+
+      const spawnSplash = (x: number, y: number, z: number) => {
+        const splash = splashes[splashIdx]
+        splash.active = true
+        splash.x = x
+        splash.y = y + 0.02
+        splash.z = z
+        splash.vx = (Math.random() - 0.5) * 0.9
+        splash.vy = 0.5 + Math.random() * 0.5
+        splash.life = 1.0
+        splashIdx = (splashIdx + 1) % SPLASH_POOL_SIZE
+      }
+
+      const splashPositions = new Float32Array(SPLASH_POOL_SIZE * 2 * 3)
+      const splashGeometry = new THREE.BufferGeometry()
+      splashGeometry.setAttribute(
+        'position',
+        new THREE.BufferAttribute(splashPositions, 3),
+      )
+      const splashMaterial = new THREE.LineBasicMaterial({
+        color: 0x9ec0e6,
+        transparent: true,
+        opacity: 0.9,
+        depthWrite: false,
+      })
+      disposables.push(splashGeometry, splashMaterial)
+      const splashSegments = new THREE.LineSegments(splashGeometry, splashMaterial)
+      splashSegments.renderOrder = 1
+      splashSegments.frustumCulled = false
+      scene.add(splashSegments)
 
       // --- Flash Rain (Diagonal slants during lightning, behind logo) ---
       const FLASH_COUNT = Math.floor(RAIN_COUNT / 8)
@@ -266,24 +308,19 @@ export default function HeroLogo3D({ anchor = null }: HeroLogo3DProps) {
             logoEl.style.filter = nextFilter
           }
         }
-        // Flash overlay on the ground strip: opacity (not brightness —
-        // multiplying near-black stays near-black, so this blends toward
-        // pale blue-white instead).
-        const groundFlashEl = groundFlashRef.current
-        if (groundFlashEl) {
-          const nextOpacity = f > 0.02 ? (f * 0.85).toFixed(2) : ''
-          if (groundFlashEl.style.opacity !== nextOpacity) {
-            groundFlashEl.style.opacity = nextOpacity
-          }
-        }
 
         // Rain falls the full height of the hero and exits below the fold
         const topEdge = bounds.halfH + 0.3
         const bottomEdge = -(bounds.halfH + 0.3)
+        const tanHalfFov = Math.tan(THREE.MathUtils.degToRad(camera.fov / 2))
         for (let i = 0; i < RAIN_COUNT; i += 1) {
           const drop = rainDrops[i]
           drop.y -= drop.speed * dt
           if (drop.y <= bottomEdge) {
+            // Splash exactly at the fold for this drop's depth: farther
+            // drops need a lower world-Y to land on the same screen line.
+            const halfHAtDrop = (camera.position.z - drop.z) * tanHalfFov
+            spawnSplash(drop.x, -halfHAtDrop + 0.06, drop.z)
             drop.y = topEdge
             drop.x = randomX()
           }
@@ -295,6 +332,26 @@ export default function HeroLogo3D({ anchor = null }: HeroLogo3DProps) {
           rainPositions[i * 6 + 5] = drop.z
         }
         rainGeometry.attributes.position.needsUpdate = true
+
+        // Splash updates
+        for (let i = 0; i < SPLASH_POOL_SIZE; i += 1) {
+          const s = splashes[i]
+          if (s.active) {
+            s.x += s.vx * dt
+            s.y += s.vy * dt
+            s.vy -= 4.0 * dt // gravity
+            s.life -= dt * 3.5
+            if (s.life <= 0) s.active = false
+          }
+          const base = i * 6
+          splashPositions[base] = s.x
+          splashPositions[base + 1] = s.y
+          splashPositions[base + 2] = s.z
+          splashPositions[base + 3] = s.x + s.vx * 0.06
+          splashPositions[base + 4] = s.y + s.vy * 0.06
+          splashPositions[base + 5] = s.z
+        }
+        splashGeometry.attributes.position.needsUpdate = true
 
         // Flash Rain Updates
         for (let i = 0; i < FLASH_COUNT; i += 1) {
@@ -360,19 +417,6 @@ export default function HeroLogo3D({ anchor = null }: HeroLogo3DProps) {
       role="img"
       aria-label="Arcane 3.0 Hero Environment"
     >
-      {/* Thin ground line at the hero's foot: same soil as the main
-          ground, darkened, and flashing on lightning strikes */}
-      <div
-        aria-hidden="true"
-        className="soil-bg-layer absolute inset-x-0 bottom-0 z-[5] h-[10px] border-t border-white/10"
-      >
-        <div aria-hidden="true" className="absolute inset-0 bg-black/60" />
-        <div
-          ref={groundFlashRef}
-          aria-hidden="true"
-          className="absolute inset-0 bg-[#cfd8ff] opacity-0"
-        />
-      </div>
       {/* 2D logo: gently bobs up and down over the storm.
           The wrapper pins it to the free zone between navbar and content
           so it can never overlap the text or hang off-screen. */}
