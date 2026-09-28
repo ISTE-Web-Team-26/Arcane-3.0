@@ -58,7 +58,7 @@ export default function Hero() {
         initial={{ opacity: 0, y: 35 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.85, delay: 0.25, ease: [0.16, 1, 0.3, 1] as const }}
-        className="relative z-20 flex flex-col items-center px-4 pb-14 sm:pb-16 md:pb-20"
+        className="relative z-20 flex flex-col items-center px-4 pb-18 sm:pb-20 md:pb-24"
       >
         <p className="flex items-center gap-2 font-mono text-[11px] font-semibold tracking-[0.3em] text-medium-red uppercase sm:text-xs">
           <span

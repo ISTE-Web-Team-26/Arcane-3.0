@@ -72,6 +72,27 @@ body {
   will-change: transform, filter;
 }
 
+/* High-density screens (125% OS scaling and up report DPR >= 1.25):
+   shrink the hero logo 10% to compensate. Unlayered, so it wins over
+   the Tailwind sizing utilities above. */
+@media (min-resolution: 1.25dppx) {
+  .hero-logo-frame {
+    padding-left: 11.93%;
+    padding-right: 11.93%;
+  }
+}
+
+@media (min-width: 768px) and (min-resolution: 1.25dppx) {
+  .hero-logo-frame {
+    padding-left: 10.625%;
+    padding-right: 10.625%;
+  }
+
+  .hero-logo-frame img {
+    max-width: 54rem;
+  }
+}
+
 .soil-bg-layer {
   position: relative;
   background-color: #040203;

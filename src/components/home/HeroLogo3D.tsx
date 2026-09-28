@@ -66,7 +66,8 @@ export default function HeroLogo3D({ anchor = null }: HeroLogo3DProps) {
             antialias: false,
           })
           await rendererInstance.init()
-        } catch {
+        } catch (err2) {
+          console.error('Hero storm disabled: WebGPU unavailable.', err2)
           if (!cancelled) setGpuFailed(true)
           return
         }
@@ -294,16 +295,19 @@ export default function HeroLogo3D({ anchor = null }: HeroLogo3DProps) {
         const targetFlash = flashing ? 1 : 0
         flashVal += (targetFlash - flashVal) * (flashing ? 0.65 : 0.14)
 
-        // Light up the 2D logo and the ground strip on lightning strikes
-        // (mirrors the old white-blowout shader). Direct DOM writes —
-        // no re-render.
+        // Strike light-up adapted from the original 3D shader: the logo
+        // mixes toward white through the envelope, then slams to pure
+        // white for a few frames at the peak. Direct DOM writes.
         const f = Math.round(flashVal * 100) / 100
         const logoEl = logoImgRef.current
         if (logoEl) {
-          const nextFilter =
-            f > 0.02
-              ? `brightness(${(1 + f * 1.6).toFixed(2)}) drop-shadow(0 0 ${(f * 28).toFixed(1)}px rgba(255,255,255,${(f * 0.9).toFixed(2)}))`
-              : ''
+          let nextFilter = ''
+          if (f > 0.02) {
+            const peak = Math.max(0, (f - 0.55) / 0.45)
+            const sat = Math.max(0, 1 - f * 1.6)
+            const bri = 1 + f * 1.8 + peak * peak * 28
+            nextFilter = `saturate(${sat.toFixed(2)}) brightness(${bri.toFixed(1)})`
+          }
           if (logoEl.style.filter !== nextFilter) {
             logoEl.style.filter = nextFilter
           }
@@ -421,7 +425,7 @@ export default function HeroLogo3D({ anchor = null }: HeroLogo3DProps) {
           The wrapper pins it to the free zone between navbar and content
           so it can never overlap the text or hang off-screen. */}
       <div
-        className="absolute inset-x-0 z-10 px-[7.7%] md:px-[6.25%]"
+        className="hero-logo-frame absolute inset-x-0 z-10 px-[7.7%] md:px-[6.25%]"
         style={
           anchor
             ? { top: anchor.top, bottom: anchor.bottom }
