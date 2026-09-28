@@ -274,7 +274,7 @@ export default function EventDetailPage({
               className="group relative inline-flex items-center justify-center gap-2.5 overflow-hidden rounded-xl border border-medium-red bg-medium-red px-8 py-3.5 font-mono text-sm font-bold tracking-wider text-mist uppercase transition-all duration-300 hover:bg-dark-red hover:shadow-[0_0_28px_rgba(170,52,48,0.7)] active:scale-[0.98] cursor-pointer"
             >
               <span className="relative z-10 flex items-center gap-2">
-                <span>ENTER ARENA // REGISTER NOW</span>
+                <span>REGISTER NOW</span>
                 <span className="transition-transform group-hover:translate-x-1">▶</span>
               </span>
               <div className="absolute inset-0 -translate-x-full bg-gradient-to-r from-transparent via-white/20 to-transparent transition-transform duration-700 group-hover:translate-x-full" />

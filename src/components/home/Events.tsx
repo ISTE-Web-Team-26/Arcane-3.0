@@ -131,6 +131,12 @@ export default function Events({ events: eventsProp }: EventsProps) {
           {filteredEvents.map((event, index) => {
             const isLocked =
               event.actionText === 'LOCKED' || event.status === 'FULL'
+            const teamLine =
+              event.teamMin != null || event.teamMax != null
+                ? event.teamMin === event.teamMax
+                  ? `${event.teamMin ?? event.teamMax} MEMBER${(event.teamMin ?? event.teamMax) === 1 ? '' : 'S'}`
+                  : `${event.teamMin ?? '?'} - ${event.teamMax ?? '?'} MEMBERS`
+                : (event.team ?? '')
 
             return (
               <motion.article
@@ -218,13 +224,16 @@ export default function Events({ events: eventsProp }: EventsProps) {
                 {/* Card Footer */}
                 <div className="p-4 pt-0 sm:p-5 sm:pt-0">
                   <div className="flex items-center justify-between border-t border-dark-red/25 pt-3.5">
-                    <div className="flex flex-col font-mono text-[11px] text-mist/70">
-                      <span className="font-semibold text-mist/90">
+                    <div className="flex flex-col font-mono text-[11px]">
+                      <span className="font-semibold text-mist">
                         TIME: {event.time}
                       </span>
-                      <span className="text-mist/50">VENUE: {event.venue}</span>
+                      <span className="font-semibold text-mist">VENUE: {event.venue}</span>
+                      {teamLine && (
+                        <span className="font-semibold text-mist">TEAM: {teamLine}</span>
+                      )}
                       {event.fee && (
-                        <span className="font-semibold text-mist/90">FEE: {event.fee}</span>
+                        <span className="font-semibold text-mist">FEE: {event.fee}</span>
                       )}
                     </div>
 

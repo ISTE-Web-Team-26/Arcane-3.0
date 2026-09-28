@@ -2,6 +2,7 @@ import { lazy, Suspense } from 'react'
 import { BrowserRouter, Route, Routes } from 'react-router'
 import Layout from './components/Layout.tsx'
 import Home from './pages/Home.tsx'
+import EventLoading from './components/events/EventLoading.tsx'
 
 // Lazy-load secondary routes — they're never needed on first paint
 const Event = lazy(() => import('./pages/Event.tsx'))
@@ -19,7 +20,7 @@ function App() {
           <Route
             path="event1"
             element={
-              <Suspense fallback={null}>
+              <Suspense fallback={<EventLoading />}>
                 <Event1 />
               </Suspense>
             }
@@ -27,7 +28,7 @@ function App() {
           <Route
             path="event2"
             element={
-              <Suspense fallback={null}>
+              <Suspense fallback={<EventLoading />}>
                 <Event2 />
               </Suspense>
             }
@@ -35,7 +36,7 @@ function App() {
           <Route
             path="event3"
             element={
-              <Suspense fallback={null}>
+              <Suspense fallback={<EventLoading />}>
                 <Event3 />
               </Suspense>
             }
@@ -43,7 +44,7 @@ function App() {
           <Route
             path="events/:slug"
             element={
-              <Suspense fallback={null}>
+              <Suspense fallback={<EventLoading />}>
                 <Event />
               </Suspense>
             }
