@@ -16,10 +16,42 @@ canvas text effect.
 ```bash
 npm install
 npm run dev      # start dev server
-npm run build    # type-check + production build
+npm run build    # sync events from Supabase, then type-check + production build
 npm run preview  # preview the production build
 npm run lint     # eslint
 ```
+
+## Events data pipeline (Supabase → JSON → home page)
+
+The home page events table is driven by `public/events.json`, generated at
+build time — no Supabase credentials ever reach the browser.
+
+1. Copy `.env.example` to `.env` and fill in `SUPABASE_URL` plus the
+   secret `SUPABASE_SECRET_KEY` (`sb_secret_...`, server-side only, no `VITE_`
+   prefix). On Vercel, set the same two variables in the dashboard.
+2. `npm run build` triggers `prebuild` → `npm run fetch:events`, which runs
+   `scripts/fetch-events.ts` (dependency-free, uses the Supabase REST API):
+   - reads every row from the `events` table (override with
+     `SUPABASE_EVENTS_TABLE`),
+   - normalizes rows to the `EventItem` shape (`src/data/events.ts`):
+     `slug`→`id`, `name`→`title`, `description_short`→`description`,
+     integer `prize`→`★50K` style, `time`→`HH:MM` (Asia/Kolkata),
+     `min/max_team_members`→squad label, `poster_img`→poster asset,
+     `registration_fee`→fee (`₹300`, `FREE` when 0),
+     only `enabled` rows, ordered by `time`,
+   - downloads remote posters into `public/events/` and rewrites `image`
+     to the local path (already-local `/events/...` paths are kept;
+     bare storage paths resolve via `SUPABASE_STORAGE_BUCKET`),
+   - writes `public/events.json` (`{ updatedAt, count, events }`), which
+     Vite copies into `dist/`.
+3. `src/data/useEvents.ts` fetches `/events.json` at runtime. If the sync
+   never ran (e.g. local dev without `.env`), it falls back to the bundled
+   `DEFAULT_EVENTS`, so the page always renders. Filter pills are derived
+   from the actual tracks, so new Supabase tracks appear automatically.
+
+Without credentials the sync logs a warning and exits 0 (build still
+succeeds on fallback data); with credentials but a failing query it exits 1
+so bad data never ships silently.
 
 ## Routes
 

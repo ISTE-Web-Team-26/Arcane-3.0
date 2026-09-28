@@ -1,25 +1,42 @@
-import { useId, useState } from 'react'
+import { useId, useMemo, useState } from 'react'
 import { Link } from 'react-router'
 import { motion, AnimatePresence } from 'framer-motion'
-import { DEFAULT_EVENTS, type EventItem } from '../../data/events.ts'
+import { type EventItem } from '../../data/events.ts'
+import { useEvents } from '../../data/useEvents.ts'
 
 interface EventsProps {
+  /** Override for tests/previews. Defaults to the build-time synced events. */
   events?: EventItem[]
 }
 
-const CATEGORIES = [
-  { id: 'ALL', label: 'ALL TRACKS' },
-  { id: '01 // CODE', label: 'CODE / HACK' },
-  { id: '02 // GAME', label: 'GAMING / FPS' },
-  { id: '03 // ROBO', label: 'ROBOTICS' },
-  { id: '04 // SEC', label: 'CYBERSEC / CTF' },
-  { id: '05 // AI', label: 'AI / SYNTH' },
-  { id: '06 // DSGN', label: 'DESIGN / UX' },
-]
+const TRACK_LABELS: Record<string, string> = {
+  '01 // CODE': 'CODE / HACK',
+  '02 // GAME': 'GAMING / FPS',
+  '03 // ROBO': 'ROBOTICS',
+  '04 // SEC': 'CYBERSEC / CTF',
+  '05 // AI': 'AI / SYNTH',
+  '06 // DSGN': 'DESIGN / UX',
+}
 
-export default function Events({ events = DEFAULT_EVENTS }: EventsProps) {
+export default function Events({ events: eventsProp }: EventsProps) {
   const sectionId = useId()
   const [activeCategory, setActiveCategory] = useState('ALL')
+  const { events: syncedEvents, source } = useEvents()
+  const events = eventsProp ?? syncedEvents
+
+  // Filter pills follow whatever tracks actually exist in the synced data,
+  // so new Supabase tracks show up without a frontend change. Events without
+  // a track (the current schema has no track column) live under ALL.
+  const categories = useMemo(() => {
+    const seen = new Map<string, string>()
+    for (const e of events) {
+      if (e.track && !seen.has(e.track)) seen.set(e.track, TRACK_LABELS[e.track] ?? e.track)
+    }
+    return [
+      { id: 'ALL', label: 'ALL TRACKS' },
+      ...[...seen.entries()].map(([id, label]) => ({ id, label })),
+    ]
+  }, [events])
 
   const filteredEvents =
     activeCategory === 'ALL'
@@ -69,15 +86,24 @@ export default function Events({ events = DEFAULT_EVENTS }: EventsProps) {
           </div>
 
           {/* Total Events Counter Pill */}
-          {/* <div className="flex items-center gap-2 self-start rounded-lg border border-dark-red/40 bg-near-black/70 px-3.5 py-1.5 font-mono text-xs font-semibold text-mist/80 lg:self-end">
-            <span className="h-2 w-2 rounded-full bg-medium-red animate-pulse" />
+          <div
+            className="flex items-center gap-2 self-start rounded-lg border border-dark-red/40 bg-near-black/70 px-3.5 py-1.5 font-mono text-xs font-semibold text-mist/80 lg:self-end"
+            title={
+              source === 'supabase'
+                ? 'Synced from Supabase at build time'
+                : 'Built-in data — Supabase sync not run'
+            }
+          >
+            <span
+              className={`h-2 w-2 rounded-full animate-pulse ${source === 'supabase' ? 'bg-emerald-400' : 'bg-medium-red'}`}
+            />
             <span>LIVE TRACKS: {events.length}</span>
-          </div> */}
+          </div>
         </div>
 
         {/* Category Filter Pills with interactive animation */}
         <div className="mb-8 flex flex-wrap gap-2 sm:gap-2.5 font-mono text-xs">
-          {CATEGORIES.map((cat) => {
+          {categories.map((cat) => {
             const isActive = activeCategory === cat.id
             return (
               <button
@@ -197,6 +223,9 @@ export default function Events({ events = DEFAULT_EVENTS }: EventsProps) {
                         TIME: {event.time}
                       </span>
                       <span className="text-mist/50">VENUE: {event.venue}</span>
+                      {event.fee && (
+                        <span className="font-semibold text-mist/90">FEE: {event.fee}</span>
+                      )}
                     </div>
 
                     <Link

@@ -11,6 +11,12 @@ node_modules
 dist
 dist-ssr
 *.local
+.env
+.env.local
+
+# Generated at build time by scripts/fetch-events.ts (Supabase sync).
+# The frontend falls back to src/data/events.ts when this file is absent.
+public/events.json
 
 # Editor directories and files
 .vscode/*

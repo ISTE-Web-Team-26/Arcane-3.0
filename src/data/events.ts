@@ -13,6 +13,7 @@ export interface EventItem {
   squad: string
   venue: string
   time: string
+  fee?: string
   actionText?: string
   to: string
   tag?: string
