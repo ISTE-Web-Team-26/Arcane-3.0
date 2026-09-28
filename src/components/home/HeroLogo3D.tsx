@@ -137,7 +137,7 @@ export default function HeroLogo3D({ anchor = null }: HeroLogo3DProps) {
       scene.add(rainSegments)
 
       // Rain Splash Particle Pool (bursts where drops hit the ground strip)
-      const SPLASH_POOL_SIZE = 40
+      const SPLASH_POOL_SIZE = 60
       const splashes = Array.from({ length: SPLASH_POOL_SIZE }, () => ({
         active: false,
         x: 0,
@@ -153,10 +153,10 @@ export default function HeroLogo3D({ anchor = null }: HeroLogo3DProps) {
         const splash = splashes[splashIdx]
         splash.active = true
         splash.x = x
-        splash.y = y + 0.02
+        splash.y = y
         splash.z = z
-        splash.vx = (Math.random() - 0.5) * 0.9
-        splash.vy = 0.5 + Math.random() * 0.5
+        splash.vx = (Math.random() - 0.5) * 1.1
+        splash.vy = 0.7 + Math.random() * 0.6
         splash.life = 1.0
         splashIdx = (splashIdx + 1) % SPLASH_POOL_SIZE
       }
@@ -168,9 +168,9 @@ export default function HeroLogo3D({ anchor = null }: HeroLogo3DProps) {
         new THREE.BufferAttribute(splashPositions, 3),
       )
       const splashMaterial = new THREE.LineBasicMaterial({
-        color: 0x9ec0e6,
+        color: 0xcfe4ff,
         transparent: true,
-        opacity: 0.9,
+        opacity: 1,
         depthWrite: false,
       })
       disposables.push(splashGeometry, splashMaterial)
@@ -320,7 +320,7 @@ export default function HeroLogo3D({ anchor = null }: HeroLogo3DProps) {
             // Splash exactly at the fold for this drop's depth: farther
             // drops need a lower world-Y to land on the same screen line.
             const halfHAtDrop = (camera.position.z - drop.z) * tanHalfFov
-            spawnSplash(drop.x, -halfHAtDrop + 0.06, drop.z)
+            spawnSplash(drop.x, -halfHAtDrop, drop.z)
             drop.y = topEdge
             drop.x = randomX()
           }
@@ -340,15 +340,15 @@ export default function HeroLogo3D({ anchor = null }: HeroLogo3DProps) {
             s.x += s.vx * dt
             s.y += s.vy * dt
             s.vy -= 4.0 * dt // gravity
-            s.life -= dt * 3.5
+            s.life -= dt * 3.2
             if (s.life <= 0) s.active = false
           }
           const base = i * 6
           splashPositions[base] = s.x
           splashPositions[base + 1] = s.y
           splashPositions[base + 2] = s.z
-          splashPositions[base + 3] = s.x + s.vx * 0.06
-          splashPositions[base + 4] = s.y + s.vy * 0.06
+          splashPositions[base + 3] = s.x + s.vx * 0.08
+          splashPositions[base + 4] = s.y + s.vy * 0.08
           splashPositions[base + 5] = s.z
         }
         splashGeometry.attributes.position.needsUpdate = true
