@@ -6,6 +6,7 @@ import EventLoading from './components/events/EventLoading.tsx'
 
 // Lazy-load secondary routes — they're never needed on first paint
 const Event = lazy(() => import('./pages/Event.tsx'))
+const Register = lazy(() => import('./pages/Register.tsx'))
 const Event1 = lazy(() => import('./pages/Event1.tsx'))
 const Event2 = lazy(() => import('./pages/Event2.tsx'))
 const Event3 = lazy(() => import('./pages/Event3.tsx'))
@@ -46,6 +47,14 @@ function App() {
             element={
               <Suspense fallback={<EventLoading />}>
                 <Event />
+              </Suspense>
+            }
+          />
+          <Route
+            path="events/:slug/register"
+            element={
+              <Suspense fallback={<EventLoading />}>
+                <Register />
               </Suspense>
             }
           />

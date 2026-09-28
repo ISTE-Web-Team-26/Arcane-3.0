@@ -205,14 +205,18 @@ function toNumberOrNull(value: unknown): number | null {
 /** guidelines column -> string[] (accepts arrays or newline-separated text). */
 function toStringArray(value: unknown): string[] {
   if (Array.isArray(value)) {
-    return value.map((v) => asString(v).trim()).filter(Boolean)
+    return value
+      .map((v) => stripWhatsAppLink(asString(v)).trim())
+      .filter(Boolean)
   }
-  const raw = asString(value).trim()
+  const raw = stripWhatsAppLink(asString(value)).trim()
   if (!raw) return []
   try {
     const parsed: unknown = JSON.parse(raw)
     if (Array.isArray(parsed)) {
-      return parsed.map((v) => asString(v).trim()).filter(Boolean)
+      return parsed
+        .map((v) => stripWhatsAppLink(asString(v)).trim())
+        .filter(Boolean)
     }
   } catch {
     // Not JSON — fall through to newline splitting.
@@ -221,6 +225,37 @@ function toStringArray(value: unknown): string[] {
     .split('\n')
     .map((line) => line.replace(/^[-*•\d.)\s]+/, '').trim())
     .filter(Boolean)
+}
+
+/**
+ * The WhatsApp group link lives in the Supabase schema but must NEVER ship
+ * to the browser in events.json (public static file). Any key resembling it
+ * is dropped, and invite URLs pasted into free-text columns are stripped.
+ */
+const WHATSAPP_KEY_PATTERN = /whatsapp/i
+const WHATSAPP_URL_PATTERN =
+  /https?:\/\/(?:chat\.whatsapp\.com|wa\.me|whatsapp\.com)[^\s"'<>]*/gi
+
+function stripWhatsAppLink(value: string): string {
+  return value.replace(WHATSAPP_URL_PATTERN, '').replace(/[ \t]{2,}/g, ' ')
+}
+
+/** Drop banned keys and scrub invite URLs from every string in one event. */
+function sanitizeEvent<T extends Record<string, unknown>>(event: T): T {
+  const clean: Record<string, unknown> = {}
+  for (const [key, value] of Object.entries(event)) {
+    if (WHATSAPP_KEY_PATTERN.test(key)) continue
+    if (typeof value === 'string') {
+      clean[key] = stripWhatsAppLink(value)
+    } else if (Array.isArray(value)) {
+      clean[key] = value.map((item) =>
+        typeof item === 'string' ? stripWhatsAppLink(item) : item,
+      )
+    } else {
+      clean[key] = value
+    }
+  }
+  return clean as T
 }
 
 /** Map one Supabase `events` row to the frontend shape. */
@@ -378,7 +413,8 @@ async function main(): Promise<void> {
     const { imageSrc, paymentSrc, ...rest } = mapped
     const image = await resolveImage(imageSrc, mapped.id, `/events/${mapped.id}.jpg`)
     const paymentImage = await resolveImage(paymentSrc, `${mapped.id}-payment`, '')
-    events.push({ ...rest, image, paymentImage })
+    // Belt-and-braces: the WhatsApp group link must never reach the public file.
+    events.push(sanitizeEvent({ ...rest, image, paymentImage }))
   }
 
   const payload = {
@@ -386,8 +422,15 @@ async function main(): Promise<void> {
     count: events.length,
     events,
   }
+  const serialized = JSON.stringify(payload, null, 2)
+  WHATSAPP_URL_PATTERN.lastIndex = 0
+  if (WHATSAPP_KEY_PATTERN.test(serialized) || WHATSAPP_URL_PATTERN.test(serialized)) {
+    throw new Error(
+      '[fetch-events] refusing to write events.json: WhatsApp link detected in payload',
+    )
+  }
   mkdirSync(join(JSON_OUT, '..'), { recursive: true })
-  writeFileSync(JSON_OUT, `${JSON.stringify(payload, null, 2)}\n`)
+  writeFileSync(JSON_OUT, `${serialized}\n`)
   console.log(`[fetch-events] wrote ${events.length} event(s) to ${JSON_OUT}`)
 }
 
