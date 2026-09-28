@@ -86,20 +86,138 @@ export default function Contact() {
           </div>
         </motion.div>
 
-        {/* Official Social & Direct Channels Grid with Staggered Scroll Motion */}
-        <motion.div
-          initial="hidden"
-          whileInView="visible"
-          viewport={{ once: true, margin: '-40px' }}
-          variants={{
-            hidden: { opacity: 0 },
-            visible: {
-              opacity: 1,
-              transition: { staggerChildren: 0.08 },
-            },
-          }}
-          className="mb-12 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4 sm:gap-5"
-        >
+        {/* 3 People Contact Grid with Staggered Scroll Motion */}
+        <div className="mb-12">
+          <motion.div
+            initial={{ opacity: 0, x: -20 }}
+            whileInView={{ opacity: 1, x: 0 }}
+            viewport={{ once: true, margin: '-40px' }}
+            transition={{ duration: 0.5 }}
+            className="mb-4 flex items-center gap-2 font-mono text-xs font-semibold tracking-wider text-medium-red uppercase"
+          >
+            <span>// KEY CONTACT PERSONS</span>
+          </motion.div>
+
+          <motion.div
+            initial="hidden"
+            whileInView="visible"
+            viewport={{ once: true, margin: '-40px' }}
+            variants={{
+              hidden: { opacity: 0 },
+              visible: {
+                opacity: 1,
+                transition: { staggerChildren: 0.1 },
+              },
+            }}
+            className="grid grid-cols-1 gap-4 md:grid-cols-3 sm:gap-5"
+          >
+            {CONTACT_PERSONS.map((person, idx) => (
+              <motion.div
+                key={person.role}
+                variants={itemVariants}
+                whileHover={{ y: -5, scale: 1.015 }}
+                className="group relative flex flex-col justify-between rounded-xl border border-dark-red/30 bg-near-black/80 p-5 transition-colors duration-300 hover:border-medium-red/60 hover:shadow-[0_0_25px_rgba(170,52,48,0.18)]"
+              >
+                <div>
+                  <div className="flex items-center justify-between pb-2">
+                    <span className="font-mono text-[11px] font-semibold tracking-widest text-mist/60 uppercase">
+                      {person.role}
+                    </span>
+                    <span className="font-mono text-xs font-bold text-medium-red">
+                      [0{idx + 1}]
+                    </span>
+                  </div>
+
+                  <h3 className="font-heading text-xl font-bold tracking-wide text-mist transition-colors group-hover:text-white sm:text-2xl">
+                    {person.name}
+                  </h3>
+
+                  <p className="mt-1 font-content text-xs text-mist/60">
+                    {person.designation}
+                  </p>
+
+                  <div className="mt-4 space-y-2 border-t border-dark-red/20 pt-4 font-mono text-xs">
+                    <div className="flex items-center gap-2 text-mist/80">
+                      <svg
+                        className="h-3.5 w-3.5 text-medium-red shrink-0"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        stroke="currentColor"
+                        strokeWidth={2}
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"
+                        />
+                      </svg>
+                      <a
+                        href={`tel:${person.phone.replace(/\s+/g, '')}`}
+                        className="transition-colors hover:text-medium-red"
+                      >
+                        {person.phone}
+                      </a>
+                    </div>
+
+                    {person.email && (
+                    <div className="flex items-center gap-2 text-mist/80">
+                      <svg
+                        className="h-3.5 w-3.5 text-medium-red shrink-0"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        stroke="currentColor"
+                        strokeWidth={2}
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"
+                        />
+                      </svg>
+                      <a
+                        href={`mailto:${person.email}`}
+                        className="transition-colors hover:text-medium-red break-all"
+                      >
+                        {person.email}
+                      </a>
+                    </div>
+                    )}
+                  </div>
+                </div>
+
+                <div className="mt-5 h-[2px] w-full overflow-hidden rounded-full bg-dark-red/30">
+                  <div className="h-full w-2/3 rounded-full bg-gradient-to-r from-dark-red to-medium-red transition-all duration-500 group-hover:w-full" />
+                </div>
+              </motion.div>
+            ))}
+          </motion.div>
+        </div>
+
+        {/* Social Media Channels Grid with Staggered Scroll Motion */}
+        <div className="mb-12">
+          <motion.div
+            initial={{ opacity: 0, x: -20 }}
+            whileInView={{ opacity: 1, x: 0 }}
+            viewport={{ once: true, margin: '-40px' }}
+            transition={{ duration: 0.5 }}
+            className="mb-4 flex items-center gap-2 font-mono text-xs font-semibold tracking-wider text-medium-red uppercase"
+          >
+            <span>// SOCIAL MEDIA</span>
+          </motion.div>
+
+          <motion.div
+            initial="hidden"
+            whileInView="visible"
+            viewport={{ once: true, margin: '-40px' }}
+            variants={{
+              hidden: { opacity: 0 },
+              visible: {
+                opacity: 1,
+                transition: { staggerChildren: 0.08 },
+              },
+            }}
+            className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4 sm:gap-5"
+          >
           {/* Instagram Card */}
           <motion.a
             variants={itemVariants}
@@ -251,112 +369,6 @@ export default function Contact() {
             </div>
           </motion.a>
         </motion.div>
-
-        {/* 3 People Contact Grid with Staggered Scroll Motion */}
-        <div className="mb-12">
-          <motion.div
-            initial={{ opacity: 0, x: -20 }}
-            whileInView={{ opacity: 1, x: 0 }}
-            viewport={{ once: true, margin: '-40px' }}
-            transition={{ duration: 0.5 }}
-            className="mb-4 flex items-center gap-2 font-mono text-xs font-semibold tracking-wider text-medium-red uppercase"
-          >
-            <span>// KEY CONTACT PERSONS</span>
-          </motion.div>
-
-          <motion.div
-            initial="hidden"
-            whileInView="visible"
-            viewport={{ once: true, margin: '-40px' }}
-            variants={{
-              hidden: { opacity: 0 },
-              visible: {
-                opacity: 1,
-                transition: { staggerChildren: 0.1 },
-              },
-            }}
-            className="grid grid-cols-1 gap-4 md:grid-cols-3 sm:gap-5"
-          >
-            {CONTACT_PERSONS.map((person, idx) => (
-              <motion.div
-                key={person.role}
-                variants={itemVariants}
-                whileHover={{ y: -5, scale: 1.015 }}
-                className="group relative flex flex-col justify-between rounded-xl border border-dark-red/30 bg-near-black/80 p-5 transition-colors duration-300 hover:border-medium-red/60 hover:shadow-[0_0_25px_rgba(170,52,48,0.18)]"
-              >
-                <div>
-                  <div className="flex items-center justify-between pb-2">
-                    <span className="font-mono text-[11px] font-semibold tracking-widest text-mist/60 uppercase">
-                      {person.role}
-                    </span>
-                    <span className="font-mono text-xs font-bold text-medium-red">
-                      [0{idx + 1}]
-                    </span>
-                  </div>
-
-                  <h3 className="font-heading text-xl font-bold tracking-wide text-mist transition-colors group-hover:text-white sm:text-2xl">
-                    {person.name}
-                  </h3>
-
-                  <p className="mt-1 font-content text-xs text-mist/60">
-                    {person.designation}
-                  </p>
-
-                  <div className="mt-4 space-y-2 border-t border-dark-red/20 pt-4 font-mono text-xs">
-                    <div className="flex items-center gap-2 text-mist/80">
-                      <svg
-                        className="h-3.5 w-3.5 text-medium-red shrink-0"
-                        fill="none"
-                        viewBox="0 0 24 24"
-                        stroke="currentColor"
-                        strokeWidth={2}
-                      >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"
-                        />
-                      </svg>
-                      <a
-                        href={`tel:${person.phone.replace(/\s+/g, '')}`}
-                        className="transition-colors hover:text-medium-red"
-                      >
-                        {person.phone}
-                      </a>
-                    </div>
-
-                    {person.email && (
-                    <div className="flex items-center gap-2 text-mist/80">
-                      <svg
-                        className="h-3.5 w-3.5 text-medium-red shrink-0"
-                        fill="none"
-                        viewBox="0 0 24 24"
-                        stroke="currentColor"
-                        strokeWidth={2}
-                      >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"
-                        />
-                      </svg>
-                      <a
-                        href={`mailto:${person.email}`}
-                        className="transition-colors hover:text-medium-red break-all"
-                      >
-                        {person.email}
-                      </a>
-                    </div>
-                    )}
-                  </div>
-                </div>
-
-                <div className="mt-5 h-[2px] w-full overflow-hidden rounded-full bg-dark-red/30">
-                  <div className="h-full w-2/3 rounded-full bg-gradient-to-r from-dark-red to-medium-red transition-all duration-500 group-hover:w-full" />
-                </div>
-              </motion.div>
-            ))}
-          </motion.div>
         </div>
 
         {/* Footer Bottom Bar with Scroll Reveal */}
