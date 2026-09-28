@@ -248,6 +248,8 @@ export default function HeroLogo3D({ anchor = null }: HeroLogo3DProps) {
         renderer.setSize(w, h, false)
         camera.aspect = w / h
         camera.updateProjectionMatrix()
+        // Bolt width steps up past the mobile breakpoint: 4px below, 6px at/above.
+        boltMaterial.linewidth = w < 768 ? 4 : 6
         updateFit()
       }
       updateFit()
