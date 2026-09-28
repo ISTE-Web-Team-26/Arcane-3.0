@@ -29,28 +29,6 @@ body {
   overflow-x: clip;
 }
 
-/* Underground soil below the hero, deepening to the end of the page:
-   packed-earth base, SVG-noise grain, broad tonal blotches, stone pits.
-   Always dark — the whole site descends into the soil in every mode. */
-.underground {
-  background-color: #120b06;
-  background-image:
-    linear-gradient(rgba(0, 0, 0, 0.55) 0, rgba(0, 0, 0, 0) 220px),
-    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='240' height='240'%3E%3Cfilter id='grain'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix type='matrix' values='0 0 0 0 0.5 0 0 0 0 0.32 0 0 0 0 0.18 0 0 0 0.5 0'/%3E%3C/filter%3E%3Crect width='240' height='240' filter='url(%23grain)'/%3E%3C/svg%3E"),
-    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='560' height='560'%3E%3Cfilter id='blotch'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.011' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix type='matrix' values='0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0.55 0'/%3E%3C/filter%3E%3Crect width='560' height='560' filter='url(%23blotch)'/%3E%3C/svg%3E"),
-    radial-gradient(
-      circle at 50% 42%,
-      rgba(0, 0, 0, 0.45) 0 1.5px,
-      transparent 2.5px
-    );
-  background-size:
-    100% 220px,
-    240px 240px,
-    560px 560px,
-    110px 110px;
-  background-repeat: no-repeat, repeat, repeat, repeat;
-}
-
 .font-heading {
   letter-spacing: 0.08em;
 }

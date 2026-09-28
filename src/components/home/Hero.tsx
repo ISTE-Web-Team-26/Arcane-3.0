@@ -43,16 +43,17 @@ export default function Hero() {
     <section
       ref={sectionRef}
       id="home"
-      className="relative -mx-4 -mt-[4.5rem] flex max-w-none flex-col items-center justify-end overflow-x-clip bg-mist text-center sm:-mx-8 sm:-mt-[5rem] min-h-[calc(100svh-4.5rem)] sm:min-h-[calc(100svh-5rem)] dark:bg-near-black"
+      className="relative -mx-4 -mt-[4.5rem] flex h-[100svh] min-h-[640px] max-w-none flex-col items-center justify-end overflow-hidden text-center sm:-mx-8 sm:-mt-[5rem]"
     >
       <h1 className="sr-only">Arcane 3.0</h1>
-      <HeroLogo3D anchor={anchor} />
-      {/* Compacted topsoil lip the rain sinks into. */}
-      <div
-        aria-hidden="true"
-        className="pointer-events-none absolute inset-x-0 bottom-0 z-[5] h-12 bg-gradient-to-b from-transparent to-[#120b06]"
-      />
-      <div
+
+      {/* Lazy-load the heavy 3D scene — mobile gets static fallback only */}
+      <Suspense fallback={null}>
+        <HeroLogo3D anchor={anchor} />
+      </Suspense>
+
+      {/* Hero Foreground Content with Framer Motion Entrance */}
+      <motion.div
         ref={contentRef}
         initial={{ opacity: 0, y: 35 }}
         animate={{ opacity: 1, y: 0 }}

@@ -48,9 +48,48 @@ export default function About() {
           <span>System Overview</span>
         </motion.div>
 
-          <h2
-            id="about-heading"
-            className="font-heading text-3xl font-bold text-mist underline underline-offset-8 decoration-medium-red sm:text-4xl md:text-5xl"
+        {/* Main High-Impact Headline */}
+        <motion.h2
+          variants={itemVariants}
+          id="about-heading"
+          className="font-heading text-3xl font-bold tracking-tight text-mist sm:text-4xl md:text-5xl lg:text-6xl leading-[1.12]"
+        >
+          Arcane 3.0, the{' '}
+          <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#e05652] via-[#ea6e6b] to-[#f4938f]">
+            Premier{' '}
+          </span>
+          technical fest organized by ISTE FISAT.
+        </motion.h2>
+
+        {/* Narrative Paragraphs */}
+        <motion.div
+          variants={itemVariants}
+          className="mt-6 space-y-4 text-sm sm:text-base md:text-lg text-mist/80 leading-relaxed max-w-5xl"
+        >
+          <p>
+            Welcome to{' '}
+            <strong className="font-semibold text-mist">ARCANE 3.0</strong> the
+            premier technical fest organized by ISTE FISAT. This two-day
+            extravaganza brings together the brightest minds to explore the
+            latest in technology, innovation, and creativity.
+          </p>
+          <p className="text-mist/70 text-xs sm:text-sm md:text-base">
+            With a perfect blend of technical competitions, workshops, and
+            networking opportunities, Arcane 2.0 promises to be an
+            unforgettable experience for all tech enthusiasts. Get ready to
+            witness cutting-edge innovations, participate in challenging
+            competitions, and learn from industry experts.
+          </p>
+        </motion.div>
+
+        {/* Quick Action Badges / Technical Links */}
+        <motion.div
+          variants={itemVariants}
+          className="mt-8 flex flex-wrap items-center gap-5 sm:gap-8 font-mono text-xs sm:text-sm"
+        >
+          <a
+            href="#events"
+            className="group inline-flex items-center gap-1.5 text-medium-red transition-colors hover:text-[#f4938f]"
           >
             <span className="transition-transform duration-200 group-hover:translate-y-0.5">
               ↓
@@ -73,41 +112,60 @@ export default function About() {
         </motion.div>
       </motion.div>
 
-      {/* Main Content Panel taking 60% width and filling remaining viewport height */}
-      <div className="relative flex flex-1 min-h-0 w-full items-stretch px-2 pb-2">
-        <div className="flex h-full w-full flex-col justify-between rounded-xs border border-dark-red/40 bg-near-black/60 p-6 backdrop-blur-xs md:w-[60%] sm:p-8 md:p-10">
-          <div className="space-y-4 sm:space-y-6">
-            <div className="flex items-center gap-2 font-mono text-xs font-bold tracking-widest text-medium-red uppercase">
-              <span className="h-[1px] flex-1 bg-dark-red/50" />
+      {/* Metric Cards Grid with Staggered Scroll Motion */}
+      <motion.div
+        initial="hidden"
+        whileInView="visible"
+        viewport={{ once: true, margin: '-60px' }}
+        variants={{
+          hidden: { opacity: 0 },
+          visible: {
+            opacity: 1,
+            transition: {
+              staggerChildren: 0.1,
+              delayChildren: 0.15,
+            },
+          },
+        }}
+        className="mt-10 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4 sm:gap-5"
+      >
+        {/* Card 1: Attendance / Delegates */}
+        <motion.div
+          variants={itemVariants}
+          whileHover={{ y: -5, scale: 1.015 }}
+          className="group relative flex flex-col justify-between rounded-xl border border-dark-red/30 bg-near-black/80 p-5 transition-colors duration-300 hover:border-medium-red/60 hover:shadow-[0_0_25px_rgba(170,52,48,0.18)] cursor-default"
+        >
+          <div>
+            <div className="flex items-center justify-between pb-3">
+              <span className="font-mono text-[11px] font-semibold tracking-widest text-mist/60 uppercase">
+                ATTENDANCE
+              </span>
+              <svg
+                className="h-4 w-4 text-medium-red/80 transition-colors group-hover:text-medium-red"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+                strokeWidth={1.75}
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"
+                />
+              </svg>
             </div>
 
-            <p className="font-content text-base leading-relaxed text-mist/90 sm:text-lg md:text-xl lg:text-2xl">
-              <strong className="text-medium-red">ARCANE 3.0</strong> is the premier national-level technical and gaming symposium designed to ignite curiosity, foster relentless innovation, and challenge the brightest minds across domains.
+            <p className="font-heading text-3xl font-bold tracking-tight text-mist sm:text-4xl">
+              1.5K+
             </p>
 
-            <p className="text-xs leading-relaxed text-mist/70 sm:text-sm md:text-base lg:text-lg">
-              Blending high-stakes competitive programming, cutting-edge engineering hackathons, design sprints, and intense esports battles, Arcane delivers an electrifying arena where technology meets culture.
+            <p className="mt-2 font-content text-xs leading-relaxed text-mist/70">
+              Delegates, developers & innovators competing from across the nation.
             </p>
           </div>
 
-          {/* Quick Stats Grid */}
-          <div className="mt-6 grid grid-cols-2 gap-4 border-t border-dark-red/30 pt-6 sm:grid-cols-4">
-            <div>
-              <p className="font-heading text-2xl font-bold text-medium-red sm:text-3xl lg:text-4xl">20+</p>
-              <p className="font-mono text-[10px] font-semibold tracking-wider text-mist/60 uppercase sm:text-xs">Events</p>
-            </div>
-            <div>
-              <p className="font-heading text-2xl font-bold text-medium-red sm:text-3xl lg:text-4xl">1.5K+</p>
-              <p className="font-mono text-[10px] font-semibold tracking-wider text-mist/60 uppercase sm:text-xs">Delegates</p>
-            </div>
-            <div>
-              <p className="font-heading text-2xl font-bold text-medium-red sm:text-3xl lg:text-4xl">₹100K</p>
-              <p className="font-mono text-[10px] font-semibold tracking-wider text-mist/60 uppercase sm:text-xs">Prize Pool</p>
-            </div>
-            <div>
-              <p className="font-heading text-2xl font-bold text-medium-red sm:text-3xl lg:text-4xl">48H</p>
-              <p className="font-mono text-[10px] font-semibold tracking-wider text-mist/60 uppercase sm:text-xs">Non-Stop</p>
-            </div>
+          <div className="mt-5 h-[2px] w-full overflow-hidden rounded-full bg-dark-red/30">
+            <div className="h-full w-3/4 rounded-full bg-gradient-to-r from-dark-red to-medium-red transition-all duration-500 group-hover:w-full" />
           </div>
         </motion.div>
 

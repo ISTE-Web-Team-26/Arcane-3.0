@@ -94,77 +94,7 @@ export default function HeroLogo3D({ anchor = null }: HeroLogo3DProps) {
       const camera = new THREE.PerspectiveCamera(34, LOGO_ASPECT, 0.1, 50)
       camera.position.set(0, 0, 5.2)
 
-      // --- Logo plane -------------------------------------------------
-      let texture: import('three').Texture
-      try {
-        texture = await new THREE.TextureLoader().loadAsync(logoUrl)
-      } catch {
-        if (!cancelled) setWebglFailed(true)
-        rendererInstance.dispose()
-        rendererInstance.domElement.remove()
-        return
-      }
-      if (cancelled) {
-        texture.dispose()
-        rendererInstance.dispose()
-        return
-      }
-      texture.colorSpace = THREE.SRGBColorSpace
-      texture.anisotropy = rendererInstance.capabilities.getMaxAnisotropy()
-
-      const uniforms = {
-        uMap: { value: texture },
-        uFlash: { value: 0 },
-        uTime: { value: 0 },
-      }
-      const logoMaterial = new THREE.ShaderMaterial({
-        uniforms,
-        transparent: true,
-        depthWrite: false,
-        // Drawn last, ignoring depth: the logo always sits above the
-        // rain and lightning. Transparent texels are discarded in-shader,
-        // so the storm still shows through around the artwork.
-        depthTest: false,
-        vertexShader: /* glsl */ `
-          varying vec2 vUv;
-          void main() {
-            vUv = uv;
-            gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
-          }
-        `,
-        fragmentShader: /* glsl */ `
-          uniform sampler2D uMap;
-          uniform float uFlash;
-          uniform float uTime;
-          varying vec2 vUv;
-          void main() {
-            vec4 tex = texture2D(uMap, vUv);
-            if (tex.a < 0.02) discard;
-            // Subtle electric shimmer so the logo never looks dead flat.
-            float shimmer = sin(vUv.y * 120.0 + uTime * 8.0) * 0.5 + 0.5;
-            vec3 flashed = mix(tex.rgb, vec3(1.0), uFlash * 0.9);
-            flashed += uFlash * vec3(0.35, 0.37, 0.48) * (0.5 + 0.5 * shimmer);
-            flashed += tex.rgb * 0.07 * (0.5 + 0.5 * sin(uTime * 2.0));
-            gl_FragColor = vec4(flashed, tex.a);
-          }
-        `,
-      })
-      disposables.push(logoMaterial, texture)
-      // Slightly bigger than before: 5.5 world units wide.
-      // `updateFit` below scales it down on narrow/tall screens so it never
-      // overflows, and caps its height so the date/countdown block keeps clear space.
-      const BASE_W = 5.5
-      const BASE_H = BASE_W / LOGO_ASPECT
-      const logoMesh = new THREE.Mesh(
-        new THREE.PlaneGeometry(BASE_W, BASE_H),
-        logoMaterial,
-      )
-      disposables.push(logoMesh.geometry)
-      logoMesh.renderOrder = 2
-      scene.add(logoMesh)
-
-      // Visible-world bounds, refreshed on resize so rain + bolt always
-      // cover the full viewport on both landscape (PC) and portrait (mobile).
+      // Bounds (rain, bolt and flash rain span the full view)
       const bounds = { halfW: 3.2, halfH: 1.8 }
 
       const updateFit = () => {
@@ -203,9 +133,9 @@ export default function HeroLogo3D({ anchor = null }: HeroLogo3DProps) {
         depthWrite: false,
       })
       disposables.push(rainGeometry, rainMaterial)
-      const rainLines = new THREE.LineSegments(rainGeometry, rainMaterial)
-      rainLines.renderOrder = 0
-      scene.add(rainLines)
+      const rainSegments = new THREE.LineSegments(rainGeometry, rainMaterial)
+      rainSegments.renderOrder = 1
+      scene.add(rainSegments)
 
       // Rain Splash Particle Pool (bursts where drops hit the ground strip)
       const SPLASH_POOL_SIZE = 60
@@ -272,9 +202,9 @@ export default function HeroLogo3D({ anchor = null }: HeroLogo3DProps) {
         depthWrite: false,
       })
       disposables.push(flashGeometry, flashMaterial)
-      const flashLines = new THREE.LineSegments(flashGeometry, flashMaterial)
-      flashLines.renderOrder = 0
-      scene.add(flashLines)
+      const flashSegments = new THREE.LineSegments(flashGeometry, flashMaterial)
+      flashSegments.renderOrder = 1
+      scene.add(flashSegments)
 
       // --- Lightning Bolt Arc (fat line, 3px) ---------------------------
       const BOLT_SEGMENTS = 14
@@ -291,7 +221,6 @@ export default function HeroLogo3D({ anchor = null }: HeroLogo3DProps) {
       bolt.position.z = -0.35
       bolt.renderOrder = 1
       bolt.frustumCulled = false
-      bolt.renderOrder = 1
       scene.add(bolt)
 
       const rebuildBolt = () => {
@@ -368,24 +297,44 @@ export default function HeroLogo3D({ anchor = null }: HeroLogo3DProps) {
         const targetFlash = flashing ? 1 : 0
         flashVal += (targetFlash - flashVal) * (flashing ? 0.65 : 0.14)
 
-        // Rain falls out of the sky and dies where it hits the ground at
-        // the bottom of the hero — streaks taper into the soil instead of
-        // wrapping through it.
+        // Strike light-up adapted from the original 3D shader: the logo
+        // mixes toward white through the envelope, then slams to pure
+        // white for a few frames at the peak. Direct DOM writes.
+        const f = Math.round(flashVal * 100) / 100
+        const logoEl = logoImgRef.current
+        if (logoEl) {
+          let nextFilter = ''
+          if (f > 0.02) {
+            const peak = Math.max(0, (f - 0.55) / 0.45)
+            const sat = Math.max(0, 1 - f * 1.6)
+            const bri = 1 + f * 1.8 + peak * peak * 28
+            nextFilter = `saturate(${sat.toFixed(2)}) brightness(${bri.toFixed(1)})`
+          }
+          if (logoEl.style.filter !== nextFilter) {
+            logoEl.style.filter = nextFilter
+          }
+        }
+
+        // Rain falls the full height of the hero and exits below the fold
         const topEdge = bounds.halfH + 0.3
-        const groundY = -bounds.halfH + 0.02
+        const bottomEdge = -(bounds.halfH + 0.3)
+        const tanHalfFov = Math.tan(THREE.MathUtils.degToRad(camera.fov / 2))
         for (let i = 0; i < RAIN_COUNT; i += 1) {
           const drop = rainDrops[i]
           drop.y -= drop.speed * dt
-          if (drop.y < groundY) {
+          if (drop.y <= bottomEdge) {
+            // Splash exactly at the fold for this drop's depth: farther
+            // drops need a lower world-Y to land on the same screen line.
+            const halfHAtDrop = (camera.position.z - drop.z) * tanHalfFov
+            spawnSplash(drop.x, -halfHAtDrop, drop.z)
             drop.y = topEdge
             drop.x = randomX()
           }
-          const taper = Math.min(1, Math.max(0, (drop.y - groundY) / 0.35))
           rainPositions[i * 6] = drop.x
           rainPositions[i * 6 + 1] = drop.y
           rainPositions[i * 6 + 2] = drop.z
           rainPositions[i * 6 + 3] = drop.x
-          rainPositions[i * 6 + 4] = drop.y + drop.len * taper
+          rainPositions[i * 6 + 4] = drop.y + drop.len
           rainPositions[i * 6 + 5] = drop.z
         }
         rainGeometry.attributes.position.needsUpdate = true
@@ -414,20 +363,15 @@ export default function HeroLogo3D({ anchor = null }: HeroLogo3DProps) {
         for (let i = 0; i < FLASH_COUNT; i += 1) {
           const drop = flashDrops[i]
           drop.y -= drop.speed * dt
-          if (drop.y < groundY) {
+          if (drop.y <= bottomEdge) {
             drop.y = topEdge
             drop.x = randomX()
           }
-          // Diagonal slant -> the ASCII `╱`.
-          const flashTaper = Math.min(
-            1,
-            Math.max(0, (drop.y - groundY) / 0.35),
-          )
           flashPositions[i * 6] = drop.x
           flashPositions[i * 6 + 1] = drop.y
           flashPositions[i * 6 + 2] = drop.z
           flashPositions[i * 6 + 3] = drop.x + 0.045
-          flashPositions[i * 6 + 4] = drop.y + drop.len * flashTaper
+          flashPositions[i * 6 + 4] = drop.y + drop.len
           flashPositions[i * 6 + 5] = drop.z
         }
         flashGeometry.attributes.position.needsUpdate = true

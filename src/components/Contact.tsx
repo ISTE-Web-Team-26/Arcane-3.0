@@ -46,16 +46,32 @@ export default function Contact() {
       aria-labelledby="contact-heading"
       className="soil-bg-layer scroll-mt-20 px-4 pt-0 pb-8 font-content sm:px-8"
     >
-      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-        <div>
-          <p className="font-heading text-sm font-semibold text-mist">
-            Arcane 3.0
-          </p>
-          <p className="mt-1 text-sm">
-            Questions about the events?{' '}
-            <a
-              href="mailto:hello@example.com"
-              className="font-medium text-mist hover:text-medium-red hover:underline"
+      {/* Strata Transition Line (matches the Events–FAQ divider) */}
+      <div
+        aria-hidden="true"
+        className="h-[1px] w-full bg-gradient-to-r from-transparent via-dark-red/30 to-transparent animate-strata-pulse"
+      />
+      <div className="w-full pt-12 sm:pt-16">
+        {/* Header Tag with Scroll Reveal */}
+        <motion.div
+          initial={{ opacity: 0, y: 30 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true, margin: '-60px' }}
+          transition={{ duration: 0.65, ease: [0.16, 1, 0.3, 1] as const }}
+        >
+          <div className="mb-2 flex items-center gap-2 font-mono text-xs font-semibold tracking-wider text-medium-red uppercase">
+            <span
+              className="inline-block h-2 w-2 bg-medium-red"
+              aria-hidden="true"
+            />
+            <span>Communications // Terminal</span>
+          </div>
+
+          {/* Section Heading */}
+          <div className="mb-10 sm:mb-14">
+            <h2
+              id="contact-heading"
+              className="font-heading text-3xl font-bold tracking-tight text-mist sm:text-4xl md:text-5xl dark:text-mist"
             >
               GET IN{' '}
               <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#e05652] via-[#ea6e6b] to-[#f4938f]">
@@ -176,28 +192,74 @@ export default function Contact() {
             ))}
           </motion.div>
         </div>
-        <nav className="flex flex-wrap gap-1 text-sm">
-          <Link
-            to="/"
-              className="rounded-md px-3 py-1.5 transition-colors hover:bg-medium-red/20 hover:text-mist"
+
+        {/* Social Media Channels Grid with Staggered Scroll Motion */}
+        <div className="mb-12">
+          <motion.div
+            initial={{ opacity: 0, x: -20 }}
+            whileInView={{ opacity: 1, x: 0 }}
+            viewport={{ once: true, margin: '-40px' }}
+            transition={{ duration: 0.5 }}
+            className="mb-4 flex items-center gap-2 font-mono text-xs font-semibold tracking-wider text-medium-red uppercase"
           >
-            Home
-          </Link>
-          <Link
-            to="/event1"
-              className="rounded-md px-3 py-1.5 transition-colors hover:bg-medium-red/20 hover:text-mist"
+            <span>// SOCIAL MEDIA</span>
+          </motion.div>
+
+          <motion.div
+            initial="hidden"
+            whileInView="visible"
+            viewport={{ once: true, margin: '-40px' }}
+            variants={{
+              hidden: { opacity: 0 },
+              visible: {
+                opacity: 1,
+                transition: { staggerChildren: 0.08 },
+              },
+            }}
+            className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4 sm:gap-5"
           >
-            Event 1
-          </Link>
-          <Link
-            to="/event2"
-              className="rounded-md px-3 py-1.5 transition-colors hover:bg-medium-red/20 hover:text-mist"
+          {/* Instagram Card */}
+          <motion.a
+            variants={itemVariants}
+            whileHover={{ y: -5, scale: 1.015 }}
+            href="https://instagram.com/iste_fisat"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="group relative flex flex-col justify-between rounded-xl border border-dark-red/30 bg-near-black/80 p-5 transition-colors duration-300 hover:border-medium-red/60 hover:shadow-[0_0_25px_rgba(170,52,48,0.18)]"
           >
-            Event 2
-          </Link>
-          <Link
-            to="/event3"
-              className="rounded-md px-3 py-1.5 transition-colors hover:bg-medium-red/20 hover:text-mist"
+            <div>
+              <div className="flex items-center justify-between pb-3">
+                <span className="font-mono text-[11px] font-semibold tracking-widest text-mist/60 uppercase">
+                  INSTAGRAM
+                </span>
+                <svg
+                  className="h-5 w-5 text-medium-red transition-transform duration-300 group-hover:scale-110"
+                  fill="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z" />
+                </svg>
+              </div>
+              <p className="font-heading text-xl font-bold tracking-tight text-mist sm:text-2xl">
+                @iste_fisat
+              </p>
+              <p className="mt-2 font-content text-xs leading-relaxed text-mist/70">
+                Live stories, announcements, event schedules & teaser drops.
+              </p>
+            </div>
+            <div className="mt-5 h-[2px] w-full overflow-hidden rounded-full bg-dark-red/30">
+              <div className="h-full w-2/3 rounded-full bg-gradient-to-r from-dark-red to-medium-red transition-all duration-500 group-hover:w-full" />
+            </div>
+          </motion.a>
+
+          {/* LinkedIn Card */}
+          <motion.a
+            variants={itemVariants}
+            whileHover={{ y: -5, scale: 1.015 }}
+            href="https://linkedin.com/company/iste-fisat"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="group relative flex flex-col justify-between rounded-xl border border-dark-red/30 bg-near-black/80 p-5 transition-colors duration-300 hover:border-medium-red/60 hover:shadow-[0_0_25px_rgba(170,52,48,0.18)]"
           >
             <div>
               <div className="flex items-center justify-between pb-3">
@@ -362,9 +424,6 @@ export default function Contact() {
           </nav>
         </motion.div>
       </div>
-      <p className="mt-4 text-xs text-mist/50">
-        © {new Date().getFullYear()} Arcane 3.0. All rights reserved.
-      </p>
     </footer>
   )
 }
