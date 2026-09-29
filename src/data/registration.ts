@@ -72,13 +72,12 @@ export async function submitRegistration(
   data: RegistrationData,
   attachedImg: string | null,
 ): Promise<RegistrationSuccess> {
-  const anonKey = import.meta.env.VITE_SUPABASE_ANON_KEY
-  if (typeof anonKey !== 'string' || !anonKey.trim()) {
-    throw new Error(
-      'Online registration is not configured yet. Please contact the organizers.',
-    )
-  }
-  const key = anonKey.trim()
+  // The Edge Function is deployed with verify_jwt=false (public), so the
+  // anon key is optional — it is sent when configured, otherwise the request
+  // goes out unauthenticated and the gateway still routes it.
+  const rawKey = import.meta.env.VITE_SUPABASE_ANON_KEY
+  const key =
+    typeof rawKey === 'string' && rawKey.trim() ? rawKey.trim() : null
 
   let res: Response
   try {
@@ -86,8 +85,7 @@ export async function submitRegistration(
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        Authorization: `Bearer ${key}`,
-        apikey: key,
+        ...(key ? { Authorization: `Bearer ${key}`, apikey: key } : {}),
       },
       body: JSON.stringify({
         event_id: eventId,
