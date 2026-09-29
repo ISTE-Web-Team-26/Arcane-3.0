@@ -285,11 +285,11 @@ function formatTeam(min: unknown, max: unknown): string {
   return `${a}-${b} MEMBERS`
 }
 
-/** registration_fee integer -> "₹300", 0/NULL -> "FREE". */
+/** registration_fee integer -> "₹300 / TEAM", 0/NULL -> "FREE". */
 function formatFee(fee: unknown): string {
   const n = typeof fee === 'number' ? fee : Number(fee)
   if (!Number.isFinite(n) || n <= 0) return 'FREE'
-  return `₹${n.toLocaleString('en-IN')}`
+  return `₹${n.toLocaleString('en-IN')} / TEAM`
 }
 
 /** timestamptz -> "HH:MM" in the venue timezone (FISAT, Kerala). */

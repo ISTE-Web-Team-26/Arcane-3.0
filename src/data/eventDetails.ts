@@ -40,7 +40,7 @@ export function eventDateLine(event: EventItem): string {
 
 export function eventFeeLine(event: EventItem): string {
   return event.feeAmount != null && event.feeAmount > 0
-    ? formatINR(event.feeAmount)
+    ? `${formatINR(event.feeAmount)} / TEAM`
     : (event.fee ?? 'FREE')
 }
 
