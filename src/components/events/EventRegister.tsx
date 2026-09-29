@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import type { InputHTMLAttributes } from 'react'
 import { Link } from 'react-router'
 import { motion } from 'framer-motion'
+import { jsPDF } from 'jspdf'
 import BackgroundParticles from '../BackgroundParticles.tsx'
 import type { EventItem } from '../../data/events.ts'
 import gpayLogo from '../../assets/gpay-g.svg'
@@ -228,6 +229,85 @@ export default function EventRegister({ event }: { event: EventItem }) {
       // Storage full or unavailable — the form keeps working in memory.
     }
   }, [storageKey, teamName, collegeName, members, step, success])
+
+  /** jsPDF's built-in fonts are WinAnsi — strip glyphs outside it. */
+function pdfSafe(value: string): string {
+  return value
+    .replace(/₹/g, 'Rs. ')
+    .replace(/★/g, '')
+    .replace(/•/g, '')
+    .replace(/[—–]/g, '-')
+    .trim()
+}
+
+  function handleDownloadTicket() {
+    if (!success) return
+    const rows = members.filter((m) =>
+      [m.name, m.semester, m.branch, m.batch, m.phone_no, m.email].some(
+        (v) => v.trim() !== '',
+      ),
+    )
+    const doc = new jsPDF({ unit: 'pt', format: 'a4' })
+    const margin = 48
+    const bottom = 780
+    let y = 64
+    const line = (
+      text: string,
+      opts?: { size?: number; bold?: boolean; gap?: number },
+    ) => {
+      if (y > bottom) {
+        doc.addPage()
+        y = 64
+      }
+      doc.setFont('helvetica', opts?.bold ? 'bold' : 'normal')
+      doc.setFontSize(opts?.size ?? 11)
+      doc.text(pdfSafe(text), margin, y)
+      y += opts?.gap ?? 20
+    }
+
+    line('ARCANE 3.0 - EVENT TICKET', { size: 18, bold: true, gap: 26 })
+    line(`${event.title} (${event.code || 'ARCANE'})`, { size: 13, gap: 24 })
+    line(`Ticket: ${success.ticket}`, { size: 26, bold: true, gap: 30 })
+    line(`Team: ${teamName.trim()}`, { bold: true })
+    line(`College: ${collegeName.trim()}`)
+    line(`Registration ID: #${success.registration_id}`)
+    line(`Verification: ${success.verification.toUpperCase()}`)
+    line(`Venue: ${event.venue}`)
+    line(`Date: ${dateLine} - ${event.time}`)
+    if (teamLine) line(`Team size: ${teamLine}`)
+    line(`Fee: ${feeLine}`)
+    if (prizeLine) line(`Prize: ${prizeLine}`)
+    y += 6
+    line(`MEMBERS (${rows.length})`, { bold: true })
+    rows.forEach((m, i) => {
+      line(
+        `${i + 1}. ${m.name} - ${m.semester}, ${m.branch}, Batch ${m.batch}`,
+        { gap: 15 },
+      )
+      line(`${m.phone_no}, ${m.email}`, { size: 10, gap: 19 })
+    })
+    y += 6
+    if (success.whatsapp_group_link) {
+      line('WHATSAPP GROUP', { bold: true })
+      if (y > bottom) {
+        doc.addPage()
+        y = 64
+      }
+      doc.setFont('helvetica', 'normal')
+      doc.setFontSize(11)
+      doc.setTextColor(26, 115, 232)
+      doc.textWithLink(pdfSafe(success.whatsapp_group_link), margin, y, {
+        url: success.whatsapp_group_link,
+      })
+      doc.setTextColor(0, 0, 0)
+      y += 24
+    }
+    line('Show this ticket at the verification desk on event day.', {
+      size: 10,
+    })
+
+    doc.save(`arcane-ticket-${success.ticket}.pdf`)
+  }
 
   function handleCloseTicket() {
     try {
@@ -493,6 +573,13 @@ export default function EventRegister({ event }: { event: EventItem }) {
                   Join WhatsApp group
                 </a>
               ) : null}
+              <button
+                type="button"
+                onClick={handleDownloadTicket}
+                className="inline-flex w-full cursor-pointer items-center justify-center gap-2 rounded-xl border border-medium-red/60 bg-medium-red/15 px-6 py-3 font-mono text-xs font-bold tracking-wider text-mist uppercase transition-all duration-200 hover:bg-medium-red/30 active:scale-[0.98]"
+              >
+                Download ticket (PDF) ⬇
+              </button>
               <Link
                 to={`/events/${event.id}`}
                 className="inline-flex w-full items-center justify-center rounded-xl border border-dark-red/40 bg-black/40 px-6 py-3 font-mono text-xs font-semibold tracking-wider text-mist/75 uppercase hover:border-medium-red/60 hover:text-mist"
