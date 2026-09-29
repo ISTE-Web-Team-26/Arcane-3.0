@@ -69,16 +69,18 @@ export default function About() {
           <p>
             Welcome to{' '}
             <strong className="font-semibold text-mist">ARCANE 3.0</strong> the
-            premier technical fest organized by ISTE FISAT. This two-day
+            premier technical fest organized by ISTE FISAT. This three-day
             extravaganza brings together the brightest minds to explore the
             latest in technology, innovation, and creativity.
           </p>
           <p className="text-mist/70 text-xs sm:text-sm md:text-base">
-            With a perfect blend of technical competitions, workshops, and
-            networking opportunities, Arcane 2.0 promises to be an
-            unforgettable experience for all tech enthusiasts. Get ready to
-            witness cutting-edge innovations, participate in challenging
-            competitions, and learn from industry experts.
+            Four battlegrounds, one arena: dodge through Circuit &amp; Co&apos;s
+            ECE games and hands-on circuit challenges, debug and decode your
+            way through Ctrl+Chaos, rebuild the FISAT website from scratch in
+            Web Makeup, and break out of No Way Out&apos;s five-stage tech
+            escape room — with ₹12,000 in prizes and per-team entry from
+            ₹250. Arcane 3.0 promises to be an unforgettable experience for
+            all tech enthusiasts.
           </p>
         </motion.div>
 
@@ -129,47 +131,7 @@ export default function About() {
         }}
         className="mt-10 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4 sm:gap-5"
       >
-        {/* Card 1: Attendance / Delegates */}
-        <motion.div
-          variants={itemVariants}
-          whileHover={{ y: -5, scale: 1.015 }}
-          className="group relative flex flex-col justify-between rounded-xl border border-dark-red/30 bg-near-black/80 p-5 transition-colors duration-300 hover:border-medium-red/60 hover:shadow-[0_0_25px_rgba(170,52,48,0.18)] cursor-default"
-        >
-          <div>
-            <div className="flex items-center justify-between pb-3">
-              <span className="font-mono text-[11px] font-semibold tracking-widest text-mist/60 uppercase">
-                ATTENDANCE
-              </span>
-              <svg
-                className="h-4 w-4 text-medium-red/80 transition-colors group-hover:text-medium-red"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-                strokeWidth={1.75}
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"
-                />
-              </svg>
-            </div>
-
-            <p className="font-heading text-3xl font-bold tracking-tight text-mist sm:text-4xl">
-              1.5K+
-            </p>
-
-            <p className="mt-2 font-content text-xs leading-relaxed text-mist/70">
-              Delegates, developers & innovators competing from across the nation.
-            </p>
-          </div>
-
-          <div className="mt-5 h-[2px] w-full overflow-hidden rounded-full bg-dark-red/30">
-            <div className="h-full w-3/4 rounded-full bg-gradient-to-r from-dark-red to-medium-red transition-all duration-500 group-hover:w-full" />
-          </div>
-        </motion.div>
-
-        {/* Card 2: Deep-Dive Events */}
+        {/* Card 1: Events */}
         <motion.div
           variants={itemVariants}
           whileHover={{ y: -5, scale: 1.015 }}
@@ -196,20 +158,21 @@ export default function About() {
             </div>
 
             <p className="font-heading text-3xl font-bold tracking-tight text-mist sm:text-4xl">
-              20+
+              4
             </p>
 
             <p className="mt-2 font-content text-xs leading-relaxed text-mist/70">
-              Cutting-edge hackathons, design sprints, esports battles & code showdowns.
+              Circuit games, coding debug, a web-design rebuild &amp; a tech
+              escape room.
             </p>
           </div>
 
           <div className="mt-5 h-[2px] w-full overflow-hidden rounded-full bg-dark-red/30">
-            <div className="h-full w-3/5 rounded-full bg-gradient-to-r from-dark-red to-medium-red transition-all duration-500 group-hover:w-full" />
+            <div className="h-full w-3/4 rounded-full bg-gradient-to-r from-dark-red to-medium-red transition-all duration-500 group-hover:w-full" />
           </div>
         </motion.div>
 
-        {/* Card 3: Prize Pool */}
+        {/* Card 2: Prize Pool */}
         <motion.div
           variants={itemVariants}
           whileHover={{ y: -5, scale: 1.015 }}
@@ -236,20 +199,20 @@ export default function About() {
             </div>
 
             <p className="font-heading text-3xl font-bold tracking-tight text-mist sm:text-4xl">
-              ₹100K+
+              ₹12K
             </p>
 
             <p className="mt-2 font-content text-xs leading-relaxed text-mist/70">
-              Cash rewards, sponsor bounties & accolades for top-tier winners.
+              ₹3,000 up for grabs in each of the four events.
             </p>
           </div>
 
           <div className="mt-5 h-[2px] w-full overflow-hidden rounded-full bg-dark-red/30">
-            <div className="h-full w-4/5 rounded-full bg-gradient-to-r from-dark-red to-medium-red transition-all duration-500 group-hover:w-full" />
+            <div className="h-full w-3/5 rounded-full bg-gradient-to-r from-dark-red to-medium-red transition-all duration-500 group-hover:w-full" />
           </div>
         </motion.div>
 
-        {/* Card 4: Non-Stop Marathon */}
+        {/* Card 3: Squad Size */}
         <motion.div
           variants={itemVariants}
           whileHover={{ y: -5, scale: 1.015 }}
@@ -258,7 +221,47 @@ export default function About() {
           <div>
             <div className="flex items-center justify-between pb-3">
               <span className="font-mono text-[11px] font-semibold tracking-widest text-mist/60 uppercase">
-                RIGOROUS MARATHON
+                SQUAD SIZE
+              </span>
+              <svg
+                className="h-4 w-4 text-medium-red/80 transition-colors group-hover:text-medium-red"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+                strokeWidth={1.75}
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"
+                />
+              </svg>
+            </div>
+
+            <p className="font-heading text-3xl font-bold tracking-tight text-mist sm:text-4xl">
+              2–4
+            </p>
+
+            <p className="mt-2 font-content text-xs leading-relaxed text-mist/70">
+              Pairs, trios and quads — every event runs team-based.
+            </p>
+          </div>
+
+          <div className="mt-5 h-[2px] w-full overflow-hidden rounded-full bg-dark-red/30">
+            <div className="h-full w-4/5 rounded-full bg-gradient-to-r from-dark-red to-medium-red transition-all duration-500 group-hover:w-full" />
+          </div>
+        </motion.div>
+
+        {/* Card 4: Dates */}
+        <motion.div
+          variants={itemVariants}
+          whileHover={{ y: -5, scale: 1.015 }}
+          className="group relative flex flex-col justify-between rounded-xl border border-dark-red/30 bg-near-black/80 p-5 transition-colors duration-300 hover:border-medium-red/60 hover:shadow-[0_0_25px_rgba(170,52,48,0.18)] cursor-default"
+        >
+          <div>
+            <div className="flex items-center justify-between pb-3">
+              <span className="font-mono text-[11px] font-semibold tracking-widest text-mist/60 uppercase">
+                MARK THE DATES
               </span>
               <svg
                 className="h-4 w-4 text-medium-red/80 transition-colors group-hover:text-medium-red"
@@ -276,11 +279,11 @@ export default function About() {
             </div>
 
             <p className="font-heading text-3xl font-bold tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-[#e05652] to-[#f4938f] sm:text-4xl">
-              48H
+              OCT 6–8
             </p>
 
             <p className="mt-2 font-content text-xs leading-relaxed text-mist/70">
-              Non-Stop empirical engineering, pure technical friction & zero fluff.
+              Three days of circuits, code, design &amp; escape rooms on campus.
             </p>
           </div>
 
