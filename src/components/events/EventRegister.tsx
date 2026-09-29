@@ -54,6 +54,80 @@ function blankMember(): RegisterMember {
   return { name: '', semester: '', branch: '', batch: '', phone_no: '', email: '' }
 }
 
+/* ------------------- persisted registration progress ------------------- */
+
+const STORAGE_VERSION = 1
+
+interface PersistedRegistration {
+  version: number
+  teamName: string
+  collegeName: string
+  members: RegisterMember[]
+  step: number
+  success: RegistrationSuccess | null
+}
+
+/** Coerce an unknown stored value into a clean member (never throws). */
+function sanitizeMember(value: unknown): RegisterMember {
+  const clean = blankMember()
+  if (typeof value !== 'object' || value === null) return clean
+  const record = value as Record<string, unknown>
+  for (const key of Object.keys(clean) as (keyof RegisterMember)[]) {
+    if (typeof record[key] === 'string') {
+      clean[key] = (record[key] as string).slice(0, 200)
+    }
+  }
+  return clean
+}
+
+function sanitizeSuccess(value: unknown): RegistrationSuccess | null {
+  if (typeof value !== 'object' || value === null) return null
+  const record = value as Record<string, unknown>
+  if (typeof record.ticket !== 'string' || !record.ticket) return null
+  return {
+    ticket: record.ticket,
+    registration_id:
+      typeof record.registration_id === 'number'
+        ? record.registration_id
+        : Number(record.registration_id) || 0,
+    verification:
+      typeof record.verification === 'string' && record.verification
+        ? record.verification
+        : 'pending',
+    whatsapp_group_link:
+      typeof record.whatsapp_group_link === 'string'
+        ? record.whatsapp_group_link
+        : null,
+  }
+}
+
+/** Read stored progress for one event, normalized to the current team size. */
+function loadPersisted(key: string, count: number): PersistedRegistration | null {
+  try {
+    const raw = localStorage.getItem(key)
+    if (!raw) return null
+    const parsed = JSON.parse(raw) as Partial<PersistedRegistration>
+    if (!parsed || parsed.version !== STORAGE_VERSION) return null
+    const stored = Array.isArray(parsed.members) ? parsed.members : []
+    const members = stored.slice(0, count).map(sanitizeMember)
+    while (members.length < count) members.push(blankMember())
+    return {
+      version: STORAGE_VERSION,
+      teamName:
+        typeof parsed.teamName === 'string' ? parsed.teamName.slice(0, 120) : '',
+      collegeName:
+        typeof parsed.collegeName === 'string'
+          ? parsed.collegeName.slice(0, 200)
+          : '',
+      members,
+      step: parsed.step === 2 || parsed.step === 3 ? parsed.step : 1,
+      success: sanitizeSuccess(parsed.success),
+    }
+  } catch {
+    return null
+  }
+}
+
 function Field({
   label,
   ...props
@@ -111,23 +185,67 @@ export default function EventRegister({ event }: { event: EventItem }) {
   const minCount = event.teamMin ?? 1
   const maxCount = event.teamMax ?? minCount
 
-  const [step, setStep] = useState(1)
-  const [teamName, setTeamName] = useState('')
-  const [collegeName, setCollegeName] = useState(FISAT_FULL_NAME)
-  const [members, setMembers] = useState<RegisterMember[]>(() =>
-    Array.from({ length: maxCount }, blankMember),
+  // Wizard progress is persisted per event so a reload never loses it.
+  // The File object itself can't survive storage — only the fields do.
+  const storageKey = `arcane:registration:${event.id}`
+  const [initial] = useState(() => loadPersisted(storageKey, maxCount))
+
+  const [step, setStep] = useState(initial?.step ?? 1)
+  const [teamName, setTeamName] = useState(initial?.teamName ?? '')
+  const [collegeName, setCollegeName] = useState(
+    initial?.collegeName.trim() ? initial.collegeName : FISAT_FULL_NAME,
+  )
+  const [members, setMembers] = useState<RegisterMember[]>(
+    () => initial?.members ?? Array.from({ length: maxCount }, blankMember),
   )
   const [file, setFile] = useState<File | null>(null)
   const [previewUrl, setPreviewUrl] = useState<string | null>(null)
   const [error, setError] = useState<string | null>(null)
   const [submitting, setSubmitting] = useState(false)
-  const [success, setSuccess] = useState<RegistrationSuccess | null>(null)
+  const [success, setSuccess] = useState<RegistrationSuccess | null>(
+    () => initial?.success ?? null,
+  )
 
   useEffect(() => {
     return () => {
       if (previewUrl) URL.revokeObjectURL(previewUrl)
     }
   }, [previewUrl])
+
+  // Persist every change; a stored ticket keeps showing until closed.
+  useEffect(() => {
+    try {
+      const payload: PersistedRegistration = {
+        version: STORAGE_VERSION,
+        teamName,
+        collegeName,
+        members,
+        step: success ? 3 : step,
+        success,
+      }
+      localStorage.setItem(storageKey, JSON.stringify(payload))
+    } catch {
+      // Storage full or unavailable — the form keeps working in memory.
+    }
+  }, [storageKey, teamName, collegeName, members, step, success])
+
+  function handleCloseTicket() {
+    try {
+      localStorage.removeItem(storageKey)
+    } catch {
+      // Ignore — nothing persisted anyway.
+    }
+    if (previewUrl) URL.revokeObjectURL(previewUrl)
+    setFile(null)
+    setPreviewUrl(null)
+    setError(null)
+    setSuccess(null)
+    setTeamName('')
+    setCollegeName(FISAT_FULL_NAME)
+    setMembers(Array.from({ length: maxCount }, blankMember))
+    setStep(1)
+    window.scrollTo({ top: 0, behavior: 'smooth' })
+  }
 
   const feeLine = eventFeeLine(event)
   const dateLine = eventDateLine(event)
@@ -311,8 +429,19 @@ export default function EventRegister({ event }: { event: EventItem }) {
               <span className="font-mono text-[11px] font-bold tracking-[0.2em] text-mist uppercase">
                 Event ticket
               </span>
-              <span className="font-mono text-[11px] font-semibold tracking-wider text-mist/60 uppercase">
-                {event.code || 'ARCANE'}
+              <span className="flex items-center gap-3">
+                <span className="font-mono text-[11px] font-semibold tracking-wider text-mist/60 uppercase">
+                  {event.code || 'ARCANE'}
+                </span>
+                <button
+                  type="button"
+                  onClick={handleCloseTicket}
+                  aria-label="Close ticket and start a new registration"
+                  title="Close"
+                  className="flex h-6 w-6 cursor-pointer items-center justify-center rounded-md border border-dark-red/40 text-xs text-mist/60 transition-colors hover:border-medium-red hover:text-mist"
+                >
+                  ✕
+                </button>
               </span>
             </div>
 
