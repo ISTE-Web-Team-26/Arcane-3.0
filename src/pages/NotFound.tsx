@@ -1,6 +1,8 @@
 import { Link } from 'react-router'
+import { useDocumentTitle } from '../hooks/useDocumentTitle.ts'
 
 export default function NotFound() {
+  useDocumentTitle('Not Found | Arcane 3.0')
   return (
     <section>
       <h1 className="font-heading text-4xl font-medium text-near-black sm:text-5xl dark:text-mist">

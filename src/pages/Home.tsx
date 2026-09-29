@@ -1,6 +1,7 @@
 import { lazy, Suspense } from 'react'
 import BackgroundParticles from '../components/BackgroundParticles.tsx'
 import Hero from '../components/home/Hero.tsx'
+import { useDocumentTitle } from '../hooks/useDocumentTitle.ts'
 
 // Lazy-load below-the-fold sections so they don't block first paint
 const About = lazy(() => import('../components/home/About.tsx'))
@@ -8,6 +9,7 @@ const Events = lazy(() => import('../components/home/Events.tsx'))
 const FAQ = lazy(() => import('../components/home/FAQ.tsx'))
 
 export default function Home() {
+  useDocumentTitle('Arcane 3.0')
   return (
     <>
       <Hero />
