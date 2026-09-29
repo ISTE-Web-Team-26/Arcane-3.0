@@ -4,6 +4,7 @@ import { Link } from 'react-router'
 import { motion } from 'framer-motion'
 import BackgroundParticles from '../BackgroundParticles.tsx'
 import type { EventItem } from '../../data/events.ts'
+import gpayLogo from '../../assets/gpay-g.svg'
 import {
   eventDateLine,
   eventFeeLine,
@@ -132,6 +133,18 @@ export default function EventRegister({ event }: { event: EventItem }) {
   const dateLine = eventDateLine(event)
   const teamLine = eventTeamLine(event)
   const prizeLine = eventPrizeLine(event)
+
+  // UPI intent for the "Open in Google Pay" button (mobile only behavior —
+  // desktop browsers can't handle upi://). Amount is prefilled when known.
+  const upiId = 'mini.p.r.@federal'
+  const upiLink =
+    `upi://pay?pa=${encodeURIComponent(upiId)}` +
+    `&pn=${encodeURIComponent(`ARCANE 3.0 ${event.title}`)}` +
+    '&cu=INR' +
+    (event.feeAmount != null && event.feeAmount > 0
+      ? `&am=${event.feeAmount}`
+      : '') +
+    `&tn=${encodeURIComponent(`Registration ${event.code || event.title}`)}`
 
   function updateMember(index: number, key: keyof RegisterMember, value: string) {
     setMembers((prev) => prev.map((m, i) => (i === index ? { ...m, [key]: value } : m)))
@@ -550,12 +563,29 @@ export default function EventRegister({ event }: { event: EventItem }) {
             </p>
 
             {event.paymentImage && (
-              <img
-                src={event.paymentImage}
-                alt="Payment QR code"
-                loading="lazy"
-                className="mt-5 max-h-[60vh] w-full rounded-xl border border-dark-red/30 bg-black/60 object-contain"
-              />
+              <>
+                <img
+                  src={event.paymentImage}
+                  alt="Payment QR code"
+                  loading="lazy"
+                  className="mt-5 max-h-[60vh] w-full rounded-xl border border-dark-red/30 bg-black/60 object-contain"
+                />
+                <a
+                  href={upiLink}
+                  className="mt-3 inline-flex w-full items-center justify-center gap-2 rounded-xl bg-white px-6 py-3 font-mono text-sm font-bold tracking-wider text-[#1a73e8] uppercase transition-all duration-200 hover:bg-mist active:scale-[0.98]"
+                >
+                  <img
+                    src={gpayLogo}
+                    alt=""
+                    aria-hidden="true"
+                    className="h-5 w-5 object-contain"
+                  />
+                  Open in Google Pay ↗
+                </a>
+                <p className="mt-1.5 text-center font-mono text-[11px] text-mist/50">
+                  UPI ID: {upiId}
+                </p>
+              </>
             )}
 
             <div className="mt-5">
