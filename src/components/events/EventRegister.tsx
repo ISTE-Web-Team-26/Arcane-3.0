@@ -247,63 +247,186 @@ function pdfSafe(value: string): string {
         (v) => v.trim() !== '',
       ),
     )
+
+    // Palette mirrors the on-screen ticket card.
+    const PAGE: [number, number, number] = [18, 11, 6]
+    const CARD: [number, number, number] = [4, 2, 3]
+    const STRIP: [number, number, number] = [29, 10, 10]
+    const RED: [number, number, number] = [170, 52, 48]
+    const DARK_RED: [number, number, number] = [131, 27, 28]
+    const MIST: [number, number, number] = [231, 229, 232]
+    const DIM: [number, number, number] = [150, 147, 152]
+    const LIGHT_RED: [number, number, number] = [244, 147, 143]
+    const AMBER: [number, number, number] = [252, 211, 77]
+    const GREEN: [number, number, number] = [5, 150, 105]
+
     const doc = new jsPDF({ unit: 'pt', format: 'a4' })
-    const margin = 48
-    const bottom = 780
-    let y = 64
-    const line = (
-      text: string,
-      opts?: { size?: number; bold?: boolean; gap?: number },
-    ) => {
-      if (y > bottom) {
-        doc.addPage()
-        y = 64
-      }
-      doc.setFont('helvetica', opts?.bold ? 'bold' : 'normal')
-      doc.setFontSize(opts?.size ?? 11)
-      doc.text(pdfSafe(text), margin, y)
-      y += opts?.gap ?? 20
+    const pageW = doc.internal.pageSize.getWidth()
+    const margin = 64
+    const cardX = margin
+    const cardW = pageW - margin * 2
+    const cx = pageW / 2
+    let y = 0
+
+    const newPage = () => {
+      doc.addPage()
+      doc.setFillColor(...PAGE)
+      doc.rect(0, 0, pageW, doc.internal.pageSize.getHeight(), 'F')
+      y = 56
+    }
+    const ensure = (needed: number) => {
+      if (y + needed > 786) newPage()
     }
 
-    line('ARCANE 3.0 - EVENT TICKET', { size: 18, bold: true, gap: 26 })
-    line(`${event.title} (${event.code || 'ARCANE'})`, { size: 13, gap: 24 })
-    line(`Ticket: ${success.ticket}`, { size: 26, bold: true, gap: 30 })
-    line(`Team: ${teamName.trim()}`, { bold: true })
-    line(`College: ${collegeName.trim()}`)
-    line(`Registration ID: #${success.registration_id}`)
-    line(`Verification: ${success.verification.toUpperCase()}`)
-    line(`Venue: ${event.venue}`)
-    line(`Date: ${dateLine} - ${event.time}`)
-    if (teamLine) line(`Team size: ${teamLine}`)
-    line(`Fee: ${feeLine}`)
-    if (prizeLine) line(`Prize: ${prizeLine}`)
-    y += 6
-    line(`MEMBERS (${rows.length})`, { bold: true })
-    rows.forEach((m, i) => {
-      line(
-        `${i + 1}. ${m.name} - ${m.semester}, ${m.branch}, Batch ${m.batch}`,
-        { gap: 15 },
-      )
-      line(`${m.phone_no}, ${m.email}`, { size: 10, gap: 19 })
+    doc.setFillColor(...PAGE)
+    doc.rect(0, 0, pageW, doc.internal.pageSize.getHeight(), 'F')
+    y = 56
+
+    /* ------------------------- ticket card ------------------------- */
+    const hasWa = !!success.whatsapp_group_link
+    const detailRows: { label: string; value: string; color?: [number, number, number] }[] = [
+      { label: 'TEAM', value: teamName.trim() },
+      { label: 'COLLEGE', value: collegeName.trim() },
+      { label: 'REGISTRATION ID', value: `#${success.registration_id}` },
+      { label: 'VERIFICATION', value: success.verification.toUpperCase(), color: AMBER },
+    ]
+    const cardBottom =
+      y + 40 + 24 + 52 + 22 + 18 + detailRows.length * 24 + 18 + (hasWa ? 16 + 42 + 26 : 26)
+
+    // Card body + red border.
+    doc.setFillColor(...CARD)
+    doc.roundedRect(cardX, y, cardW, cardBottom - y, 12, 12, 'F')
+    // Header strip (top-rounded, squared off at the bottom).
+    doc.setFillColor(...STRIP)
+    doc.roundedRect(cardX, y, cardW, 40, 12, 12, 'F')
+    doc.rect(cardX, y + 28, cardW, 12, 'F')
+    doc.setDrawColor(...RED)
+    doc.setLineWidth(1.5)
+    doc.roundedRect(cardX, y, cardW, cardBottom - y, 12, 12, 'D')
+
+    // Header row.
+    doc.setFont('helvetica', 'bold')
+    doc.setFontSize(10)
+    doc.setTextColor(...MIST)
+    doc.text(pdfSafe('EVENT TICKET'), cardX + 20, y + 25, { charSpace: 2 })
+    doc.setFontSize(10)
+    doc.setTextColor(...DIM)
+    const code = pdfSafe(event.code || 'ARCANE')
+    doc.text(code, cardX + cardW - 20, y + 25, { align: 'right' })
+    y += 40
+
+    // Title + big ticket code + note.
+    doc.setFontSize(11)
+    doc.setTextColor(...DIM)
+    doc.text(pdfSafe(event.title), cx, y + 24, { align: 'center' })
+    doc.setFont('helvetica', 'bold')
+    doc.setFontSize(44)
+    doc.setTextColor(...LIGHT_RED)
+    doc.text(pdfSafe(success.ticket), cx, y + 74, {
+      align: 'center',
+      charSpace: 4,
     })
-    y += 6
-    if (success.whatsapp_group_link) {
-      line('WHATSAPP GROUP', { bold: true })
-      if (y > bottom) {
-        doc.addPage()
-        y = 64
-      }
+    doc.setFontSize(10)
+    doc.setFont('helvetica', 'normal')
+    doc.setTextColor(...DIM)
+    doc.text(
+      pdfSafe('Show this ticket at the verification desk on event day.'),
+      cx,
+      y + 96,
+      { align: 'center' },
+    )
+    y += 114
+
+    const dashed = (yy: number) => {
+      doc.setDrawColor(...DARK_RED)
+      doc.setLineWidth(1.5)
+      doc.setLineDashPattern([7, 5], 0)
+      doc.line(cardX + 20, yy, cardX + cardW - 20, yy)
+      doc.setLineDashPattern([], 0)
+    }
+    dashed(y)
+    y += 18
+
+    // Detail rows.
+    for (const row of detailRows) {
       doc.setFont('helvetica', 'normal')
       doc.setFontSize(11)
-      doc.setTextColor(26, 115, 232)
-      doc.textWithLink(pdfSafe(success.whatsapp_group_link), margin, y, {
-        url: success.whatsapp_group_link,
-      })
-      doc.setTextColor(0, 0, 0)
+      doc.setTextColor(...DIM)
+      doc.text(pdfSafe(row.label), cardX + 20, y)
+      doc.setFont('helvetica', 'bold')
+      doc.setTextColor(...(row.color ?? MIST))
+      doc.text(pdfSafe(row.value), cardX + cardW - 20, y, { align: 'right' })
       y += 24
     }
-    line('Show this ticket at the verification desk on event day.', {
-      size: 10,
+    dashed(y)
+    y += 18
+
+    // WhatsApp button (only when the event has a group link).
+    if (hasWa && success.whatsapp_group_link) {
+      const btnH = 42
+      doc.setFillColor(...GREEN)
+      doc.roundedRect(cardX + 20, y, cardW - 40, btnH, 8, 8, 'F')
+      doc.setFont('helvetica', 'bold')
+      doc.setFontSize(12)
+      doc.setTextColor(255, 255, 255)
+      doc.text(pdfSafe('JOIN WHATSAPP GROUP'), cx, y + 27, { align: 'center' })
+      doc.link(cardX + 20, y, cardW - 40, btnH, {
+        url: success.whatsapp_group_link,
+      })
+      y += btnH + 26
+    } else {
+      y += 26
+    }
+    y = cardBottom + 34
+
+    /* ------------------- event details + members ------------------- */
+    const section = (title: string) => {
+      ensure(30)
+      doc.setFont('helvetica', 'bold')
+      doc.setFontSize(12)
+      doc.setTextColor(...MIST)
+      doc.text(pdfSafe(title), margin, y)
+      y += 22
+    }
+    const field = (label: string, value: string) => {
+      if (!value) return
+      ensure(20)
+      doc.setFont('helvetica', 'normal')
+      doc.setFontSize(11)
+      doc.setTextColor(...DIM)
+      doc.text(pdfSafe(`${label}:`), margin, y)
+      doc.setFont('helvetica', 'bold')
+      doc.setTextColor(...MIST)
+      doc.text(pdfSafe(value), margin + 130, y)
+      y += 20
+    }
+
+    section('EVENT DETAILS')
+    field('Event', `${event.title} (${event.code || 'ARCANE'})`)
+    field('Venue', event.venue)
+    field('Date', `${dateLine} - ${event.time}`)
+    if (teamLine) field('Team size', teamLine)
+    field('Fee', feeLine)
+    if (prizeLine) field('Prize', prizeLine)
+    y += 10
+
+    section(`MEMBERS (${rows.length})`)
+    rows.forEach((m, i) => {
+      ensure(40)
+      doc.setFont('helvetica', 'bold')
+      doc.setFontSize(11)
+      doc.setTextColor(...MIST)
+      doc.text(
+        pdfSafe(`${i + 1}. ${m.name} - ${m.semester}, ${m.branch}, Batch ${m.batch}`),
+        margin,
+        y,
+      )
+      y += 18
+      doc.setFont('helvetica', 'normal')
+      doc.setFontSize(10)
+      doc.setTextColor(...DIM)
+      doc.text(pdfSafe(`${m.phone_no}, ${m.email}`), margin, y)
+      y += 22
     })
 
     doc.save(`arcane-ticket-${success.ticket}.pdf`)
