@@ -151,7 +151,7 @@ export default function Events({ events: eventsProp }: EventsProps) {
                   ease: [0.16, 1, 0.3, 1] as const,
                 }}
                 whileHover={{ y: -6, scale: 1.015 }}
-                className="group relative flex flex-col justify-between overflow-hidden rounded-xl border border-dark-red/30 bg-near-black/80 transition-colors duration-300 hover:border-medium-red/60 hover:shadow-[0_0_25px_rgba(170,52,48,0.2)]"
+                className="group relative flex cursor-pointer flex-col justify-between overflow-hidden rounded-xl border border-dark-red/30 bg-near-black/80 transition-colors duration-300 hover:border-medium-red/60 hover:shadow-[0_0_25px_rgba(170,52,48,0.2)]"
               >
                 <div>
                   {/* Poster Image Container */}
@@ -240,7 +240,8 @@ export default function Events({ events: eventsProp }: EventsProps) {
 
                     <Link
                       to={event.to}
-                      className={`inline-flex items-center gap-1.5 rounded-lg border px-3.5 py-1.5 font-mono text-xs font-bold tracking-wider uppercase transition-all duration-200 active:scale-95 sm:text-sm ${
+                      aria-label={`View ${event.title}`}
+                      className={`inline-flex items-center gap-1.5 rounded-lg border px-3.5 py-1.5 font-mono text-xs font-bold tracking-wider uppercase transition-all duration-200 before:absolute before:inset-0 before:content-[''] sm:text-sm ${
                         isLocked
                           ? 'border-dark-red/30 bg-near-black/50 text-mist/40 hover:border-dark-red/50 hover:text-mist/60 cursor-not-allowed'
                           : 'border-medium-red bg-medium-red/15 text-mist hover:bg-medium-red hover:text-mist hover:shadow-[0_0_16px_rgba(170,52,48,0.5)]'
