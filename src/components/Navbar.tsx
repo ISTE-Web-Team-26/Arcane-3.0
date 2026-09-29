@@ -1,6 +1,8 @@
 import { useEffect, useState } from 'react'
 import { Link, useLocation } from 'react-router'
 import arcaneLogo from '../assets/arcane-logo.png'
+import isteLogo from '../assets/iste-logo.png'
+import fisatCrest from '../assets/fisat-crest.png'
 
 const navLinks = [
   { id: 'home', label: 'HOME' },
@@ -74,44 +76,85 @@ export default function Navbar() {
   return (
     <header className="fixed inset-x-0 top-0 z-50 flex min-h-[4.5rem] flex-col border-b border-white/10 bg-near-black/55 font-content text-mist shadow-[0_8px_32px_rgba(0,0,0,0.35)] backdrop-blur-xl sm:min-h-[5rem]">
       <div className="flex w-full items-center justify-between px-4 py-3.5 sm:px-8">
-        {/* Left: Non-rounded Logo */}
-        <Link
-          to="/"
-          onClick={() => handleClick('home')}
-          className="group flex items-center gap-3 transition-transform active:scale-95"
-          aria-label="Arcane 3.0 Home"
-        >
-          <div className="relative flex items-center">
-            <img
-              src={arcaneLogo}
-              alt="Arcane 3.0 Logo"
-              className="h-9 w-auto sm:h-12 object-contain drop-shadow-[0_0_10px_rgba(170,52,48,0.35)] transition-all duration-300 group-hover:brightness-110 group-hover:drop-shadow-[0_0_22px_rgba(238,39,33,0.65)]"
-            />
-            <span
-              className="pointer-events-none absolute inset-0 overflow-hidden opacity-70 mix-blend-screen transition-opacity duration-300 group-hover:opacity-100"
-              style={{
-                maskImage: `url(${arcaneLogo})`,
-                WebkitMaskImage: `url(${arcaneLogo})`,
-                maskSize: 'contain',
-                WebkitMaskSize: 'contain',
-                maskRepeat: 'no-repeat',
-                WebkitMaskRepeat: 'no-repeat',
-                maskPosition: 'center',
-                WebkitMaskPosition: 'center',
-              }}
-              aria-hidden="true"
-            >
+        {/* Left: Arcane + org logos */}
+        <div className="flex min-w-0 items-center gap-2 sm:gap-3">
+          <Link
+            to="/"
+            onClick={() => handleClick('home')}
+            className="group flex shrink-0 items-center gap-3 transition-transform active:scale-95"
+            aria-label="Arcane 3.0 Home"
+          >
+            <div className="relative flex items-center">
+              <img
+                src={arcaneLogo}
+                alt="Arcane 3.0 Logo"
+                className="h-9 w-auto sm:h-12 object-contain drop-shadow-[0_0_10px_rgba(170,52,48,0.35)] transition-all duration-300 group-hover:brightness-110 group-hover:drop-shadow-[0_0_22px_rgba(238,39,33,0.65)]"
+              />
               <span
-                className="animate-logo-shimmer absolute inset-y-0 left-0 w-[45%]"
+                className="pointer-events-none absolute inset-0 overflow-hidden opacity-70 mix-blend-screen transition-opacity duration-300 group-hover:opacity-100"
+                style={{
+                  maskImage: `url(${arcaneLogo})`,
+                  WebkitMaskImage: `url(${arcaneLogo})`,
+                  maskSize: 'contain',
+                  WebkitMaskSize: 'contain',
+                  maskRepeat: 'no-repeat',
+                  WebkitMaskRepeat: 'no-repeat',
+                  maskPosition: 'center',
+                  WebkitMaskPosition: 'center',
+                }}
                 aria-hidden="true"
+              >
+                <span
+                  className="animate-logo-shimmer absolute inset-y-0 left-0 w-[45%]"
+                  aria-hidden="true"
+                />
+              </span>
+            </div>
+          </Link>
+
+          <span aria-hidden="true" className="h-7 w-px shrink-0 bg-white/15 sm:h-9" />
+
+          <a
+            href="https://www.isteonline.in"
+            target="_blank"
+            rel="noreferrer"
+            aria-label="ISTE official website"
+            title="ISTE"
+            className="flex shrink-0 flex-col items-center gap-1.5 transition-transform hover:scale-105 active:scale-95"
+          >
+            <img
+              src={isteLogo}
+              alt="ISTE logo"
+              className="h-6 w-auto object-contain sm:h-8"
+            />
+            <span className="font-mono text-[10px] leading-none font-bold tracking-[0.12em] text-mist sm:text-xs">
+              ISTE
+            </span>
+          </a>
+          <a
+            href="https://fisat.ac.in"
+            target="_blank"
+            rel="noreferrer"
+            aria-label="FISAT official website"
+            title="FISAT"
+            className="flex shrink-0 flex-col items-center gap-1.5 transition-transform hover:scale-105 active:scale-95"
+          >
+            <span className="flex h-6 items-center overflow-hidden rounded-md bg-white px-0.5 ring-1 ring-white/30 sm:h-8">
+              <img
+                src={fisatCrest}
+                alt="FISAT logo"
+                className="h-full w-auto object-contain"
               />
             </span>
-          </div>
-        </Link>
+            <span className="font-mono text-[10px] leading-none font-bold tracking-[0.12em] text-mist sm:text-xs">
+              FISAT
+            </span>
+          </a>
+        </div>
 
         {/* Right Desktop: Nav Links + Register Button */}
         <div className="hidden items-center gap-5 md:flex lg:gap-8">
-          <nav className="flex items-center gap-4 font-mono text-xs font-semibold tracking-widest sm:gap-6 sm:text-sm">
+          <nav className="flex items-center gap-4 font-mono text-xs font-semibold tracking-widest lg:gap-6 sm:text-sm">
             {navLinks.map((link) => {
               const active = isLinkActive(link.id)
               return (

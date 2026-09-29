@@ -1,5 +1,7 @@
 import { Link } from 'react-router'
 import { motion, type Variants } from 'framer-motion'
+import isteLogo from '../assets/iste-logo.png'
+import fisatCrest from '../assets/fisat-crest.png'
 
 interface ContactPerson {
   role: string
@@ -379,7 +381,45 @@ export default function Contact() {
           transition={{ duration: 0.65, ease: [0.16, 1, 0.3, 1] as const }}
           className="flex flex-col gap-6 border-t border-dark-red/30 pt-8 sm:flex-row sm:items-center sm:justify-between"
         >
-          <div className="flex flex-col gap-1">
+          <div className="flex flex-col gap-3">
+            <div className="flex items-center gap-5">
+              <a
+                href="https://www.isteonline.in"
+                target="_blank"
+                rel="noreferrer"
+                aria-label="ISTE official website"
+                title="ISTE"
+                className="flex flex-col items-center gap-1.5 transition-transform hover:scale-105 active:scale-95"
+              >
+                <img
+                  src={isteLogo}
+                  alt="ISTE logo"
+                  className="h-10 w-auto object-contain sm:h-12"
+                />
+                <span className="font-mono text-[10px] leading-none font-bold tracking-[0.12em] text-mist">
+                  ISTE
+                </span>
+              </a>
+              <a
+                href="https://fisat.ac.in"
+                target="_blank"
+                rel="noreferrer"
+                aria-label="FISAT official website"
+                title="FISAT"
+                className="flex flex-col items-center gap-1.5 transition-transform hover:scale-105 active:scale-95"
+              >
+                <span className="flex h-10 items-center overflow-hidden rounded-md bg-white px-0.5 ring-1 ring-white/30 sm:h-12">
+                  <img
+                    src={fisatCrest}
+                    alt="FISAT logo"
+                    className="h-full w-auto object-contain"
+                  />
+                </span>
+                <span className="font-mono text-[10px] leading-none font-bold tracking-[0.12em] text-mist">
+                  FISAT
+                </span>
+              </a>
+            </div>
             <p className="font-heading text-lg font-bold tracking-wider text-mist uppercase">
               ARCANE 3.0
             </p>
