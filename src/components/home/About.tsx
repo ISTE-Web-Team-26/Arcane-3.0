@@ -74,11 +74,13 @@ export default function About() {
             latest in technology, innovation, and creativity.
           </p>
           <p className="text-mist/70 text-xs sm:text-sm md:text-base">
-            Four battlegrounds, one arena: dodge through Circuit &amp; Co&apos;s
+            Seven battlegrounds, one arena: dodge through Circuit &amp; Co&apos;s
             ECE games and hands-on circuit challenges, debug and decode your
             way through Ctrl+Chaos, rebuild the FISAT website from scratch in
-            Web Makeup, and break out of No Way Out&apos;s five-stage tech
-            escape room — with ₹12,000 in prizes and per-team entry from
+            Web Makeup, break out of No Way Out&apos;s five-stage tech escape
+            room, raise towers in Nirman&apos;s civil trials, tear down
+            mechanisms in Mech Mayhem, and hunt faults in Rewire&apos;s live
+            circuit builds — with ₹21,000 in prizes and per-team entry from
             ₹250. Arcane 3.0 promises to be an unforgettable experience for
             all tech enthusiasts.
           </p>
@@ -158,12 +160,11 @@ export default function About() {
             </div>
 
             <p className="font-heading text-3xl font-bold tracking-tight text-mist sm:text-4xl">
-              4
+              7
             </p>
 
             <p className="mt-2 font-content text-xs leading-relaxed text-mist/70">
-              Circuit games, coding debug, a web-design rebuild &amp; a tech
-              escape room.
+              Circuits, code, design, escape rooms, civil, mech &amp; EEE.
             </p>
           </div>
 
@@ -199,11 +200,11 @@ export default function About() {
             </div>
 
             <p className="font-heading text-3xl font-bold tracking-tight text-mist sm:text-4xl">
-              ₹12K
+              ₹21K
             </p>
 
             <p className="mt-2 font-content text-xs leading-relaxed text-mist/70">
-              ₹3,000 up for grabs in each of the four events.
+              ₹3,000 up for grabs in each of the seven events.
             </p>
           </div>
 
