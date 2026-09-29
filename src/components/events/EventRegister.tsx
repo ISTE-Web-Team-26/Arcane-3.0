@@ -5,6 +5,12 @@ import { motion } from 'framer-motion'
 import BackgroundParticles from '../BackgroundParticles.tsx'
 import type { EventItem } from '../../data/events.ts'
 import {
+  eventDateLine,
+  eventFeeLine,
+  eventPrizeLine,
+  eventTeamLine,
+} from '../../data/eventDetails.ts'
+import {
   MAX_UPLOAD_BYTES,
   fileToDataUrl,
   submitRegistration,
@@ -45,10 +51,6 @@ const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
 
 function blankMember(): RegisterMember {
   return { name: '', semester: '', branch: '', batch: '', phone_no: '', email: '' }
-}
-
-function formatINR(amount: number): string {
-  return `₹${amount.toLocaleString('en-IN')}`
 }
 
 function Field({
@@ -126,10 +128,10 @@ export default function EventRegister({ event }: { event: EventItem }) {
     }
   }, [previewUrl])
 
-  const feeLine =
-    event.feeAmount != null && event.feeAmount > 0
-      ? formatINR(event.feeAmount)
-      : (event.fee ?? 'FREE')
+  const feeLine = eventFeeLine(event)
+  const dateLine = eventDateLine(event)
+  const teamLine = eventTeamLine(event)
+  const prizeLine = eventPrizeLine(event)
 
   function updateMember(index: number, key: keyof RegisterMember, value: string) {
     setMembers((prev) => prev.map((m, i) => (i === index ? { ...m, [key]: value } : m)))
@@ -328,6 +330,12 @@ export default function EventRegister({ event }: { event: EventItem }) {
                 <dt className="text-mist/50 uppercase">Registration ID</dt>
                 <dd className="text-right font-bold text-mist">#{success.registration_id}</dd>
               </div>
+              <div className="flex justify-between gap-4">
+                <dt className="text-mist/50 uppercase">Verification</dt>
+                <dd className="text-right font-bold text-amber-300 uppercase">
+                  {success.verification}
+                </dd>
+              </div>
             </dl>
 
             <div aria-hidden="true" className="border-t-2 border-dashed border-dark-red/50" />
@@ -375,8 +383,24 @@ export default function EventRegister({ event }: { event: EventItem }) {
 
         <div className="mt-3 flex flex-wrap gap-2 font-mono text-[11px] sm:text-xs">
           <span className="rounded-md border border-dark-red/40 bg-near-black/80 px-3 py-1.5 text-mist">
+            Date: <strong>{dateLine}</strong>
+          </span>
+          <span className="rounded-md border border-dark-red/40 bg-near-black/80 px-3 py-1.5 text-mist">
+            Time: <strong>{event.time}</strong>
+          </span>
+          {teamLine ? (
+            <span className="rounded-md border border-dark-red/40 bg-near-black/80 px-3 py-1.5 text-mist">
+              Team: <strong>{teamLine}</strong>
+            </span>
+          ) : null}
+          <span className="rounded-md border border-dark-red/40 bg-near-black/80 px-3 py-1.5 text-mist">
             Fee: <strong className="text-medium-red">{feeLine}</strong>
           </span>
+          {prizeLine ? (
+            <span className="rounded-md border border-dark-red/40 bg-near-black/80 px-3 py-1.5 text-mist">
+              Prize: <strong className="text-medium-red">{prizeLine}</strong>
+            </span>
+          ) : null}
           <span className="rounded-md border border-dark-red/40 bg-near-black/80 px-3 py-1.5 text-mist">
             Venue: <strong>{event.venue}</strong>
           </span>

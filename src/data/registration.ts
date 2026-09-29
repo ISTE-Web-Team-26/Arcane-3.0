@@ -33,6 +33,7 @@ export interface RegistrationData {
 export interface RegistrationSuccess {
   ticket: string
   registration_id: number
+  verification: string
   whatsapp_group_link: string | null
 }
 
@@ -62,6 +63,7 @@ interface ApiReply {
   success?: boolean
   ticket?: unknown
   registration_id?: unknown
+  verification?: unknown
   whatsapp_group_link?: unknown
   error?: unknown
 }
@@ -102,6 +104,10 @@ export async function submitRegistration(
     return {
       ticket: String(body.ticket ?? ''),
       registration_id: Number(body.registration_id ?? 0),
+      verification:
+        typeof body.verification === 'string' && body.verification.trim()
+          ? body.verification.trim()
+          : 'pending',
       whatsapp_group_link:
         typeof body.whatsapp_group_link === 'string' &&
         body.whatsapp_group_link.trim()

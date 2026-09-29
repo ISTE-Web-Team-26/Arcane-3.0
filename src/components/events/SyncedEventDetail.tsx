@@ -3,57 +3,18 @@ import { motion } from 'framer-motion'
 import BackgroundParticles from '../BackgroundParticles.tsx'
 import EventMarkdown from './EventMarkdown.tsx'
 import type { EventItem } from '../../data/events.ts'
-
-function ordinalSuffix(day: number): string {
-  if (day >= 11 && day <= 13) return 'TH'
-  switch (day % 10) {
-    case 1:
-      return 'ST'
-    case 2:
-      return 'ND'
-    case 3:
-      return 'RD'
-    default:
-      return 'TH'
-  }
-}
-
-/** Raw ISO -> "6TH OCTOBER 2026" in the venue timezone. */
-function formatFullDate(iso: string): string | null {
-  const date = new Date(iso)
-  if (Number.isNaN(date.getTime())) return null
-  const parts = new Intl.DateTimeFormat('en-GB', {
-    timeZone: 'Asia/Kolkata',
-    day: 'numeric',
-    month: 'long',
-    year: 'numeric',
-  }).formatToParts(date)
-  const get = (type: string) => parts.find((p) => p.type === type)?.value ?? ''
-  const day = Number(get('day'))
-  return `${day}${ordinalSuffix(day)} ${get('month').toUpperCase()} ${get('year')}`
-}
-
-function formatINR(amount: number): string {
-  return `₹${amount.toLocaleString('en-IN')}`
-}
+import {
+  eventDateLine,
+  eventFeeLine,
+  eventPrizeLine,
+  eventTeamLine,
+} from '../../data/eventDetails.ts'
 
 export default function SyncedEventDetail({ event }: { event: EventItem }) {
-  const dateLine =
-    (event.startsAt ? formatFullDate(event.startsAt) : null) ?? 'OCT 6, 7, 8'
-  const feeLine =
-    event.feeAmount != null && event.feeAmount > 0
-      ? formatINR(event.feeAmount)
-      : (event.fee ?? 'FREE')
-  const prizeLine =
-    event.prizeAmount != null && event.prizeAmount > 0
-      ? `${formatINR(event.prizeAmount)} POOL`
-      : (event.prize ?? '')
-  const teamLine =
-    event.teamMin != null || event.teamMax != null
-      ? event.teamMin === event.teamMax
-        ? `${event.teamMin ?? event.teamMax} MEMBER${(event.teamMin ?? event.teamMax) === 1 ? '' : 'S'}`
-        : `${event.teamMin ?? '?'} - ${event.teamMax ?? '?'} MEMBERS`
-      : (event.team ?? '')
+  const dateLine = eventDateLine(event)
+  const feeLine = eventFeeLine(event)
+  const prizeLine = eventPrizeLine(event)
+  const teamLine = eventTeamLine(event)
 
   return (
     <div className="relative -mx-4 -mt-[4.5rem] sm:-mx-8 sm:-mt-[5rem] -mb-8 overflow-hidden soil-bg-layer px-4 pt-[calc(4.5rem+2rem)] pb-16 sm:px-8 sm:pt-[calc(5rem+3rem)]">
