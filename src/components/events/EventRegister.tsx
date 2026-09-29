@@ -16,17 +16,27 @@ import type {
 
 const STEPS = ['Team', 'Members', 'Payment'] as const
 
+const FISAT_FULL_NAME = 'Federal Institute of Science and Technology'
+
+const SEMESTER_OPTIONS = ['S1', 'S2', 'S3', 'S4', 'S5', 'S6', 'S7', 'S8']
+
+/** Short forms of the B.Tech branches offered at FISAT (see fisat.ac.in/ug-programs). */
+const BRANCH_OPTIONS = ['CE', 'CSE', 'CSD', 'ECE', 'EEE', 'EIE', 'ME']
+
+const BATCH_OPTIONS = ['A', 'B', 'C', 'D']
+
 const MEMBER_FIELDS: {
   key: keyof RegisterMember
   label: string
   placeholder: string
   type?: string
   autoComplete?: string
+  options?: string[]
 }[] = [
   { key: 'name', label: 'Full Name', placeholder: 'e.g. Alex Mercer', autoComplete: 'name' },
-  { key: 'semester', label: 'Semester', placeholder: 'e.g. S3' },
-  { key: 'branch', label: 'Branch', placeholder: 'e.g. CSE' },
-  { key: 'batch', label: 'Batch', placeholder: 'e.g. 2024-28' },
+  { key: 'semester', label: 'Semester', placeholder: 'Select semester', options: SEMESTER_OPTIONS },
+  { key: 'branch', label: 'Branch', placeholder: 'Select branch', options: BRANCH_OPTIONS },
+  { key: 'batch', label: 'Batch', placeholder: 'Select batch', options: BATCH_OPTIONS },
   { key: 'phone_no', label: 'Phone Number', placeholder: '+91 98765 43210', type: 'tel', autoComplete: 'tel' },
   { key: 'email', label: 'Email', placeholder: 'name@college.edu', type: 'email', autoComplete: 'email' },
 ]
@@ -58,13 +68,49 @@ function Field({
   )
 }
 
+function Select({
+  label,
+  value,
+  options,
+  placeholder,
+  onChange,
+}: {
+  label: string
+  value: string
+  options: string[]
+  placeholder: string
+  onChange: (value: string) => void
+}) {
+  return (
+    <label className="block">
+      <span className="mb-1.5 block font-mono text-[11px] font-semibold tracking-wider text-mist/70 uppercase">
+        {label}
+      </span>
+      <select
+        value={value}
+        onChange={(e) => onChange(e.target.value)}
+        className="w-full cursor-pointer appearance-none rounded-lg border border-dark-red/40 bg-black/60 px-3.5 py-2.5 font-mono text-sm text-mist focus:border-medium-red focus:outline-none [&>option]:bg-black"
+      >
+        <option value="" disabled>
+          {placeholder}
+        </option>
+        {options.map((o) => (
+          <option key={o} value={o}>
+            {o}
+          </option>
+        ))}
+      </select>
+    </label>
+  )
+}
+
 export default function EventRegister({ event }: { event: EventItem }) {
   const minCount = event.teamMin ?? 1
   const maxCount = event.teamMax ?? minCount
 
   const [step, setStep] = useState(1)
   const [teamName, setTeamName] = useState('')
-  const [collegeName, setCollegeName] = useState('')
+  const [collegeName, setCollegeName] = useState(FISAT_FULL_NAME)
   const [members, setMembers] = useState<RegisterMember[]>(() =>
     Array.from({ length: maxCount }, blankMember),
   )
@@ -117,6 +163,15 @@ export default function EventRegister({ event }: { event: EventItem }) {
       }
       if (filled === 0) {
         return { payload: [], error: `${label} is incomplete — fill all fields.` }
+      }
+      if (!SEMESTER_OPTIONS.includes(m.semester.trim())) {
+        return { payload: [], error: `${label} has an invalid semester.` }
+      }
+      if (!BRANCH_OPTIONS.includes(m.branch.trim())) {
+        return { payload: [], error: `${label} has an invalid branch.` }
+      }
+      if (!BATCH_OPTIONS.includes(m.batch.trim())) {
+        return { payload: [], error: `${label} has an invalid batch.` }
       }
       if (!EMAIL_PATTERN.test(m.email.trim())) {
         return { payload: [], error: `${label} has an invalid email address.` }
@@ -190,6 +245,10 @@ export default function EventRegister({ event }: { event: EventItem }) {
     if (membersError) {
       setError(membersError)
       setStep(2)
+      return
+    }
+    if (!file) {
+      setError('Payment proof is required — upload your payment screenshot or receipt to complete registration.')
       return
     }
     setSubmitting(true)
@@ -426,18 +485,29 @@ export default function EventRegister({ event }: { event: EventItem }) {
                     ) : null}
                   </p>
                   <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-                    {MEMBER_FIELDS.map((f) => (
-                      <Field
-                        key={f.key}
-                        label={`${f.label} ${optional ? '' : '*'}`.trim()}
-                        type={f.type}
-                        autoComplete={f.autoComplete}
-                        value={m[f.key]}
-                        maxLength={120}
-                        placeholder={f.placeholder}
-                        onChange={(e) => updateMember(i, f.key, e.target.value)}
-                      />
-                    ))}
+                    {MEMBER_FIELDS.map((f) =>
+                      f.options ? (
+                        <Select
+                          key={f.key}
+                          label={`${f.label} ${optional ? '' : '*'}`.trim()}
+                          value={m[f.key]}
+                          options={f.options}
+                          placeholder={f.placeholder}
+                          onChange={(v) => updateMember(i, f.key, v)}
+                        />
+                      ) : (
+                        <Field
+                          key={f.key}
+                          label={`${f.label} ${optional ? '' : '*'}`.trim()}
+                          type={f.type}
+                          autoComplete={f.autoComplete}
+                          value={m[f.key]}
+                          maxLength={120}
+                          placeholder={f.placeholder}
+                          onChange={(e) => updateMember(i, f.key, e.target.value)}
+                        />
+                      ),
+                    )}
                   </div>
                 </div>
               )
@@ -452,7 +522,7 @@ export default function EventRegister({ event }: { event: EventItem }) {
               Payment
             </h2>
             <p className="mt-1 font-content text-xs text-mist/60 sm:text-sm">
-              Step 3 of 3 — entry fee <strong className="text-medium-red">{feeLine}</strong>. Upload your payment proof below (optional).
+              Step 3 of 3 — entry fee <strong className="text-medium-red">{feeLine}</strong>. Upload your payment proof below to complete registration.
             </p>
 
             {event.paymentImage && (
@@ -466,7 +536,7 @@ export default function EventRegister({ event }: { event: EventItem }) {
 
             <div className="mt-5">
               <span className="mb-1.5 block font-mono text-[11px] font-semibold tracking-wider text-mist/70 uppercase">
-                Payment proof (1 file, max 10MB)
+                Payment proof (1 file, max 10MB) *
               </span>
               <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
                 <label
