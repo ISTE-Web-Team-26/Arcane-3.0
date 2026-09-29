@@ -2,6 +2,7 @@ import { useId, useMemo, useState } from 'react'
 import { Link } from 'react-router'
 import { motion, AnimatePresence } from 'framer-motion'
 import { type EventItem } from '../../data/events.ts'
+import { eventTimeLine } from '../../data/eventDetails.ts'
 import { useEvents } from '../../data/useEvents.ts'
 
 interface EventsProps {
@@ -226,7 +227,7 @@ export default function Events({ events: eventsProp }: EventsProps) {
                   <div className="flex items-center justify-between border-t border-dark-red/25 pt-3.5">
                     <div className="flex flex-col font-mono text-[11px]">
                       <span className="font-semibold text-mist">
-                        TIME: {event.time}
+                        TIME: {eventTimeLine(event)}
                       </span>
                       <span className="font-semibold text-mist">VENUE: {event.venue}</span>
                       {teamLine && (
@@ -245,7 +246,7 @@ export default function Events({ events: eventsProp }: EventsProps) {
                           : 'border-medium-red bg-medium-red/15 text-mist hover:bg-medium-red hover:text-mist hover:shadow-[0_0_16px_rgba(170,52,48,0.5)]'
                       }`}
                     >
-                      <span>{event.actionText || 'REGISTER'} ▶</span>
+                      <span>{event.actionText || 'VIEW'} ▶</span>
                     </Link>
                   </div>
 

@@ -11,6 +11,7 @@ import {
   eventFeeLine,
   eventPrizeLine,
   eventTeamLine,
+  eventTimeLine,
 } from '../../data/eventDetails.ts'
 import {
   MAX_UPLOAD_BYTES,
@@ -404,7 +405,7 @@ function pdfSafe(value: string): string {
     section('EVENT DETAILS')
     field('Event', `${event.title} (${event.code || 'ARCANE'})`)
     field('Venue', event.venue)
-    field('Date', `${dateLine} - ${event.time}`)
+    field('Date', `${dateLine} - ${timeLine}`)
     if (teamLine) field('Team size', teamLine)
     field('Fee', feeLine)
     if (prizeLine) field('Prize', prizeLine)
@@ -452,6 +453,7 @@ function pdfSafe(value: string): string {
 
   const feeLine = eventFeeLine(event)
   const dateLine = eventDateLine(event)
+  const timeLine = eventTimeLine(event)
   const teamLine = eventTeamLine(event)
   const prizeLine = eventPrizeLine(event)
 
@@ -738,7 +740,7 @@ function pdfSafe(value: string): string {
             Date: <strong>{dateLine}</strong>
           </span>
           <span className="rounded-md border border-dark-red/40 bg-near-black/80 px-3 py-1.5 text-mist">
-            Time: <strong>{event.time}</strong>
+            Time: <strong>{timeLine}</strong>
           </span>
           {teamLine ? (
             <span className="rounded-md border border-dark-red/40 bg-near-black/80 px-3 py-1.5 text-mist">

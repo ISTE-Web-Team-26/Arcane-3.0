@@ -38,6 +38,11 @@ export function eventDateLine(event: EventItem): string {
   return (event.startsAt ? formatFullDate(event.startsAt) : null) ?? 'OCT 6, 7, 8'
 }
 
+/** Default slot when the event has no time yet. */
+export function eventTimeLine(event: EventItem): string {
+  return event.time || '2:00 - 5:00'
+}
+
 export function eventFeeLine(event: EventItem): string {
   return event.feeAmount != null && event.feeAmount > 0
     ? `${formatINR(event.feeAmount)} / TEAM`

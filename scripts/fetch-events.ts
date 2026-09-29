@@ -292,12 +292,13 @@ function formatFee(fee: unknown): string {
   return `₹${n.toLocaleString('en-IN')} / TEAM`
 }
 
-/** timestamptz -> "HH:MM" in the venue timezone (FISAT, Kerala). */
+/** timestamptz -> "HH:MM" in the venue timezone (FISAT, Kerala).
+ * Missing/invalid values fall back to the default slot "2:00 - 5:00". */
 function formatTime(value: unknown): string {
   const raw = asString(value)
-  if (!raw) return 'Oct 6,7,8'
+  if (!raw) return '2:00 - 5:00'
   const date = new Date(raw)
-  if (Number.isNaN(date.getTime())) return 'Oct 6,7,8'
+  if (Number.isNaN(date.getTime())) return '2:00 - 5:00'
   return new Intl.DateTimeFormat('en-GB', {
     hour: '2-digit',
     minute: '2-digit',
@@ -332,7 +333,7 @@ function mapRow(
     venue: pick(row, 'venue', 'location') || 'TO BE ANNOUNCED',
     time: formatTime(row['time']),
     fee: formatFee(row['registration_fee']),
-    actionText: 'REGISTER',
+    actionText: 'VIEW',
     // Individual event pages land later; route per-event until then.
     to: `/events/${slug}`,
     tag: undefined,

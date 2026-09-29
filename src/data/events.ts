@@ -48,7 +48,7 @@ export const DEFAULT_EVENTS: EventItem[] = [
     team: '2-4 MEMBERS',
     venue: 'LAB_04',
     time: '09:30',
-    actionText: 'REGISTER',
+    actionText: 'VIEW',
     to: '/event1',
   },
   {
@@ -67,7 +67,7 @@ export const DEFAULT_EVENTS: EventItem[] = [
     team: '5 MEMBERS',
     venue: 'ARENA_01',
     time: '11:15',
-    actionText: 'REGISTER',
+    actionText: 'VIEW',
     to: '/event2',
   },
   {
@@ -86,7 +86,7 @@ export const DEFAULT_EVENTS: EventItem[] = [
     team: '< 15.0 KG',
     venue: 'OUTDOOR_PIT',
     time: '13:00',
-    actionText: 'REGISTER',
+    actionText: 'VIEW',
     to: '/event3',
   },
   {
@@ -105,7 +105,7 @@ export const DEFAULT_EVENTS: EventItem[] = [
     team: '1-2 MEMBERS',
     venue: 'LAB_02',
     time: '14:00',
-    actionText: 'REGISTER',
+    actionText: 'VIEW',
     to: '/event1',
   },
   {
@@ -124,7 +124,7 @@ export const DEFAULT_EVENTS: EventItem[] = [
     team: '1 MEMBER',
     venue: 'SEMINAR_03',
     time: '16:30',
-    actionText: 'REGISTER',
+    actionText: 'VIEW',
     to: '/event2',
   },
   {

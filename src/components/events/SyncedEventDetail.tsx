@@ -8,10 +8,12 @@ import {
   eventFeeLine,
   eventPrizeLine,
   eventTeamLine,
+  eventTimeLine,
 } from '../../data/eventDetails.ts'
 
 export default function SyncedEventDetail({ event }: { event: EventItem }) {
   const dateLine = eventDateLine(event)
+  const timeLine = eventTimeLine(event)
   const feeLine = eventFeeLine(event)
   const prizeLine = eventPrizeLine(event)
   const teamLine = eventTeamLine(event)
@@ -69,7 +71,7 @@ export default function SyncedEventDetail({ event }: { event: EventItem }) {
                 {dateLine}
               </span>
               <span className="mt-0.5 block font-mono text-[11px] text-medium-red">
-                {event.time}
+                {timeLine}
               </span>
             </div>
 
