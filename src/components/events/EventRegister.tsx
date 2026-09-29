@@ -576,7 +576,7 @@ function pdfSafe(value: string): string {
               <button
                 type="button"
                 onClick={handleDownloadTicket}
-                className="inline-flex w-full cursor-pointer items-center justify-center gap-2 rounded-xl border border-medium-red/60 bg-medium-red/15 px-6 py-3 font-mono text-xs font-bold tracking-wider text-mist uppercase transition-all duration-200 hover:bg-medium-red/30 active:scale-[0.98]"
+                className="inline-flex w-full cursor-pointer items-center justify-center gap-2 rounded-xl border border-medium-red bg-medium-red px-6 py-3 font-mono text-xs font-bold tracking-wider text-mist uppercase transition-all duration-200 hover:bg-dark-red hover:shadow-[0_0_24px_rgba(170,52,48,0.6)] active:scale-[0.98]"
               >
                 Download ticket (PDF) ⬇
               </button>
