@@ -5,6 +5,7 @@ import Layout from './components/Layout.tsx'
 import Home from './pages/Home.tsx'
 import EventLoading from './components/events/EventLoading.tsx'
 import AdminLoading from './pages/AdminLoading.tsx'
+import { isAdminHost } from './data/admin.ts'
 
 // Lazy-load secondary routes — they're never needed on first paint
 const Event = lazy(() => import('./pages/Event.tsx'))
@@ -16,12 +17,26 @@ const Event3 = lazy(() => import('./pages/Event3.tsx'))
 const NotFound = lazy(() => import('./pages/NotFound.tsx'))
 
 function App() {
+  // The admin subdomain serves the dashboard at `/` — the exact same page
+  // as `/admin` (same component, same data, same login).
+  const adminHome = isAdminHost()
   return (
     <BrowserRouter>
       <Analytics />
       <Routes>
         <Route element={<Layout />}>
-          <Route index element={<Home />} />
+          <Route
+            index
+            element={
+              adminHome ? (
+                <Suspense fallback={<AdminLoading />}>
+                  <Admin />
+                </Suspense>
+              ) : (
+                <Home />
+              )
+            }
+          />
           <Route
             path="event1"
             element={

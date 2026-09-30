@@ -18,6 +18,17 @@ export function adminEndpoint(): string {
 
 const SESSION_KEY = 'arcane:admin-pw'
 
+/** True when the site is opened via the admin subdomain, which renders
+ * the admin dashboard at `/` instead of the home page. */
+export function isAdminHost(): boolean {
+  if (typeof window === 'undefined') return false
+  const host = window.location.hostname.toLowerCase()
+  return (
+    host === 'admin.arcane3.in' ||
+    (host.startsWith('admin.') && host.endsWith('.arcane3.in'))
+  )
+}
+
 /** Admin sessions live for 30 days, then require a fresh login. */
 const SESSION_TTL_MS = 30 * 24 * 60 * 60 * 1000
 

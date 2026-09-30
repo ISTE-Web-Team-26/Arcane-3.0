@@ -2,6 +2,7 @@ import { useEffect } from 'react'
 import { Outlet, useLocation } from 'react-router'
 import Contact from './Contact.tsx'
 import Navbar from './Navbar.tsx'
+import { isAdminHost } from '../data/admin.ts'
 
 function ScrollToHash() {
   const { pathname, hash } = useLocation()
@@ -21,7 +22,9 @@ function ScrollToHash() {
 
 export default function Layout() {
   const { pathname } = useLocation()
-  const isAdmin = pathname.startsWith('/admin')
+  // Chromeless admin view: the /admin route, plus `/` on the admin subdomain.
+  const isAdmin =
+    pathname.startsWith('/admin') || (isAdminHost() && pathname === '/')
   return (
     <div className="relative flex min-h-svh w-full flex-col bg-near-black font-content text-mist antialiased">
       {isAdmin ? null : <Navbar />}
