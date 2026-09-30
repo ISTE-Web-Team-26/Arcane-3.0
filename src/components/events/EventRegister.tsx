@@ -241,8 +241,28 @@ function pdfSafe(value: string): string {
     .trim()
 }
 
-  function handleDownloadTicket() {
-    if (!success) return
+  async function handleDownloadQr() {
+    if (!event.paymentImage) return
+    try {
+      const res = await fetch(event.paymentImage)
+      if (!res.ok) throw new Error('download failed')
+      const blob = await res.blob()
+      const url = URL.createObjectURL(blob)
+      const a = document.createElement('a')
+      a.href = url
+      a.download = `arcane-payment-qr-${event.id}.png`
+      document.body.appendChild(a)
+      a.click()
+      a.remove()
+      setTimeout(() => URL.revokeObjectURL(url), 5000)
+    } catch {
+      // Same-origin fetch can fail (e.g. offline cache quirks) — fall back
+      // to opening the image where the user can save it manually.
+      window.open(event.paymentImage, '_blank', 'noopener')
+    }
+  }
+
+  function handleDownloadTicket() {    if (!success) return
     const rows = members.filter((m) =>
       [m.name, m.semester, m.branch, m.batch, m.phone_no, m.email].some(
         (v) => v.trim() !== '',
@@ -923,6 +943,13 @@ function pdfSafe(value: string): string {
                   />
                   Open in Google Pay ↗
                 </a>
+                <button
+                  type="button"
+                  onClick={() => void handleDownloadQr()}
+                  className="mt-3 inline-flex w-full cursor-pointer items-center justify-center gap-2 rounded-xl bg-white px-6 py-3 font-mono text-xs font-bold tracking-wider text-near-black uppercase transition-all duration-200 hover:bg-mist active:scale-[0.98]"
+                >
+                  Download QR ⬇
+                </button>
                 <p className="mt-1.5 text-center font-mono text-[11px] text-mist/50">
                   UPI ID: {upiId}
                 </p>
