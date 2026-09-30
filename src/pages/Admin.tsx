@@ -98,10 +98,13 @@ export default function Admin() {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
-  const [expandedId, setExpandedId] = useState<number | null>(null)
+  const [expandedIds, setExpandedIds] = useState<Set<number>>(new Set())
   const [lightboxUrl, setLightboxUrl] = useState<string | null>(null)
-  const [proofUrl, setProofUrl] = useState<string | null>(null)
-  const [proofState, setProofState] = useState<'idle' | 'loading' | 'error' | 'done'>('idle')
+  interface ProofEntry {
+    state: 'loading' | 'error' | 'done'
+    url: string | null
+  }
+  const [proofs, setProofs] = useState<Record<number, ProofEntry>>({})
   const [verifyingId, setVerifyingId] = useState<number | null>(null)
 
   const logout = useCallback(() => {
@@ -111,7 +114,8 @@ export default function Admin() {
     setRows([])
     setTotals(null)
     setEventStats([])
-    setExpandedId(null)
+    setExpandedIds(new Set())
+    setProofs({})
   }, [])
 
   const handleAuthError = useCallback(
@@ -213,32 +217,39 @@ export default function Admin() {
   function changeEventFilter(value: number | 'all') {
     setEventId(value)
     setPage(0)
-    setExpandedId(null)
+    setExpandedIds(new Set())
   }
 
   function changeStatusFilter(value: string) {
     setStatus(value)
     setPage(0)
-    setExpandedId(null)
+    setExpandedIds(new Set())
   }
 
   async function toggleExpand(row: AdminRow) {
-    if (expandedId === row.id) {
-      setExpandedId(null)
-      return
-    }
-    setExpandedId(row.id)
-    setProofUrl(null)
-    setProofState('loading')
+    const isOpen = expandedIds.has(row.id)
+    setExpandedIds((prev) => {
+      const next = new Set(prev)
+      if (isOpen) {
+        next.delete(row.id)
+      } else {
+        next.add(row.id)
+      }
+      return next
+    })
+    if (isOpen) return
+    // Reuse the cached proof when this row was opened before.
+    const cached = proofs[row.id]
+    if (cached && cached.state !== 'error') return
+    setProofs((prev) => ({ ...prev, [row.id]: { state: 'loading', url: null } }))
     try {
       const res = await adminCall<{ url: string | null }>('proof', { id: row.id })
-      setProofUrl(res.url)
-      setProofState('done')
+      setProofs((prev) => ({ ...prev, [row.id]: { state: 'done', url: res.url } }))
     } catch (e) {
       if (e instanceof AdminError && e.status === 401) {
         handleAuthError(e)
       } else {
-        setProofState('error')
+        setProofs((prev) => ({ ...prev, [row.id]: { state: 'error', url: null } }))
       }
     }
   }
@@ -513,7 +524,8 @@ export default function Admin() {
             </thead>
             <tbody>
               {rows.map((row) => {
-                const expanded = expandedId === row.id
+                const expanded = expandedIds.has(row.id)
+                const proof = proofs[row.id] ?? { state: 'loading', url: null }
                 return (
                   <Fragment key={row.id}>
                     <tr
@@ -619,23 +631,23 @@ export default function Admin() {
                                 Payment proof
                               </p>
                               <div className="mt-2">
-                                {proofState === 'loading' && (
+                                {proof.state === 'loading' && (
                                   <p className="text-[11px] text-mist/50">Loading proof…</p>
                                 )}
-                                {proofState === 'error' && (
+                                {proof.state === 'error' && (
                                   <p className="text-[11px] text-red-300">
                                     Could not load proof. Try again.
                                   </p>
                                 )}
-                                {proofState === 'done' && !proofUrl && (
+                                {proof.state === 'done' && !proof.url && (
                                   <p className="text-[11px] text-mist/50">
                                     No proof uploaded for this registration.
                                   </p>
                                 )}
-                                {proofState === 'done' && proofUrl && (
-                                  /\.pdf($|\?)/i.test(proofUrl.split('?')[0]) ? (
+                                {proof.state === 'done' && proof.url && (
+                                  /\.pdf($|\?)/i.test(proof.url.split('?')[0]) ? (
                                     <a
-                                      href={proofUrl}
+                                      href={proof.url}
                                       target="_blank"
                                       rel="noreferrer"
                                       className="inline-flex items-center gap-2 rounded-xl border border-medium-red/60 bg-medium-red/15 px-5 py-2.5 font-mono text-xs font-bold tracking-wider text-mist uppercase hover:bg-medium-red/30"
@@ -644,9 +656,9 @@ export default function Admin() {
                                     </a>
                                   ) : (
                                     <img
-                                      src={proofUrl}
+                                      src={proof.url}
                                       alt={`Payment proof for ticket ${row.ticket ?? row.id}`}
-                                      onClick={() => setLightboxUrl(proofUrl)}
+                                      onClick={() => setLightboxUrl(proof.url)}
                                       title="Click to expand"
                                       className="max-h-96 w-auto cursor-zoom-in rounded-xl border border-dark-red/30 transition-transform hover:scale-[1.01]"
                                     />

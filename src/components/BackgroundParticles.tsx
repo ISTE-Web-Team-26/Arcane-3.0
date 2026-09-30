@@ -47,7 +47,27 @@ export default function BackgroundParticles({
     let lastTime = 0
     const TARGET_INTERVAL = 1000 / 30 // Cap at 30fps for perf
 
-    const initParticles = () => {
+    const newParticle = (): Particle => {
+      const baseAlpha = 0.25 + Math.random() * 0.65
+      return {
+        x: Math.random() * width,
+        y: Math.random() * height,
+        size:
+          Math.random() < 0.7
+            ? 2 + Math.random() * 1.8
+            : 3.8 + Math.random() * 1.8,
+        vx: (Math.random() - 0.5) * 0.35,
+        vy: -(0.25 + Math.random() * 0.55), // gentle upward float
+        baseAlpha,
+        alpha: baseAlpha,
+        alphaSpeed: 0.008 + Math.random() * 0.02,
+        color:
+          PARTICLE_COLORS[Math.floor(Math.random() * PARTICLE_COLORS.length)],
+        aspectRatio: 0.8 + Math.random() * 0.4,
+      }
+    }
+
+    const syncSize = (preserve: boolean) => {
       if (!canvas) return
       const rect = canvas.getBoundingClientRect()
       // Use CSS pixel dimensions — no need for devicePixelRatio scaling on
@@ -58,34 +78,28 @@ export default function BackgroundParticles({
       const area = (width * height) / 100000
       const count = Math.max(25, Math.floor(area * density))
 
-      particles = Array.from({ length: count }, () => {
-        const baseAlpha = 0.25 + Math.random() * 0.65
-        return {
-          x: Math.random() * width,
-          y: Math.random() * height,
-          size:
-            Math.random() < 0.7
-              ? 2 + Math.random() * 1.8
-              : 3.8 + Math.random() * 1.8,
-          vx: (Math.random() - 0.5) * 0.35,
-          vy: -(0.25 + Math.random() * 0.55), // gentle upward float
-          baseAlpha,
-          alpha: baseAlpha,
-          alphaSpeed: 0.008 + Math.random() * 0.02,
-          color:
-            PARTICLE_COLORS[Math.floor(Math.random() * PARTICLE_COLORS.length)],
-          aspectRatio: 0.8 + Math.random() * 0.4,
-        }
-      })
+      if (!preserve || particles.length === 0) {
+        particles = Array.from({ length: count }, newParticle)
+        return
+      }
+      // Keep existing particles so the field doesn't reshuffle: clamp the
+      // ones outside the new bounds, then top up or trim to the new count.
+      for (const p of particles) {
+        if (p.x > width) p.x = Math.random() * width
+        if (p.y > height) p.y = Math.random() * height
+      }
+      while (particles.length < count) particles.push(newParticle())
+      if (particles.length > count) particles.length = count
     }
 
-    initParticles()
+    syncSize(false)
 
-    // Debounce resize to avoid thrashing
+    // Debounce resize to avoid thrashing. Particle positions are preserved
+    // so content height changes (e.g. expanding rows) don't reshuffle the field.
     let resizeTimer: ReturnType<typeof setTimeout> | null = null
     const handleResize = () => {
       if (resizeTimer) clearTimeout(resizeTimer)
-      resizeTimer = setTimeout(initParticles, 200)
+      resizeTimer = setTimeout(() => syncSize(true), 200)
     }
 
     const resizeObserver = new ResizeObserver(() => {

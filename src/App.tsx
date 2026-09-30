@@ -4,6 +4,7 @@ import { Analytics } from '@vercel/analytics/react'
 import Layout from './components/Layout.tsx'
 import Home from './pages/Home.tsx'
 import EventLoading from './components/events/EventLoading.tsx'
+import AdminLoading from './pages/AdminLoading.tsx'
 
 // Lazy-load secondary routes — they're never needed on first paint
 const Event = lazy(() => import('./pages/Event.tsx'))
@@ -64,7 +65,7 @@ function App() {
           <Route
             path="admin"
             element={
-              <Suspense fallback={<EventLoading />}>
+              <Suspense fallback={<AdminLoading />}>
                 <Admin />
               </Suspense>
             }
