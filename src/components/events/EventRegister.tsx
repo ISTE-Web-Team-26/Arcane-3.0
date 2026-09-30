@@ -202,6 +202,7 @@ export default function EventRegister({ event }: { event: EventItem }) {
   )
   const [file, setFile] = useState<File | null>(null)
   const [previewUrl, setPreviewUrl] = useState<string | null>(null)
+  const [upiCopied, setUpiCopied] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [submitting, setSubmitting] = useState(false)
   const [success, setSuccess] = useState<RegistrationSuccess | null>(
@@ -240,6 +241,34 @@ function pdfSafe(value: string): string {
     .replace(/[—–]/g, '-')
     .trim()
 }
+
+  async function handleCopyUpi() {
+    let ok = false
+    try {
+      await navigator.clipboard.writeText(upiId)
+      ok = true
+    } catch {
+      // Fallback for non-secure contexts / older browsers.
+      try {
+        const ta = document.createElement('textarea')
+        ta.value = upiId
+        ta.style.position = 'fixed'
+        ta.style.opacity = '0'
+        document.body.appendChild(ta)
+        ta.select()
+        ok = document.execCommand('copy')
+        ta.remove()
+      } catch {
+        ok = false
+      }
+    }
+    if (ok) {
+      setUpiCopied(true)
+      setTimeout(() => setUpiCopied(false), 2000)
+    } else {
+      setError('Could not copy — long-press the UPI ID to copy it manually.')
+    }
+  }
 
   async function handleDownloadQr() {
     if (!event.paymentImage) return
@@ -948,7 +977,56 @@ function pdfSafe(value: string): string {
                   onClick={() => void handleDownloadQr()}
                   className="mt-3 inline-flex w-full cursor-pointer items-center justify-center gap-2 rounded-xl bg-white px-6 py-3 font-mono text-xs font-bold tracking-wider text-near-black uppercase transition-all duration-200 hover:bg-mist active:scale-[0.98]"
                 >
-                  Download QR ⬇
+                  Download QR
+                  <svg
+                    aria-hidden="true"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth={2}
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    className="h-4 w-4"
+                  >
+                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+                    <polyline points="7 10 12 15 17 10" />
+                    <line x1="12" y1="15" x2="12" y2="3" />
+                  </svg>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => void handleCopyUpi()}
+                  className="mt-3 inline-flex w-full cursor-pointer items-center justify-center gap-2 rounded-xl bg-white px-6 py-3 font-mono text-xs font-bold tracking-wider text-near-black uppercase transition-all duration-200 hover:bg-mist active:scale-[0.98]"
+                >
+                  {upiCopied ? 'Copied' : 'Copy UPI ID'}
+                  {upiCopied ? (
+                    <svg
+                      aria-hidden="true"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth={2.5}
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      className="h-4 w-4"
+                    >
+                      <path d="M5 13l4 4L19 7" />
+                    </svg>
+                  ) : (
+                    <svg
+                      aria-hidden="true"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth={2}
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      className="h-4 w-4"
+                    >
+                      <rect x="9" y="9" width="13" height="13" rx="2" />
+                      <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1" />
+                    </svg>
+                  )}
                 </button>
                 <p className="mt-1.5 text-center font-mono text-[11px] text-mist/50">
                   UPI ID: {upiId}
