@@ -154,7 +154,7 @@ export async function adminCall<T>(
   }
   if (res.status === 401) {
     clearAdminPassword()
-    throw new AdminError('Wrong password or session expired.', 401)
+    throw new AdminError('Wrong password.', 401)
   }
   const message =
     body && typeof body.error === 'string' && body.error.trim()

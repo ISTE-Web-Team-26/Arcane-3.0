@@ -1,4 +1,4 @@
-import { Fragment, useCallback, useEffect, useState } from 'react'
+import { Fragment, useCallback, useEffect, useMemo, useState } from 'react'
 import { motion } from 'framer-motion'
 import BackgroundParticles from '../components/BackgroundParticles.tsx'
 import { useDocumentTitle } from '../hooks/useDocumentTitle.ts'
@@ -44,6 +44,36 @@ function memberText(value: unknown): string {
   return typeof value === 'string' && value.trim() ? value : '—'
 }
 
+type EventSortKey = 'total' | 'pending' | 'good' | 'bad'
+interface EventSort {
+  key: EventSortKey
+  dir: 'asc' | 'desc'
+}
+
+function SortHeader({
+  label,
+  sortKey,
+  sort,
+  onToggle,
+}: {
+  label: string
+  sortKey: EventSortKey
+  sort: EventSort | null
+  onToggle: (key: EventSortKey) => void
+}) {
+  const active = sort?.key === sortKey
+  return (
+    <button
+      type="button"
+      onClick={() => onToggle(sortKey)}
+      aria-sort={active ? (sort.dir === 'desc' ? 'descending' : 'ascending') : 'none'}
+      className="cursor-pointer uppercase transition-colors hover:text-mist"
+    >
+      {label} {active ? (sort.dir === 'desc' ? '▼' : '▲') : ''}
+    </button>
+  )
+}
+
 export default function Admin() {
   useDocumentTitle('Admin | Arcane 3.0')
 
@@ -59,12 +89,17 @@ export default function Admin() {
   const [query, setQuery] = useState('')
   const [debouncedQuery, setDebouncedQuery] = useState('')
   const [page, setPage] = useState(0)
+  const [eventSort, setEventSort] = useState<EventSort | null>({
+    key: 'total',
+    dir: 'desc',
+  })
   const [rows, setRows] = useState<AdminRow[]>([])
   const [total, setTotal] = useState(0)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
   const [expandedId, setExpandedId] = useState<number | null>(null)
+  const [lightboxUrl, setLightboxUrl] = useState<string | null>(null)
   const [proofUrl, setProofUrl] = useState<string | null>(null)
   const [proofState, setProofState] = useState<'idle' | 'loading' | 'error' | 'done'>('idle')
   const [verifyingId, setVerifyingId] = useState<number | null>(null)
@@ -83,7 +118,7 @@ export default function Admin() {
     (e: unknown) => {
       if (e instanceof AdminError && e.status === 401) {
         logout()
-        setLoginError('Wrong password or session expired.')
+        setLoginError('Wrong password.')
       }
     },
     [logout],
@@ -103,7 +138,11 @@ export default function Admin() {
     } catch (err) {
       clearAdminPassword()
       setLoginError(
-        err instanceof AdminError ? err.message : 'Login failed. Try again.',
+        err instanceof AdminError && err.status === 401
+          ? 'Wrong password.'
+          : err instanceof Error
+            ? err.message
+            : 'Login failed. Try again.',
       )
     } finally {
       setLoggingIn(false)
@@ -151,6 +190,16 @@ export default function Admin() {
   useEffect(() => {
     if (authed) void refreshList()
   }, [authed, refreshList])
+
+  // Close the proof lightbox with Escape.
+  useEffect(() => {
+    if (!lightboxUrl) return
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') setLightboxUrl(null)
+    }
+    window.addEventListener('keydown', onKey)
+    return () => window.removeEventListener('keydown', onKey)
+  }, [lightboxUrl])
 
   // Debounce the search box so we don't hammer the function per keystroke.
   useEffect(() => {
@@ -222,10 +271,28 @@ export default function Admin() {
   const eventNameOf = (id: number) =>
     eventStats.find((e) => e.event_id === id)?.name ?? `Event ${id}`
 
+  function toggleEventSort(key: EventSortKey) {
+    setEventSort((prev) =>
+      prev?.key === key
+        ? { key, dir: prev.dir === 'desc' ? 'asc' : 'desc' }
+        : { key, dir: 'desc' },
+    )
+  }
+
+  const sortedEvents = useMemo(() => {
+    if (!eventSort) return eventStats
+    const { key, dir } = eventSort
+    return [...eventStats].sort(
+      (a, b) =>
+        (dir === 'desc' ? b[key] - a[key] : a[key] - b[key]) ||
+        a.event_id - b.event_id,
+    )
+  }, [eventStats, eventSort])
+
   /* --------------------------------- login --------------------------------- */
   if (!authed) {
     return (
-      <div className="relative -mx-4 -mt-[4.5rem] -mb-8 overflow-hidden soil-bg-layer px-4 pt-[calc(4.5rem+2rem)] pb-16 sm:-mx-8 sm:-mt-[5rem] sm:px-8 sm:pt-[calc(5rem+3rem)]">
+      <div className="relative -mx-4 -mt-[4.5rem] -mb-8 flex min-h-svh flex-col items-center justify-center overflow-hidden soil-bg-layer px-4 py-8 sm:-mx-8 sm:-mt-[5rem] sm:px-8">
         <BackgroundParticles density={10} className="z-0" />
         <motion.div
           initial={{ opacity: 0, y: 25 }}
@@ -279,7 +346,7 @@ export default function Admin() {
 
   /* -------------------------------- dashboard ------------------------------- */
   return (
-    <div className="relative -mx-4 -mt-[4.5rem] -mb-8 overflow-hidden soil-bg-layer px-4 pt-[calc(4.5rem+2rem)] pb-16 sm:-mx-8 sm:-mt-[5rem] sm:px-8 sm:pt-[calc(5rem+3rem)]">
+    <div className="relative -mx-4 -mt-[4.5rem] -mb-8 min-h-svh overflow-hidden soil-bg-layer px-4 pt-16 pb-16 sm:-mx-8 sm:-mt-[5rem] sm:px-8">
       <BackgroundParticles density={10} className="z-0" />
       <div className="relative z-10 mx-auto w-full max-w-6xl">
         <div className="flex flex-wrap items-center justify-between gap-3">
@@ -307,7 +374,7 @@ export default function Admin() {
               onClick={logout}
               className="cursor-pointer rounded-xl border border-dark-red/40 bg-near-black/80 px-4 py-2 font-mono text-xs font-bold tracking-wider text-mist/75 uppercase hover:border-medium-red/60 hover:text-mist"
             >
-              Lock
+              Logout
             </button>
           </div>
         </div>
@@ -340,14 +407,34 @@ export default function Admin() {
             <thead>
               <tr className="text-left text-[10px] tracking-wider text-mist/50 uppercase">
                 <th className="px-4 py-3">Event</th>
-                <th className="px-4 py-3 text-right">Total</th>
-                <th className="px-4 py-3 text-right">Pending</th>
-                <th className="px-4 py-3 text-right">Good</th>
-                <th className="px-4 py-3 text-right">Bad</th>
+                <th className="px-4 py-3 text-right">
+                  <SortHeader label="Total" sortKey="total" sort={eventSort} onToggle={toggleEventSort} />
+                </th>
+                <th className="px-4 py-3 text-right">
+                  <SortHeader label="Pending" sortKey="pending" sort={eventSort} onToggle={toggleEventSort} />
+                </th>
+                <th className="px-4 py-3 text-right">
+                  <SortHeader label="Good" sortKey="good" sort={eventSort} onToggle={toggleEventSort} />
+                </th>
+                <th className="px-4 py-3 text-right">
+                  <SortHeader label="Bad" sortKey="bad" sort={eventSort} onToggle={toggleEventSort} />
+                </th>
               </tr>
             </thead>
             <tbody>
-              {eventStats.map((e) => (
+              <tr
+                onClick={() => changeEventFilter('all')}
+                className={`cursor-pointer border-t border-dark-red/25 font-bold transition-colors hover:bg-medium-red/10 ${
+                  eventId === 'all' ? 'bg-medium-red/15 text-mist' : 'text-mist/80'
+                }`}
+              >
+                <td className="px-4 py-2.5">All events</td>
+                <td className="px-4 py-2.5 text-right">{totals?.total ?? 0}</td>
+                <td className="px-4 py-2.5 text-right text-amber-300">{totals?.pending ?? 0}</td>
+                <td className="px-4 py-2.5 text-right text-emerald-300">{totals?.good ?? 0}</td>
+                <td className="px-4 py-2.5 text-right text-red-300">{totals?.bad ?? 0}</td>
+              </tr>
+              {sortedEvents.map((e) => (
                 <tr
                   key={e.event_id}
                   onClick={() => changeEventFilter(e.event_id)}
@@ -430,7 +517,8 @@ export default function Admin() {
                 return (
                   <Fragment key={row.id}>
                     <tr
-                      className="border-t border-dark-red/25 transition-colors hover:bg-medium-red/5"
+                      onClick={() => void toggleExpand(row)}
+                      className="cursor-pointer border-t border-dark-red/25 transition-colors hover:bg-medium-red/5"
                     >
                       <td className="px-4 py-2.5 font-bold tracking-widest text-mist">
                         {row.ticket ?? `#${row.id}`}
@@ -458,7 +546,10 @@ export default function Admin() {
                       <td className="px-4 py-2.5 text-right">
                         <button
                           type="button"
-                          onClick={() => void toggleExpand(row)}
+                          onClick={(e) => {
+                            e.stopPropagation()
+                            void toggleExpand(row)
+                          }}
                           className="cursor-pointer rounded-lg border border-dark-red/40 px-3 py-1 text-[11px] font-bold uppercase hover:border-medium-red/60 hover:text-mist"
                         >
                           {expanded ? 'Hide' : 'Open'}
@@ -555,7 +646,9 @@ export default function Admin() {
                                     <img
                                       src={proofUrl}
                                       alt={`Payment proof for ticket ${row.ticket ?? row.id}`}
-                                      className="max-h-96 w-auto rounded-xl border border-dark-red/30"
+                                      onClick={() => setLightboxUrl(proofUrl)}
+                                      title="Click to expand"
+                                      className="max-h-96 w-auto cursor-zoom-in rounded-xl border border-dark-red/30 transition-transform hover:scale-[1.01]"
                                     />
                                   )
                                 )}
@@ -607,6 +700,31 @@ export default function Admin() {
           <p className="mt-2 font-mono text-xs text-mist/50">Loading…</p>
         )}
       </div>
+
+      {/* Proof lightbox */}
+      {lightboxUrl && (
+        <div
+          role="dialog"
+          aria-modal="true"
+          aria-label="Expanded payment proof"
+          onClick={() => setLightboxUrl(null)}
+          className="fixed inset-0 z-50 flex cursor-zoom-out items-center justify-center bg-black/90 p-4"
+        >
+          <button
+            type="button"
+            onClick={() => setLightboxUrl(null)}
+            aria-label="Close expanded proof"
+            className="absolute top-4 right-4 flex h-10 w-10 cursor-pointer items-center justify-center rounded-xl border border-white/20 text-lg text-white/80 hover:border-white/50 hover:text-white"
+          >
+            ✕
+          </button>
+          <img
+            src={lightboxUrl}
+            alt="Expanded payment proof"
+            className="max-h-[90vh] max-w-[92vw] rounded-xl border border-white/15 object-contain"
+          />
+        </div>
+      )}
     </div>
   )
 }

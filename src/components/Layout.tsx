@@ -20,14 +20,16 @@ function ScrollToHash() {
 }
 
 export default function Layout() {
+  const { pathname } = useLocation()
+  const isAdmin = pathname.startsWith('/admin')
   return (
     <div className="relative flex min-h-svh w-full flex-col bg-near-black font-content text-mist antialiased">
-      <Navbar />
+      {isAdmin ? null : <Navbar />}
       <main className="flex w-full flex-1 flex-col px-4 pt-[4.5rem] pb-8 sm:px-8 sm:pt-[5rem]">
         <ScrollToHash />
         <Outlet />
       </main>
-      <Contact />
+      {isAdmin ? null : <Contact />}
     </div>
   )
 }
