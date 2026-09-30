@@ -1,5 +1,6 @@
 import { lazy, Suspense } from 'react'
 import { BrowserRouter, Route, Routes } from 'react-router'
+import { Analytics } from '@vercel/analytics/react'
 import Layout from './components/Layout.tsx'
 import Home from './pages/Home.tsx'
 import EventLoading from './components/events/EventLoading.tsx'
@@ -16,6 +17,7 @@ const NotFound = lazy(() => import('./pages/NotFound.tsx'))
 function App() {
   return (
     <BrowserRouter>
+      <Analytics />
       <Routes>
         <Route element={<Layout />}>
           <Route index element={<Home />} />
