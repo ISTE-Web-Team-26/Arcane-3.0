@@ -506,17 +506,18 @@ function pdfSafe(value: string): string {
   const teamLine = eventTeamLine(event)
   const prizeLine = eventPrizeLine(event)
 
-  // UPI intent for the "Open in Google Pay" button (mobile only behavior —
-  // desktop browsers can't handle upi://). Amount is prefilled when known.
+  // Minimal UPI intent: GPay rejects payee-name mismatches and non-ASCII
+  // notes, so send only payee, amount, an ASCII note and currency.
   const upiId = 'mini.p.r.@federal'
+  const upiNote =
+    `Registration ${((event.code || event.title).replace(/[^\x20-\x7E]/g, '')).trim() || event.id}`
   const upiLink =
     `upi://pay?pa=${encodeURIComponent(upiId)}` +
-    `&pn=${encodeURIComponent(`ARCANE 3.0 ${event.title}`)}` +
-    '&cu=INR' +
     (event.feeAmount != null && event.feeAmount > 0
       ? `&am=${event.feeAmount}`
       : '') +
-    `&tn=${encodeURIComponent(`Registration ${event.code || event.title}`)}`
+    `&tn=${encodeURIComponent(upiNote)}` +
+    '&cu=INR'
 
   function updateMember(index: number, key: keyof RegisterMember, value: string) {
     setMembers((prev) => prev.map((m, i) => (i === index ? { ...m, [key]: value } : m)))
