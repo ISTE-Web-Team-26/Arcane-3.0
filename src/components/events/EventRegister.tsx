@@ -5,7 +5,6 @@ import { motion } from 'framer-motion'
 import { jsPDF } from 'jspdf'
 import BackgroundParticles from '../BackgroundParticles.tsx'
 import type { EventItem } from '../../data/events.ts'
-import gpayLogo from '../../assets/gpay-g.svg'
 import {
   eventDateLine,
   eventFeeLine,
@@ -509,15 +508,6 @@ function pdfSafe(value: string): string {
   // Minimal UPI intent: GPay rejects payee-name mismatches and non-ASCII
   // notes, so send only payee, amount, an ASCII note and currency.
   const upiId = 'mini.p.r.@federal'
-  const upiNote =
-    `Registration ${((event.code || event.title).replace(/[^\x20-\x7E]/g, '')).trim() || event.id}`
-  const upiLink =
-    `upi://pay?pa=${encodeURIComponent(upiId)}` +
-    (event.feeAmount != null && event.feeAmount > 0
-      ? `&am=${event.feeAmount}`
-      : '') +
-    `&tn=${encodeURIComponent(upiNote)}` +
-    '&cu=INR'
 
   function updateMember(index: number, key: keyof RegisterMember, value: string) {
     setMembers((prev) => prev.map((m, i) => (i === index ? { ...m, [key]: value } : m)))
@@ -961,18 +951,6 @@ function pdfSafe(value: string): string {
                   loading="lazy"
                   className="mt-5 max-h-[60vh] w-full rounded-xl border border-dark-red/30 bg-black/60 object-contain"
                 />
-                <a
-                  href={upiLink}
-                  className="mt-3 inline-flex w-full items-center justify-center gap-2 rounded-xl bg-white px-6 py-3 font-mono text-sm font-bold tracking-wider text-[#1a73e8] uppercase transition-all duration-200 hover:bg-mist active:scale-[0.98]"
-                >
-                  <img
-                    src={gpayLogo}
-                    alt=""
-                    aria-hidden="true"
-                    className="h-5 w-5 object-contain"
-                  />
-                  Open in Google Pay ↗
-                </a>
                 <button
                   type="button"
                   onClick={() => void handleDownloadQr()}
