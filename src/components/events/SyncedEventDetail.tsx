@@ -2,6 +2,7 @@ import { Link } from 'react-router'
 import { motion } from 'framer-motion'
 import BackgroundParticles from '../BackgroundParticles.tsx'
 import EventMarkdown from './EventMarkdown.tsx'
+import VoiceMessage from './VoiceMessage.tsx'
 import type { EventItem } from '../../data/events.ts'
 import {
   eventDateLine,
@@ -120,6 +121,13 @@ export default function SyncedEventDetail({ event }: { event: EventItem }) {
               </span>
             </div>
           </div>
+
+          {/* Organizer voice note — only when the event has one */}
+          {event.voiceMsg ? (
+            <div className="mt-4">
+              <VoiceMessage key={event.voiceMsg} src={event.voiceMsg} />
+            </div>
+          ) : null}
 
           {/* Primary Action Row with Register Button */}
           <div className="mt-6 flex items-center">

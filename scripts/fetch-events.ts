@@ -110,6 +110,7 @@ interface EventItem {
   createdAt?: string
   updatedAt?: string
   guidelines?: string[]
+  voiceMsg?: string
 }
 
 type Row = Record<string, unknown>
@@ -339,6 +340,7 @@ function mapRow(
     tag: undefined,
     imageSrc: pick(row, 'poster_img', 'image_url'),
     paymentSrc: pick(row, 'payment_img'),
+    voiceMsg: pick(row, 'voice_msg'),
     // Every remaining column, raw, for the individual event pages.
     dbId: toNumberOrNull(row['id']) ?? 0,
     longDescription: asString(row['description_long']),

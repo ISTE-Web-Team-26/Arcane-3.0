@@ -23,6 +23,7 @@ export interface EventItem {
   feeAmount?: number | null
   prizeAmount?: number | null
   paymentImage?: string
+  voiceMsg?: string
   teamMin?: number | null
   teamMax?: number | null
   startsAt?: string
