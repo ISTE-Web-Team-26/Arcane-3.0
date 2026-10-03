@@ -38,8 +38,36 @@ export function eventDateLine(event: EventItem): string {
   return (event.startsAt ? formatFullDate(event.startsAt) : null) ?? 'OCT 6, 7, 8'
 }
 
+/** ISO -> "2:00" (12-hour, venue timezone, no period) for time ranges. */
+function formatTime12(iso: string): string | null {
+  const date = new Date(iso)
+  if (Number.isNaN(date.getTime())) return null
+  const parts = new Intl.DateTimeFormat('en-GB', {
+    timeZone: 'Asia/Kolkata',
+    hour: 'numeric',
+    minute: '2-digit',
+    hour12: true,
+  }).formatToParts(date)
+  const get = (type: string) => parts.find((p) => p.type === type)?.value ?? ''
+  const hour = get('hour')
+  const minute = get('minute')
+  if (!hour || !minute) return null
+  return `${hour}:${minute}`
+}
+
 /** Default slot when the event has no time yet. */
 export function eventTimeLine(event: EventItem): string {
+  // Real schedule: "2:00 to 5:00" from start time + duration in minutes.
+  if (event.startsAt && event.durationMins != null && event.durationMins > 0) {
+    const start = formatTime12(event.startsAt)
+    if (start) {
+      const endMs =
+        new Date(event.startsAt).getTime() + event.durationMins * 60_000
+      const end = formatTime12(new Date(endMs).toISOString())
+      if (end) return `${start} to ${end}`
+      return start
+    }
+  }
   return event.time || '2:00 - 5:00'
 }
 
