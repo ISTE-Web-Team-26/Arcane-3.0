@@ -202,6 +202,7 @@ export default function EventRegister({ event }: { event: EventItem }) {
   const [file, setFile] = useState<File | null>(null)
   const [previewUrl, setPreviewUrl] = useState<string | null>(null)
   const [upiCopied, setUpiCopied] = useState(false)
+  const [phoneCopied, setPhoneCopied] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [submitting, setSubmitting] = useState(false)
   const [success, setSuccess] = useState<RegistrationSuccess | null>(
@@ -266,6 +267,34 @@ function pdfSafe(value: string): string {
       setTimeout(() => setUpiCopied(false), 2000)
     } else {
       setError('Could not copy — long-press the UPI ID to copy it manually.')
+    }
+  }
+
+  async function handleCopyPhone() {
+    let ok = false
+    try {
+      await navigator.clipboard.writeText(phoneNumber)
+      ok = true
+    } catch {
+      // Fallback for non-secure contexts / older browsers.
+      try {
+        const ta = document.createElement('textarea')
+        ta.value = phoneNumber
+        ta.style.position = 'fixed'
+        ta.style.opacity = '0'
+        document.body.appendChild(ta)
+        ta.select()
+        ok = document.execCommand('copy')
+        ta.remove()
+      } catch {
+        ok = false
+      }
+    }
+    if (ok) {
+      setPhoneCopied(true)
+      setTimeout(() => setPhoneCopied(false), 2000)
+    } else {
+      setError('Could not copy — long-press the phone number to copy it manually.')
     }
   }
 
@@ -508,6 +537,7 @@ function pdfSafe(value: string): string {
   // Minimal UPI intent: GPay rejects payee-name mismatches and non-ASCII
   // notes, so send only payee, amount, an ASCII note and currency.
   const upiId = 'mini.p.r.@federal'
+  const phoneNumber = '+91 94959 49355'
 
   function updateMember(index: number, key: keyof RegisterMember, value: string) {
     setMembers((prev) => prev.map((m, i) => (i === index ? { ...m, [key]: value } : m)))
@@ -951,6 +981,44 @@ function pdfSafe(value: string): string {
                   loading="lazy"
                   className="mt-5 max-h-[60vh] w-full rounded-xl border border-dark-red/30 bg-black/60 object-contain"
                 />
+                <p className="mt-1.5 text-center font-mono text-[11px] text-mist/50">
+                  Phone: {phoneNumber}
+                </p>
+                <button
+                  type="button"
+                  onClick={() => void handleCopyPhone()}
+                  className="mt-3 inline-flex w-full cursor-pointer items-center justify-center gap-2 rounded-xl bg-white px-6 py-3 font-mono text-xs font-bold tracking-wider text-near-black uppercase transition-all duration-200 hover:bg-mist active:scale-[0.98]"
+                >
+                  {phoneCopied ? 'Copied' : 'Copy phone number'}
+                  {phoneCopied ? (
+                    <svg
+                      aria-hidden="true"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth={2.5}
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      className="h-4 w-4"
+                    >
+                      <path d="M5 13l4 4L19 7" />
+                    </svg>
+                  ) : (
+                    <svg
+                      aria-hidden="true"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth={2}
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      className="h-4 w-4"
+                    >
+                      <rect x="9" y="9" width="13" height="13" rx="2" />
+                      <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1" />
+                    </svg>
+                  )}
+                </button>
                 <button
                   type="button"
                   onClick={() => void handleDownloadQr()}
