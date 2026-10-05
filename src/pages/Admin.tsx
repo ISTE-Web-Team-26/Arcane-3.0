@@ -101,6 +101,7 @@ export default function Admin() {
   const [rows, setRows] = useState<AdminRow[]>([])
   const [total, setTotal] = useState(0)
   const [loading, setLoading] = useState(false)
+  const [reloading, setReloading] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
   const [expandedIds, setExpandedIds] = useState<Set<number>>(new Set())
@@ -275,6 +276,15 @@ export default function Admin() {
       if (res.items.length < 200 || all.length >= res.total) break
     }
     return all.filter((row) => row.verified !== 'bad')
+  }
+
+  async function handleReload() {
+    setReloading(true)
+    try {
+      await Promise.all([refreshStats(), refreshList()])
+    } finally {
+      setReloading(false)
+    }
   }
 
   async function handleExportEvent(stat: AdminEventStat, format: 'xlsx' | 'pdf') {
@@ -459,13 +469,17 @@ export default function Admin() {
           <div className="flex gap-2">
             <button
               type="button"
-              onClick={() => {
-                void refreshStats()
-                void refreshList()
-              }}
-              className="cursor-pointer rounded-xl border border-dark-red/40 bg-near-black/80 px-4 py-2 font-mono text-xs font-bold tracking-wider text-mist/75 uppercase hover:border-medium-red/60 hover:text-mist"
+              onClick={() => void handleReload()}
+              disabled={reloading}
+              className="inline-flex cursor-pointer items-center gap-1.5 rounded-xl border border-dark-red/40 bg-near-black/80 px-4 py-2 font-mono text-xs font-bold tracking-wider text-mist/75 uppercase hover:border-medium-red/60 hover:text-mist disabled:opacity-60"
             >
               Reload
+              {reloading && (
+                <span
+                  aria-hidden="true"
+                  className="h-3.5 w-3.5 animate-spin rounded-full border-2 border-dark-red/40 border-t-medium-red"
+                />
+              )}
             </button>
             <div>
               <button
