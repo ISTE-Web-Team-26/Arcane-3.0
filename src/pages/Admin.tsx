@@ -12,6 +12,11 @@ import {
   teamNameOf,
   AdminError,
 } from '../data/admin.ts'
+import {
+  buildParticipantSheet,
+  downloadPdf,
+  downloadWorkbook,
+} from '../data/export.ts'
 import type {
   AdminEventStat,
   AdminRow,
@@ -99,6 +104,8 @@ export default function Admin() {
   const [error, setError] = useState<string | null>(null)
 
   const [expandedIds, setExpandedIds] = useState<Set<number>>(new Set())
+  const [exportOpen, setExportOpen] = useState(false)
+  const [exporting, setExporting] = useState(false)
   const [lightboxUrl, setLightboxUrl] = useState<string | null>(null)
   interface ProofEntry {
     state: 'loading' | 'error' | 'done'
@@ -254,6 +261,86 @@ export default function Admin() {
     }
   }
 
+  /** Fetch every registration for an event (paged), for XLSX export.
+   *  Rejected ("bad") registrations are never exported. */
+  async function fetchAllRegistrations(eventId?: number): Promise<AdminRow[]> {
+    const all: AdminRow[] = []
+    for (let offset = 0; offset <= 10000; offset += 200) {
+      const res = await adminCall<{ total: number; items: AdminRow[] }>('list', {
+        ...(eventId === undefined ? {} : { event_id: eventId }),
+        limit: 200,
+        offset,
+      })
+      all.push(...res.items)
+      if (res.items.length < 200 || all.length >= res.total) break
+    }
+    return all.filter((row) => row.verified !== 'bad')
+  }
+
+  async function handleExportEvent(stat: AdminEventStat, format: 'xlsx' | 'pdf') {
+    setExporting(true)
+    setError(null)
+    try {
+      const rows = await fetchAllRegistrations(stat.event_id)
+      const aoa = buildParticipantSheet(rows)
+      if (format === 'xlsx') {
+        downloadWorkbook(`arcane-${stat.slug}-participants.xlsx`, [
+          { name: stat.name, aoa },
+        ])
+      } else {
+        downloadPdf(`arcane-${stat.slug}-participants.pdf`, [
+          { title: `ARCANE 3.0 - ${stat.name} Participants`, aoa },
+        ])
+      }
+    } catch (e) {
+      if (e instanceof AdminError && e.status === 401) {
+        handleAuthError(e)
+      } else {
+        setError(e instanceof Error ? e.message : 'Export failed. Try again.')
+      }
+    } finally {
+      setExporting(false)
+      setExportOpen(false)
+    }
+  }
+
+  async function handleExportAll(format: 'xlsx' | 'pdf') {
+    setExporting(true)
+    setError(null)
+    try {
+      if (format === 'xlsx') {
+        const sheets = []
+        for (const stat of eventStats) {
+          const rows = await fetchAllRegistrations(stat.event_id)
+          sheets.push({
+            name: stat.name,
+            aoa: buildParticipantSheet(rows),
+          })
+        }
+        downloadWorkbook('arcane-all-participants.xlsx', sheets)
+      } else {
+        const sections = []
+        for (const stat of eventStats) {
+          const rows = await fetchAllRegistrations(stat.event_id)
+          sections.push({
+            title: `ARCANE 3.0 - ${stat.name} Participants`,
+            aoa: buildParticipantSheet(rows),
+          })
+        }
+        downloadPdf('arcane-all-participants.pdf', sections)
+      }
+    } catch (e) {
+      if (e instanceof AdminError && e.status === 401) {
+        handleAuthError(e)
+      } else {
+        setError(e instanceof Error ? e.message : 'Export failed. Try again.')
+      }
+    } finally {
+      setExporting(false)
+      setExportOpen(false)
+    }
+  }
+
   async function setVerification(row: AdminRow, verified: string) {
     setVerifyingId(row.id)
     try {
@@ -360,7 +447,7 @@ export default function Admin() {
     <div className="relative -mx-4 -mt-[4.5rem] -mb-8 min-h-svh overflow-hidden soil-bg-layer px-4 pt-16 pb-16 sm:-mx-8 sm:-mt-[5rem] sm:px-8">
       <BackgroundParticles density={10} className="z-0" />
       <div className="relative z-10 mx-auto w-full max-w-6xl">
-        <div className="flex flex-wrap items-center justify-between gap-3">
+        <div className="relative flex flex-wrap items-center justify-between gap-3">
           <div>
             <p className="font-mono text-xs font-semibold tracking-[0.25em] text-medium-red uppercase">
               Admin // Registrations
@@ -380,6 +467,32 @@ export default function Admin() {
             >
               Reload
             </button>
+            <div>
+              <button
+                type="button"
+                onClick={() => setExportOpen((o) => !o)}
+                disabled={exporting}
+                aria-haspopup="menu"
+                aria-expanded={exportOpen}
+                className="inline-flex cursor-pointer items-center gap-1.5 rounded-xl border border-dark-red/40 bg-near-black/80 px-4 py-2 font-mono text-xs font-bold tracking-wider text-mist/75 uppercase hover:border-medium-red/60 hover:text-mist disabled:opacity-60"
+              >
+                {exporting ? 'Preparing…' : 'Export'}
+                {!exporting && (
+                  <svg
+                    aria-hidden="true"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth={2}
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    className="h-4 w-4"
+                  >
+                    <polyline points="6 9 12 15 18 9" />
+                  </svg>
+                )}
+              </button>
+            </div>
             <button
               type="button"
               onClick={logout}
@@ -388,6 +501,76 @@ export default function Admin() {
               Logout
             </button>
           </div>
+          {exportOpen && !exporting && (
+            <>
+              <div
+                aria-hidden="true"
+                onClick={() => setExportOpen(false)}
+                className="fixed inset-0 z-40 cursor-default"
+              />
+              <div
+                role="menu"
+                aria-label="Export participants per event"
+                className="absolute inset-x-0 top-full z-50 mt-2 max-h-[70vh] overflow-y-auto rounded-xl border border-dark-red/40 bg-near-black p-2 shadow-[0_8px_32px_rgba(0,0,0,0.5)] sm:right-0 sm:left-auto sm:w-80"
+              >
+                <p className="px-3 pt-1 pb-2 font-mono text-[10px] tracking-wider text-mist/50 uppercase">
+                  Export participants
+                </p>
+                <div className="flex items-center justify-between gap-2 rounded-lg px-3 py-2">
+                  <span className="font-mono text-xs font-bold text-mist uppercase">
+                    All events
+                  </span>
+                  <span className="flex gap-1.5">
+                    <button
+                      type="button"
+                      role="menuitem"
+                      onClick={() => void handleExportAll('xlsx')}
+                      className="cursor-pointer rounded-md border border-dark-red/40 px-2.5 py-1 font-mono text-[11px] font-bold uppercase hover:border-medium-red/60 hover:text-mist"
+                    >
+                      XLSX
+                    </button>
+                    <button
+                      type="button"
+                      role="menuitem"
+                      onClick={() => void handleExportAll('pdf')}
+                      className="cursor-pointer rounded-md border border-dark-red/40 px-2.5 py-1 font-mono text-[11px] font-bold uppercase hover:border-medium-red/60 hover:text-mist"
+                    >
+                      PDF
+                    </button>
+                  </span>
+                </div>
+                {eventStats.map((e) => (
+                  <div
+                    key={e.event_id}
+                    className="flex items-center justify-between gap-2 rounded-lg px-3 py-2 hover:bg-medium-red/15"
+                  >
+                    <span className="flex min-w-0 flex-1 items-center justify-between gap-2 text-left font-mono text-xs text-mist/80 uppercase">
+                      <span className="truncate">{e.name}</span>
+                      <span className="shrink-0 text-mist/40">{e.total}</span>
+                    </span>
+                    <span className="flex shrink-0 gap-1.5">
+                      <button
+                        type="button"
+                        role="menuitem"
+                        onClick={() => void handleExportEvent(e, 'xlsx')}
+                        className="cursor-pointer rounded-md border border-dark-red/40 px-2.5 py-1 font-mono text-[11px] font-bold uppercase hover:border-medium-red/60 hover:text-mist"
+                      >
+                        XLSX
+                      </button>
+                      <button
+                        type="button"
+                        role="menuitem"
+                        onClick={() => void handleExportEvent(e, 'pdf')}
+                        className="cursor-pointer rounded-md border border-dark-red/40 px-2.5 py-1 font-mono text-[11px] font-bold uppercase hover:border-medium-red/60 hover:text-mist"
+                      >
+                        PDF
+                      </button>
+                    </span>
+                  </div>
+                ))}
+              </div>
+            </>
+          )}
         </div>
 
         {/* Totals */}
