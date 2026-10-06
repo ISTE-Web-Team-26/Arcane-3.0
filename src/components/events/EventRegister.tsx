@@ -22,8 +22,6 @@ import type {
   RegistrationSuccess,
 } from '../../data/registration.ts'
 
-const STEPS = ['Team', 'Members', 'Payment'] as const
-
 const FISAT_FULL_NAME = 'Federal Institute of Science and Technology'
 
 const SEMESTER_OPTIONS = ['S1', 'S2', 'S3', 'S4', 'S5', 'S6', 'S7', 'S8']
@@ -185,6 +183,9 @@ function Select({
 export default function EventRegister({ event }: { event: EventItem }) {
   const minCount = event.teamMin ?? 1
   const maxCount = event.teamMax ?? minCount
+  // Solo event (exactly 1 member): single-step personal form, no team name.
+  const isSolo = minCount === 1 && maxCount === 1
+  const STEPS: readonly string[] = isSolo ? ['Details'] : ['Team', 'Members', 'Payment']
 
   // Wizard progress is persisted per event so a reload never loses it.
   // The File object itself can't survive storage — only the fields do.
@@ -242,27 +243,31 @@ function pdfSafe(value: string): string {
     .trim()
 }
 
-  async function handleCopyUpi() {
-    let ok = false
+  /** Copy text with a legacy fallback; resolves true on success. */
+  async function tryCopyText(text: string): Promise<boolean> {
     try {
-      await navigator.clipboard.writeText(upiId)
-      ok = true
+      await navigator.clipboard.writeText(text)
+      return true
     } catch {
       // Fallback for non-secure contexts / older browsers.
       try {
         const ta = document.createElement('textarea')
-        ta.value = upiId
+        ta.value = text
         ta.style.position = 'fixed'
         ta.style.opacity = '0'
         document.body.appendChild(ta)
         ta.select()
-        ok = document.execCommand('copy')
+        const ok = document.execCommand('copy')
         ta.remove()
+        return ok
       } catch {
-        ok = false
+        return false
       }
     }
-    if (ok) {
+  }
+
+  async function handleCopyUpi() {
+    if (await tryCopyText(upiId)) {
       setUpiCopied(true)
       setTimeout(() => setUpiCopied(false), 2000)
     } else {
@@ -271,26 +276,7 @@ function pdfSafe(value: string): string {
   }
 
   async function handleCopyPhone() {
-    let ok = false
-    try {
-      await navigator.clipboard.writeText(phoneNumber)
-      ok = true
-    } catch {
-      // Fallback for non-secure contexts / older browsers.
-      try {
-        const ta = document.createElement('textarea')
-        ta.value = phoneNumber
-        ta.style.position = 'fixed'
-        ta.style.opacity = '0'
-        document.body.appendChild(ta)
-        ta.select()
-        ok = document.execCommand('copy')
-        ta.remove()
-      } catch {
-        ok = false
-      }
-    }
-    if (ok) {
+    if (await tryCopyText(phoneNumber)) {
       setPhoneCopied(true)
       setTimeout(() => setPhoneCopied(false), 2000)
     } else {
@@ -533,6 +519,8 @@ function pdfSafe(value: string): string {
   const timeLine = eventTimeLine(event)
   const teamLine = eventTeamLine(event)
   const prizeLine = eventPrizeLine(event)
+  // Solo events have no team name — greet and label with the person's name.
+  const displayName = (isSolo ? members[0]?.name.trim() : teamName.trim()) || 'team'
 
   // Minimal UPI intent: GPay rejects payee-name mismatches and non-ASCII
   // notes, so send only payee, amount, an ASCII note and currency.
@@ -544,7 +532,12 @@ function pdfSafe(value: string): string {
   }
 
   function validateStep1(): string | null {
-    if (!teamName.trim() || !collegeName.trim()) {
+    if (!collegeName.trim()) {
+      return isSolo
+        ? 'Enter your college name to continue.'
+        : 'Enter your team name and college name to continue.'
+    }
+    if (!isSolo && !teamName.trim()) {
       return 'Enter your team name and college name to continue.'
     }
     return null
@@ -559,7 +552,7 @@ function pdfSafe(value: string): string {
       const values = [m.name, m.semester, m.branch, m.batch, m.phone_no, m.email]
       const filled = values.filter((v) => v.trim() !== '').length
       const required = i < minCount
-      const label = `Member ${String(i + 1).padStart(2, '0')}`
+      const label = isSolo ? 'Your details' : `Member ${String(i + 1).padStart(2, '0')}`
       if (filled === 0 && !required) continue
       if (filled > 0 && filled < values.length) {
         return {
@@ -652,7 +645,7 @@ function pdfSafe(value: string): string {
     const { payload, error: membersError } = buildMembers()
     if (membersError) {
       setError(membersError)
-      setStep(2)
+      setStep(isSolo ? 1 : 2)
       return
     }
     if (!file) {
@@ -665,7 +658,8 @@ function pdfSafe(value: string): string {
       const result = await submitRegistration(
         event.dbId,
         {
-          team_name: teamName.trim(),
+          // Solo events have no team name — the person's name is the team.
+          team_name: isSolo ? (payload[0]?.name ?? '') : teamName.trim(),
           college_name: collegeName.trim(),
           members: payload,
         },
@@ -695,7 +689,7 @@ function pdfSafe(value: string): string {
             Registration confirmed
           </p>
           <h1 className="mt-2 text-center font-heading text-3xl font-bold tracking-tight text-mist uppercase sm:text-4xl">
-            You&apos;re in, {teamName.trim() || 'team'}
+            You&apos;re in, {displayName}
           </h1>
 
           {/* Ticket */}
@@ -736,8 +730,8 @@ function pdfSafe(value: string): string {
 
             <dl className="space-y-2 px-5 py-5 font-mono text-xs sm:px-7 sm:text-sm">
               <div className="flex justify-between gap-4">
-                <dt className="text-mist/50 uppercase">Team</dt>
-                <dd className="text-right font-bold text-mist">{teamName.trim()}</dd>
+                <dt className="text-mist/50 uppercase">{isSolo ? 'Name' : 'Team'}</dt>
+                <dd className="text-right font-bold text-mist">{displayName}</dd>
               </div>
               <div className="flex justify-between gap-4">
                 <dt className="text-mist/50 uppercase">College</dt>
@@ -830,8 +824,9 @@ function pdfSafe(value: string): string {
           </span>
         </div>
 
-        {/* Stepper */}
-        <ol className="mt-6 flex items-center gap-1.5 sm:gap-2">
+        {/* Stepper — hidden when there is only one step */}
+        {STEPS.length > 1 && (
+          <ol className="mt-6 flex items-center gap-1.5 sm:gap-2">
           {STEPS.map((label, i) => {
             const n = i + 1
             const active = step === n
@@ -868,7 +863,8 @@ function pdfSafe(value: string): string {
               </li>
             )
           })}
-        </ol>
+          </ol>
+        )}
 
         {error && (
           <div
@@ -879,23 +875,27 @@ function pdfSafe(value: string): string {
           </div>
         )}
 
-        {/* Step 1 — team */}
-        {step === 1 && (
+        {/* Step 1 — team (team events only; solo folds college into the details card) */}
+        {step === 1 && !isSolo && (
           <div className="mt-5 rounded-2xl border border-dark-red/35 bg-near-black/75 p-5 sm:p-7">
             <h2 className="font-heading text-xl font-bold tracking-tight text-mist uppercase sm:text-2xl">
-              Team details
+              {isSolo ? 'Your details' : 'Team details'}
             </h2>
             <p className="mt-1 font-content text-xs text-mist/60 sm:text-sm">
-              Step 1 of 3 — tell us who is registering.
+              {isSolo
+                ? 'Tell us who is registering.'
+                : 'Step 1 of 3 — tell us who is registering.'}
             </p>
             <div className="mt-5 grid grid-cols-1 gap-4 sm:grid-cols-2">
-              <Field
-                label="Team Name *"
-                value={teamName}
-                maxLength={60}
-                placeholder="e.g. Circuit Breakers"
-                onChange={(e) => setTeamName(e.target.value)}
-              />
+              {isSolo ? null : (
+                <Field
+                  label="Team Name *"
+                  value={teamName}
+                  maxLength={60}
+                  placeholder="e.g. Circuit Breakers"
+                  onChange={(e) => setTeamName(e.target.value)}
+                />
+              )}
               <Field
                 label="College Name *"
                 value={collegeName}
@@ -908,10 +908,12 @@ function pdfSafe(value: string): string {
         )}
 
         {/* Step 2 — members */}
-        {step === 2 && (
+        {(step === 2 || isSolo) && (
           <div className="mt-5 space-y-4">
             <p className="font-content text-xs text-mist/60 sm:text-sm">
-              Step 2 of 3 — {minCount === maxCount ? (
+              {isSolo ? (
+                <>Fill in your personal details below.</>
+              ) : minCount === maxCount ? (
                 <>this event needs exactly <strong className="text-mist">{maxCount} {maxCount === 1 ? 'member' : 'members'}</strong>.</>
               ) : (
                 <><strong className="text-mist">{minCount} {minCount === 1 ? 'member' : 'members'}</strong> required, up to <strong className="text-mist">{maxCount}</strong> — extra members are optional.</>
@@ -925,12 +927,18 @@ function pdfSafe(value: string): string {
                   className="rounded-2xl border border-dark-red/35 bg-near-black/75 p-5 sm:p-6"
                 >
                   <p className="mb-4 font-mono text-xs font-bold tracking-wider text-mist uppercase sm:text-sm">
-                    Member {String(i + 1).padStart(2, '0')}
-                    {i === 0 ? (
-                      <span className="text-medium-red"> (Team Leader)</span>
-                    ) : optional ? (
-                      <span className="text-mist/50"> (Optional)</span>
-                    ) : null}
+                    {isSolo ? (
+                      'Your details'
+                    ) : (
+                      <>
+                        Member {String(i + 1).padStart(2, '0')}
+                        {i === 0 ? (
+                          <span className="text-medium-red"> (Team Leader)</span>
+                        ) : optional ? (
+                          <span className="text-mist/50"> (Optional)</span>
+                        ) : null}
+                      </>
+                    )}
                   </p>
                   <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                     {MEMBER_FIELDS.map((f) =>
@@ -956,6 +964,15 @@ function pdfSafe(value: string): string {
                         />
                       ),
                     )}
+                    {isSolo && i === 0 ? (
+                      <Field
+                        label="College Name *"
+                        value={collegeName}
+                        maxLength={120}
+                        placeholder="e.g. FISAT"
+                        onChange={(e) => setCollegeName(e.target.value)}
+                      />
+                    ) : null}
                   </div>
                 </div>
               )
@@ -964,13 +981,17 @@ function pdfSafe(value: string): string {
         )}
 
         {/* Step 3 — payment */}
-        {step === 3 && (
+        {(step === 3 || isSolo) && (
           <div className="mt-5 rounded-2xl border border-dark-red/35 bg-near-black/75 p-5 sm:p-7">
             <h2 className="font-heading text-xl font-bold tracking-tight text-mist uppercase sm:text-2xl">
               Payment
             </h2>
             <p className="mt-1 font-content text-xs text-mist/60 sm:text-sm">
-              Step 3 of 3 — entry fee <strong className="text-medium-red">{feeLine}</strong>. Upload your payment proof below to complete registration.
+              {isSolo ? (
+                <>Entry fee <strong className="text-medium-red">{feeLine}</strong>. Upload your payment proof below to complete registration.</>
+              ) : (
+                <>Step 3 of 3 — entry fee <strong className="text-medium-red">{feeLine}</strong>. Upload your payment proof below to complete registration.</>
+              )}
             </p>
 
             {event.paymentImage && (
@@ -1151,7 +1172,7 @@ function pdfSafe(value: string): string {
               ← Event
             </Link>
           )}
-          {step < 3 ? (
+          {!isSolo && step < 3 ? (
             <button
               type="button"
               onClick={goNext}
