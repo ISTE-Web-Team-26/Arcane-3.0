@@ -2,7 +2,7 @@ import { useId, useMemo, useState } from 'react'
 import { Link } from 'react-router'
 import { motion, AnimatePresence } from 'framer-motion'
 import { type EventItem } from '../../data/events.ts'
-import { eventTimeLine } from '../../data/eventDetails.ts'
+import { eventDateLine, eventTimeLine } from '../../data/eventDetails.ts'
 import { useEvents } from '../../data/useEvents.ts'
 
 interface EventsProps {
@@ -226,6 +226,9 @@ export default function Events({ events: eventsProp }: EventsProps) {
                 <div className="p-4 pt-0 sm:p-5 sm:pt-0">
                   <div className="flex items-center justify-between border-t border-dark-red/25 pt-3.5">
                     <div className="flex flex-col font-mono text-[11px]">
+                      <span className="font-semibold text-mist">
+                        DATE: {eventDateLine(event)}
+                      </span>
                       <span className="font-semibold text-mist">
                         TIME: {eventTimeLine(event)}
                       </span>
