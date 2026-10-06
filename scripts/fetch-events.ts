@@ -17,7 +17,8 @@
  *
  * Optional env:
  *   SUPABASE_EVENTS_TABLE  (default: "events")
- *   SUPABASE_EVENTS_FILTER (default: "enabled=eq.true", empty disables)
+ *   SUPABASE_EVENTS_FILTER (default: "" — syncs open AND closed events;
+ *   set "enabled=eq.true" to hide closed ones again)
  *   SUPABASE_EVENTS_ORDER  (default: "time.asc.nullslast", empty disables)
  *   SUPABASE_STORAGE_BUCKET (storage bucket for bare storage paths)
  *   EVENTS_JSON_OUT        (default: "public/events.json")
@@ -72,7 +73,9 @@ const SUPABASE_URL = (process.env.SUPABASE_URL ?? '')
 const SERVICE_KEY =
   process.env.SUPABASE_SECRET_KEY ?? process.env.SUPABASE_SERVICE_ROLE_KEY ?? ''
 const TABLE = process.env.SUPABASE_EVENTS_TABLE ?? 'events'
-const FILTER = process.env.SUPABASE_EVENTS_FILTER ?? 'enabled=eq.true'
+// Empty by default: closed (enabled=false) events sync too, flagged CLOSED.
+// Set e.g. SUPABASE_EVENTS_FILTER=enabled=eq.true to hide them again.
+const FILTER = process.env.SUPABASE_EVENTS_FILTER ?? ''
 const ORDER = process.env.SUPABASE_EVENTS_ORDER ?? 'time.asc.nullslast'
 const STORAGE_BUCKET = process.env.SUPABASE_STORAGE_BUCKET ?? ''
 const JSON_OUT = resolve(ROOT, process.env.EVENTS_JSON_OUT ?? 'public/events.json')
@@ -112,6 +115,7 @@ interface EventItem {
   guidelines?: string[]
   voiceMsg?: string
   durationMins?: number | null
+  enabled?: boolean
 }
 
 type Row = Record<string, unknown>
@@ -323,8 +327,8 @@ function mapRow(
   return {
     id: slug,
     code: `•EVT_${String(index + 1).padStart(2, '0')}`,
-    // Query already filters enabled=eq.true, so everything here is open.
-    status: pick(row, 'status') || 'OPEN',
+    // Disabled events sync too, flagged CLOSED for the closed-state UI.
+    status: row['enabled'] === false ? 'CLOSED' : pick(row, 'status') || 'OPEN',
     posterTag: `POSTER::${String(index + 1).padStart(2, '0')}`,
     badgeBottom: '',
     title: name,
@@ -347,6 +351,7 @@ function mapRow(
     durationMins: toNumberOrNull(row['duration']),
     // Every remaining column, raw, for the individual event pages.
     dbId: toNumberOrNull(row['id']) ?? 0,
+    enabled: row['enabled'] !== false,
     longDescription: asString(row['description_long']),
     feeAmount: toNumberOrNull(row['registration_fee']) ?? 0,
     prizeAmount: toNumberOrNull(row['prize']),

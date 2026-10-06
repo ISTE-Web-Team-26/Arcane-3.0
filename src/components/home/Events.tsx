@@ -130,8 +130,12 @@ export default function Events({ events: eventsProp }: EventsProps) {
       >
         <AnimatePresence mode="sync">
           {filteredEvents.map((event, index) => {
+            const isClosed =
+              event.status === 'CLOSED' || event.enabled === false
             const isLocked =
-              event.actionText === 'LOCKED' || event.status === 'FULL'
+              event.actionText === 'LOCKED' ||
+              event.status === 'FULL' ||
+              isClosed
             const teamLine =
               event.teamMin != null || event.teamMax != null
                 ? event.teamMin === event.teamMax
@@ -250,7 +254,7 @@ export default function Events({ events: eventsProp }: EventsProps) {
                           : 'border-medium-red bg-medium-red/15 text-mist hover:bg-medium-red hover:text-mist hover:shadow-[0_0_16px_rgba(170,52,48,0.5)]'
                       }`}
                     >
-                      <span>{event.actionText || 'VIEW'} ▶</span>
+                      <span>{isClosed ? 'CLOSED' : event.actionText || 'VIEW'} ▶</span>
                     </Link>
                   </div>
 

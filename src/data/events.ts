@@ -19,6 +19,7 @@ export interface EventItem {
   tag?: string
   // Raw/detail fields synced from Supabase for the individual event pages.
   dbId?: number
+  enabled?: boolean
   longDescription?: string
   feeAmount?: number | null
   prizeAmount?: number | null
