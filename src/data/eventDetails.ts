@@ -72,8 +72,10 @@ export function eventTimeLine(event: EventItem): string {
 }
 
 export function eventFeeLine(event: EventItem): string {
+  const perHead = event.teamMin === 1 && event.teamMax === 1
+  const suffix = perHead ? ' / HEAD' : ' / TEAM'
   return event.feeAmount != null && event.feeAmount > 0
-    ? `${formatINR(event.feeAmount)} / TEAM`
+    ? `${formatINR(event.feeAmount)}${suffix}`
     : (event.fee ?? 'FREE')
 }
 

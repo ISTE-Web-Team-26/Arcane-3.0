@@ -287,11 +287,13 @@ function formatTeam(min: unknown, max: unknown): string {
   return `${a}-${b} MEMBERS`
 }
 
-/** registration_fee integer -> "₹300 / TEAM", 0/NULL -> "FREE". */
-function formatFee(fee: unknown): string {
+/** registration_fee integer -> "₹300 / TEAM" (or " / HEAD" for solo events),
+ *  0/NULL -> "FREE". */
+function formatFee(fee: unknown, minTeam: unknown, maxTeam: unknown): string {
   const n = typeof fee === 'number' ? fee : Number(fee)
   if (!Number.isFinite(n) || n <= 0) return 'FREE'
-  return `₹${n.toLocaleString('en-IN')} / TEAM`
+  const solo = Number(minTeam) === 1 && Number(maxTeam) === 1
+  return `₹${n.toLocaleString('en-IN')}${solo ? ' / HEAD' : ' / TEAM'}`
 }
 
 /** timestamptz -> "HH:MM" in the venue timezone (FISAT, Kerala).
@@ -334,7 +336,7 @@ function mapRow(
     team: formatTeam(row['min_team_members'], row['max_team_members']),
     venue: pick(row, 'venue', 'location') || 'TO BE ANNOUNCED',
     time: formatTime(row['time']),
-    fee: formatFee(row['registration_fee']),
+    fee: formatFee(row['registration_fee'], row['min_team_members'], row['max_team_members']),
     actionText: 'VIEW',
     // Individual event pages land later; route per-event until then.
     to: `/events/${slug}`,
