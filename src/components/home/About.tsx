@@ -74,15 +74,15 @@ export default function About() {
             latest in technology, innovation, and creativity.
           </p>
           <p className="text-mist/70 text-xs sm:text-sm md:text-base">
-            Seven battlegrounds, one arena: dodge through Circuit &amp; Co&apos;s
+            Nine events, one arena: dodge through Circuit &amp; Co&apos;s
             ECE games and hands-on circuit challenges, debug and decode your
             way through Ctrl+Chaos, rebuild the FISAT website from scratch in
             Web Makeup, break out of No Way Out&apos;s five-stage tech escape
             room, raise towers in Nirman&apos;s civil trials, tear down
-            mechanisms in Mech Mayhem, and hunt faults in Rewire&apos;s live
-            circuit builds — with ₹21,000 in prizes and per-team entry from
-            ₹250. Arcane 3.0 promises to be an unforgettable experience for
-            all tech enthusiasts.
+            mechanisms in Mech Mayhem, hunt faults in Rewire&apos;s live
+            circuit builds — plus hands-on Arduino and Siemens PLC workshops —
+            with ₹21,000 in competition prizes and entry from ₹100. Arcane 3.0
+            promises to be an unforgettable experience for all tech enthusiasts.
           </p>
         </motion.div>
 
@@ -160,11 +160,12 @@ export default function About() {
             </div>
 
             <p className="font-heading text-3xl font-bold tracking-tight text-mist sm:text-4xl">
-              7
+              9
             </p>
 
             <p className="mt-2 font-content text-xs leading-relaxed text-mist/70">
-              Circuits, code, design, escape rooms, civil, mech &amp; EEE.
+              Circuits, code, design, escape rooms, civil, mech, EEE — plus
+              Arduino &amp; PLC workshops.
             </p>
           </div>
 
@@ -204,7 +205,7 @@ export default function About() {
             </p>
 
             <p className="mt-2 font-content text-xs leading-relaxed text-mist/70">
-              ₹3,000 up for grabs in each of the seven events.
+              ₹3,000 up for grabs in each of the seven competitions.
             </p>
           </div>
 
@@ -240,11 +241,11 @@ export default function About() {
             </div>
 
             <p className="font-heading text-3xl font-bold tracking-tight text-mist sm:text-4xl">
-              2–4
+              1–4
             </p>
 
             <p className="mt-2 font-content text-xs leading-relaxed text-mist/70">
-              Pairs, trios and quads — every event runs team-based.
+              Solo seats and squads up to four — individuals to teams.
             </p>
           </div>
 
