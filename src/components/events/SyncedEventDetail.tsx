@@ -111,15 +111,17 @@ export default function SyncedEventDetail({ event }: { event: EventItem }) {
               </span>
             </div>
 
-            {/* Prize Pool */}
-            <div className="flex flex-col justify-start rounded-xl border border-dark-red/35 bg-near-black/80 p-4 transition-all duration-200 hover:border-medium-red/50">
-              <span className="block font-mono text-[10px] font-semibold tracking-wider text-mist/50 uppercase">
-                PRIZE POOL
-              </span>
-              <span className="mt-1 font-mono text-lg font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-[#e05652] to-[#f4938f] sm:text-xl md:text-2xl">
-                {prizeLine}
-              </span>
-            </div>
+            {/* Prize Pool — hidden when the event has none */}
+            {prizeLine ? (
+              <div className="flex flex-col justify-start rounded-xl border border-dark-red/35 bg-near-black/80 p-4 transition-all duration-200 hover:border-medium-red/50">
+                <span className="block font-mono text-[10px] font-semibold tracking-wider text-mist/50 uppercase">
+                  PRIZE POOL
+                </span>
+                <span className="mt-1 font-mono text-lg font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-[#e05652] to-[#f4938f] sm:text-xl md:text-2xl">
+                  {prizeLine}
+                </span>
+              </div>
+            ) : null}
           </div>
 
           {/* Organizer voice note — only when the event has one */}
